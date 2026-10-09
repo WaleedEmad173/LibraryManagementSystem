@@ -1,0 +1,39 @@
+@model MemberDeleteViewModel
+
+@{
+    ViewData["Title"] = "Delete Member";
+}
+
+<h1>Delete Member</h1>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (!Model.CanDelete)
+{
+    <div class="alert alert-danger">
+        @Model.BlockMessage
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+}
+else
+{
+    <div class="alert alert-warning">
+        Delete the member <strong>@Model.FullName</strong>? This action cannot be undone.
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+        <dt class="col-sm-2">Joined</dt>
+        <dd class="col-sm-10">@Model.JoinDate.ToString("yyyy-MM-dd")</dd>
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+}

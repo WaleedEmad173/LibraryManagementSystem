@@ -1,0 +1,61 @@
+@model MemberDetailsViewModel
+
+@{
+    ViewData["Title"] = "Member Details";
+}
+
+<h1>Member Details</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4>
+            @Model.FullName
+            <span class="badge bg-success">Member</span>
+        </h4>
+        <p class="mb-1"><strong>Email:</strong> @Model.Email</p>
+        <p class="mb-1"><strong>Phone:</strong> @(Model.Phone ?? "-")</p>
+        <p class="mb-0"><strong>Joined:</strong> @Model.JoinDate.ToString("yyyy-MM-dd")</p>
+    </div>
+</div>
+
+<h4>Borrowing History</h4>
+
+@if (!Model.Borrowings.Any())
+{
+    <div class="alert alert-info">This member has no borrowings yet.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Book</th>
+                <th>Borrow Date</th>
+                <th>Return Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in Model.Borrowings)
+            {
+                <tr>
+                    <td>@b.BookTitle</td>
+                    <td>@b.BorrowDate.ToString("yyyy-MM-dd")</td>
+                    <td>@(b.ReturnDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                    <td>
+                        @if (b.ReturnDate == null)
+                        {
+                            <span class="badge bg-warning text-dark">Borrowed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Returned</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

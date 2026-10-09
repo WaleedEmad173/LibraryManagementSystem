@@ -1,0 +1,33 @@
+@model DeleteCategoryViewModel
+
+@{
+    ViewData["Title"] = "Delete Category";
+}
+
+<h1>Delete Category</h1>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (!Model.CanDelete)
+{
+    <div class="alert alert-danger">
+        @Model.BlockMessage
+    </div>
+    <p>This category has <strong>@Model.BooksCount</strong> book(s). Move or delete the books first.</p>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+}
+else
+{
+    <div class="alert alert-warning">
+        Are you sure you want to delete the category <strong>@Model.Name</strong>? This action cannot be undone.
+    </div>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+}
