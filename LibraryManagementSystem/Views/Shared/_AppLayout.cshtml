@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - LibraryManagementSystem</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/LibraryManagementSystem.styles.css" asp-append-version="true" />
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0 !important;
+			padding: 0 !important;
+			overflow: hidden;
+		}
+		.app-wrapper {
+			display: flex;
+			height: 100vh;
+			width: 100vw;
+			overflow: hidden;
+		}
+		.app-sidebar-wrapper {
+			width: 240px;
+			flex-shrink: 0;
+			height: 100vh;
+			overflow-y: auto;
+		}
+		.app-main-wrapper {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			height: 100vh;
+			min-width: 0;
+			overflow-y: auto;
+			background-color: #f8fafc;
+		}
+		/* Clean custom scrollbar */
+		.app-main-wrapper::-webkit-scrollbar {
+			width: 6px;
+		}
+		.app-main-wrapper::-webkit-scrollbar-thumb {
+			background-color: #cbd5e1;
+			border-radius: 4px;
+		}
+		.app-sidebar-wrapper::-webkit-scrollbar {
+			width: 4px;
+		}
+		.app-sidebar-wrapper::-webkit-scrollbar-thumb {
+			background-color: rgba(255, 255, 255, 0.2);
+			border-radius: 4px;
+		}
+	</style>
+</head>
+<body>
+	<div class="app-wrapper">
+		<div class="app-sidebar-wrapper">
+			@await Html.PartialAsync("~/Views/Shared/Layout/SideBar.cshtml")
+		</div>
+		<div class="app-main-wrapper">
+			@await Html.PartialAsync("~/Views/Shared/Layout/_MemberNavBar.cshtml")
+			<main role="main" class="flex-grow-1 p-4">
+				@RenderBody()
+			</main>
+		</div>
+	</div>
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

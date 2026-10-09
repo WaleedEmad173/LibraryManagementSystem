@@ -16,10 +16,28 @@ namespace LibraryManagementSystem.Controllers
             return View();
         }
 
+        [Route("/Home/Error/{statusCode:int?}")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? statusCode = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var code = statusCode ?? Response.StatusCode;
+            if (code == 0 || code == 200) code = 500;
+
+            return View(new ErrorViewModel 
+            { 
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                StatusCode = code
+            });
+        }
+
+        [Route("/404")]
+        public IActionResult PageNotFound()
+        {
+            return View("Error", new ErrorViewModel 
+            { 
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                StatusCode = 404
+            });
         }
     }
 }

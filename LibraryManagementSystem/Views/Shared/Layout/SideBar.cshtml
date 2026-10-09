@@ -1,0 +1,459 @@
+@using Microsoft.AspNetCore.Http
+@{
+    var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+    
+    var isAdmin = User.IsInRole("Admin");
+    var isLibrarian = User.IsInRole("Librarian");
+    var isStaff = isAdmin || isLibrarian;
+    var isMember = !isStaff;
+
+    // Active state checks
+    var isBooks = currentPath.Contains("/books") || currentPath.Contains("/book");
+    var isCategories = currentPath.Contains("/categories") || currentPath.Contains("/category");
+    var isMembers = currentPath.Contains("/members") && !currentPath.Contains("/member/borrowings");
+    var isBorrow = currentPath.Contains("/borrow") && !currentPath.Contains("/borrowings") && !currentPath.Contains("/history");
+    var isReturn = currentPath.Contains("/return");
+    var isHistory = currentPath.Contains("/history");
+    var isStaffAccounts = currentPath.Contains("/staff") || currentPath.Contains("/accounts") || currentPath.Contains("/admin/staff");
+    var isBorrowings = currentPath.Contains("/borrowings");
+    var isDashboard = !isBooks && !isCategories && !isMembers && !isBorrow && !isReturn && !isHistory && !isStaffAccounts && !isBorrowings;
+}
+
+<aside class="app-sidebar">
+    <!-- Header / Brand -->
+    <div class="sidebar-header">
+        @if (isAdmin)
+        {
+            <div class="brand-box brand-dark-box">
+                <img src="~/Images/icons/Logo.svg" alt="Library System" width="20" height="20" class="brand-icon" />
+            </div>
+            <div class="brand-text-wrapper">
+                <span class="brand-title">Library System</span>
+                <span class="brand-portal-subtitle">ADMIN PORTAL</span>
+            </div>
+        }
+        else if (isLibrarian)
+        {
+            <div class="brand-box brand-orange-box">
+                <img src="~/Images/icons/Logo.svg" alt="Library System" width="20" height="20" class="brand-icon" />
+            </div>
+            <div class="brand-text-wrapper">
+                <span class="brand-title">Library System</span>
+                <span class="brand-portal-subtitle">LIBRARIAN PORTAL</span>
+            </div>
+        }
+        else
+        {
+            <div class="brand-box brand-default-box">
+                <img src="~/Images/icons/Logo.svg" alt="Library System" width="22" height="22" class="brand-icon" />
+            </div>
+            <div class="brand-text-wrapper">
+                <span class="brand-title">Library System</span>
+            </div>
+        }
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav">
+        @if (isLibrarian)
+        {
+            <div class="nav-section-title">CORE MENU</div>
+        }
+
+        <ul class="nav-list">
+            @if (isMember)
+            {
+                <!-- ================= MEMBER MENU (Only 3 Items) ================= -->
+                <li class="nav-item">
+                    <a class="nav-link-item @(isDashboard ? "active" : "")" href="/">
+                        <span class="nav-icon">
+                            <img src="~/Images/icons/HomeIcon.png" alt="Home" width="18" height="18" />
+                        </span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBooks ? "active" : "")" href="/Books">
+                        <span class="nav-icon">
+                            <img src="~/Images/icons/BooksIcon.png" alt="Books" width="18" height="18" />
+                        </span>
+                        <span class="nav-text">Books</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBorrowings ? "active" : "")" href="/Member/Borrowings">
+                        <span class="nav-icon">
+                            <img src="~/Images/icons/BorrowIcon.png" alt="My Borrowings" width="18" height="18" />
+                        </span>
+                        <span class="nav-text">My Borrowings</span>
+                    </a>
+                </li>
+            }
+            else
+            {
+                <!-- ================= ADMIN & LIBRARIAN MENU ================= -->
+                <li class="nav-item">
+                    <a class="nav-link-item @(isDashboard ? "active" : "")" href="/">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBooks ? "active" : "")" href="/Books">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Books</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isCategories ? "active" : "")" href="/Categories">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Categories</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isMembers ? "active" : "")" href="/Members">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Members</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBorrow ? "active" : "")" href="/Borrow">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <polyline points="8 12 12 16 16 12"></polyline>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Borrow</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isReturn ? "active" : "")" href="/Return">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <polyline points="16 12 12 8 8 12"></polyline>
+                                <line x1="12" y1="16" x2="12" y2="8"></line>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Return</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isHistory ? "active" : "")" href="/History">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                <polyline points="3 3 3 8 8 8"></polyline>
+                                <polyline points="12 7 12 12 15 15"></polyline>
+                            </svg>
+                        </span>
+                        <span class="nav-text">History</span>
+                    </a>
+                </li>
+
+                @if (isAdmin)
+                {
+                    <!-- ONLY FOR ADMIN -->
+                    <li class="nav-item mt-2">
+                        <a class="nav-link-item @(isStaffAccounts ? "active" : "")" href="/Admin/Staff">
+                            <span class="nav-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Staff Accounts</span>
+                        </a>
+                    </li>
+                }
+            }
+        </ul>
+    </nav>
+
+    <!-- Footer Status Badges -->
+    <div class="sidebar-footer">
+        @if (isLibrarian)
+        {
+            <div class="librarian-badge">
+                <div class="badge-status">
+                    <span class="status-dot"></span>
+                    <span>Librarian Mode • v1.0</span>
+                </div>
+                <div class="badge-shield-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+            </div>
+        }
+        else if (isMember)
+        {
+            <div class="portal-badge">
+                <div class="portal-status">
+                    <span class="status-dot"></span>
+                    <span>Member Portal</span>
+                </div>
+                <span class="portal-version">v1.0</span>
+            </div>
+        }
+    </div>
+</aside>
+
+<style>
+    .app-sidebar {
+        width: 100%;
+        height: 100%;
+        min-height: 100vh;
+        background-color: #1a3fa3;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 24px 16px 20px 16px;
+        color: #ffffff;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Brand / Logo Header */
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 6px 24px 6px;
+    }
+
+    .brand-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .brand-default-box {
+        width: 24px;
+        height: 24px;
+    }
+
+    .brand-dark-box {
+        width: 38px;
+        height: 38px;
+        background-color: #0b225c;
+        border-radius: 9px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-orange-box {
+        width: 38px;
+        height: 38px;
+        background-color: #f59e0b;
+        border-radius: 9px;
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+    }
+
+    .brand-icon {
+        display: block;
+        filter: brightness(0) invert(1);
+    }
+
+    .brand-text-wrapper {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+
+    .brand-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: -0.2px;
+        white-space: nowrap;
+    }
+
+    .brand-portal-subtitle {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.72);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-top: 1px;
+    }
+
+    /* Section Header */
+    .nav-section-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.45);
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        padding: 10px 12px 8px 12px;
+    }
+
+    /* Navigation */
+    .sidebar-nav {
+        flex-grow: 1;
+    }
+
+    .nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .nav-item {
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-link-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 12px;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.78);
+        text-decoration: none;
+        font-size: 0.92rem;
+        font-weight: 500;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-link-item:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+
+    .nav-link-item.active {
+        background-color: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .nav-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        opacity: 0.88;
+        transition: opacity 0.15s ease;
+    }
+
+    .nav-icon img {
+        filter: brightness(0) invert(1);
+    }
+
+    .nav-link-item:hover .nav-icon,
+    .nav-link-item.active .nav-icon {
+        opacity: 1;
+    }
+
+    .nav-text {
+        white-space: nowrap;
+    }
+
+    /* Footers */
+    .sidebar-footer {
+        margin-top: auto;
+        padding-top: 20px;
+    }
+
+    .portal-badge {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .portal-status,
+    .badge-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+    }
+
+    .portal-version {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.72rem;
+    }
+
+    .librarian-badge {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: rgba(15, 33, 80, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.74rem;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .badge-shield-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.75;
+    }
+
+    @@media (max-width: 767.98px) {
+        .app-sidebar {
+            position: relative;
+            width: 100%;
+            min-height: auto;
+            height: auto;
+        }
+    }
+</style>
+    

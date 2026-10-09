@@ -1,0 +1,58 @@
+﻿@*
+   
+*@
+@{
+}
+
+<footer class="bg-white border-top mt-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <img src="~/images/Icons/Logo.svg" asp-append-version="true" alt="Library logo" width="28" height="28" class="me-2" />
+                    <span class="ms-2 fw-semibold">Library Management System</span>
+                </div>
+                <p class="text-muted small">Providing public access to knowledge, archives, and research material in a modern academic environment.</p>
+            </div>
+
+            <div class="col-md-2 mb-4">
+                <h6 class="text-dark">Explore</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="/" class="text-muted text-decoration-none">Home</a></li>
+                    <li><a href="/Books" class="text-muted text-decoration-none">Book Search</a></li>
+                    <li><a href="/Collections" class="text-muted text-decoration-none">Featured Collections</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <h6 class="text-dark">Member Services</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="/Account" class="text-muted text-decoration-none">Member Portal</a></li>
+                    <li><a href="/Account/GetCard" class="text-muted text-decoration-none">Get a Library Card</a></li>
+                    <li><a href="/Policies/Borrowing" class="text-muted text-decoration-none">Borrowing Rules</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <h6 class="text-dark">Contact &amp; Help</h6>
+                <address class="small text-muted mb-1">100 University Avenue, Central Library</address>
+                <div class="small text-muted">support@librarysystem.org</div>
+                <div class="small text-muted">(555) 234-5678</div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+            <div class="small text-muted">© @DateTime.Now.Year Library Management System. All rights reserved.</div>
+            <div class="small">
+                <a href="/Privacy" class="text-muted text-decoration-none me-3">Privacy Policy</a>
+                <a href="/Terms" class="text-muted text-decoration-none me-3">Terms of Service</a>
+                <a href="/Accessibility" class="text-muted text-decoration-none">Accessibility</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    footer h6 { font-weight: 600 }
+    footer a:hover { text-decoration: underline }
+</style>
