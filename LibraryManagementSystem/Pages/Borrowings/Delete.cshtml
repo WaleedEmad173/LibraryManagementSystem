@@ -1,0 +1,31 @@
+@page "{id:int}"
+@model LibraryManagementSystem.Pages.Borrowings.DeleteModel
+@{
+    ViewData["Title"] = "Delete Borrowing";
+}
+
+<div class="borrow-flow-container">
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h2 class="h3 fw-bold text-danger mb-3">Confirm Deletion</h2>
+        <p class="text-muted">Are you sure you want to remove this borrowing record?</p>
+
+        <dl class="row">
+            <dt class="col-sm-3 text-muted">Book Title</dt>
+            <dd class="col-sm-9 fw-semibold">@Model.Borrowing?.Book?.Title</dd>
+
+            <dt class="col-sm-3 text-muted">Borrower</dt>
+            <dd class="col-sm-9">@Model.Borrowing?.User?.FullName</dd>
+
+            <dt class="col-sm-3 text-muted">Borrow Date</dt>
+            <dd class="col-sm-9">@Model.Borrowing?.BorrowDate.ToString("F")</dd>
+        </dl>
+
+        <form method="post">
+            <input type="hidden" asp-for="Borrowing!.Id" />
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-danger px-4">Delete Record</button>
+                <a asp-page="./Index" class="btn btn-light border px-3">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

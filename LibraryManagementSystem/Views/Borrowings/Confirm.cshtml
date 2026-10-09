@@ -1,0 +1,907 @@
+@model LibraryManagementSystem.ViewModels.ConfirmBorrowViewModel
+@{
+    ViewData["Title"] = "Confirm Borrowing";
+    Layout = "_Layout";
+}
+
+<div class="borrow-flow-container">
+    <!-- Top Breadcrumb & Page Header (No custom top navbar as requested) -->
+    <nav aria-label="breadcrumb" class="mb-2">
+        <ol class="breadcrumb bg-transparent p-0 m-0 text-muted" style="font-size: 0.875rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Borrowings" asp-action="Index" class="text-decoration-none text-muted">Books</a></li>
+            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Confirm Borrowing</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-slate-900 mb-1">Confirm Borrowing</h1>
+            <p class="text-muted mb-0" style="font-size: 0.95rem;">
+                Review loan terms, verify your identity details, and authorize the circulation request.
+            </p>
+        </div>
+        <div class="mt-2 mt-md-0">
+            <span class="status-pill status-pill-active">
+                <span class="status-dot"></span>
+                Desk Clearance: Active
+            </span>
+        </div>
+    </div>
+
+    <!-- Active Feedback Message Banner (Live Transaction or Simulation) -->
+    @if (!string.IsNullOrEmpty(Model.ActiveFeedbackState))
+    {
+        <div class="mb-4">
+            @if (Model.ActiveFeedbackState.Equals("success", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="feedback-card feedback-card-success">
+                    <div class="feedback-icon bg-emerald-100 text-emerald-600">
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <div class="feedback-content">
+                        <div class="feedback-title text-emerald-900">Book borrowed successfully</div>
+                        <div class="feedback-desc text-emerald-800">
+                            @(Model.FeedbackMessage ?? "Your loan has been processed. Due date is Nov 7, 2024. Please pick up at Section T4. A receipt email has been sent to your registered address.")
+                        </div>
+                    </div>
+                    <div class="feedback-badge-container">
+                        <span class="http-badge http-badge-success">@(Model.FeedbackBadge ?? "HTTP 200 OK")</span>
+                    </div>
+                </div>
+            }
+            else if (Model.ActiveFeedbackState.Equals("nostock", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="feedback-card feedback-card-danger">
+                    <div class="feedback-icon bg-rose-100 text-rose-600">
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="feedback-content">
+                        <div class="feedback-title text-rose-900">No available copies for this book</div>
+                        <div class="feedback-desc text-rose-800">
+                            @(Model.FeedbackMessage ?? $"All {Model.TotalCopies} copies are currently on loan. You may place a reservation hold from the catalog to be queued automatically once returned.")
+                        </div>
+                    </div>
+                    <div class="feedback-badge-container">
+                        <span class="http-badge http-badge-danger">@(Model.FeedbackBadge ?? "HTTP 409 Conflict")</span>
+                    </div>
+                </div>
+            }
+            else if (Model.ActiveFeedbackState.Equals("duplicate", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="feedback-card feedback-card-danger">
+                    <div class="feedback-icon bg-rose-100 text-rose-600">
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="12" cy="12" r="9" stroke-width="2" />
+                            <path stroke-linecap="round" stroke-width="2.5" d="M12 8v4m0 4h.01" />
+                        </svg>
+                    </div>
+                    <div class="feedback-content">
+                        <div class="feedback-title text-rose-900">You already have this book</div>
+                        <div class="feedback-desc text-rose-800">
+                            @(Model.FeedbackMessage ?? $"Your account already has an active loan for '{Model.Title}'. Members are strictly limited to 1 concurrent copy per title to ensure equitable catalog distribution.")
+                        </div>
+                    </div>
+                    <div class="feedback-badge-container">
+                        <span class="http-badge http-badge-danger">@(Model.FeedbackBadge ?? "Policy Violation")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Main Two-Column Layout (Matching Figma Structure) -->
+    <div class="row g-4 mb-5">
+        <!-- Left Column: Selected Book Details -->
+        <div class="col-lg-6">
+            <div class="circulation-panel h-100">
+                <!-- Panel Header -->
+                <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#0284c7" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <h2 class="panel-title mb-0">Selected Book</h2>
+                    </div>
+                    <div>
+                        @if (Model.AvailableCopies > 0)
+                        {
+                            <span class="badge-stock badge-stock-available">
+                                <span class="stock-dot"></span> Available copies: @Model.AvailableCopies
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge-stock badge-stock-empty">
+                                <span class="stock-dot bg-danger"></span> Out of Stock (0)
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Book Showcase Inner Card -->
+                <div class="book-showcase-box mb-4">
+                    <!-- Book Visual / Realistic CSS Mockup -->
+                    <div class="book-mockup-wrapper">
+                        <div class="book-cover-mockup">
+                            <div class="book-spine-line"></div>
+                            <div class="book-cover-inner">
+                                <div class="cover-publisher">
+                                    <span>PRENTICE HALL</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                                    </svg>
+                                </div>
+                                <div class="cover-main-title">
+                                    CLEAN CODE
+                                </div>
+                                <div class="cover-sub-title">
+                                    A Handbook of Agile Software Craftsmanship
+                                </div>
+                                <div class="cover-author">
+                                    <span>Robert C. Martin</span>
+                                    <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Metadata -->
+                    <div class="book-meta-details flex-grow-1">
+                        <span class="category-tag">@Model.CategoryName</span>
+                        <h3 class="book-h3">@Model.Title</h3>
+                        <p class="book-author-text">By @Model.Author</p>
+
+                        <div class="book-specs-list mt-3">
+                            <div class="spec-row">
+                                <span class="spec-icon">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path d="M4 6h16M4 12h16m-7 6h7" />
+                                    </svg>
+                                </span>
+                                <span class="spec-label">ISBN:</span>
+                                <span class="spec-val">@Model.ISBN</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-icon">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                </span>
+                                <span class="spec-label">Edition:</span>
+                                <span class="spec-val">@Model.Edition</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shelf, Loan Period & Status List -->
+                <div class="circulation-specs mb-4">
+                    <div class="circ-spec-item">
+                        <div class="circ-spec-icon text-muted">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div class="circ-spec-text">
+                            <span class="label">Shelf Location</span>
+                            <span class="value fw-medium">@Model.ShelfLocation</span>
+                        </div>
+                    </div>
+
+                    <div class="circ-spec-item">
+                        <div class="circ-spec-icon text-muted">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                        </div>
+                        <div class="circ-spec-text">
+                            <span class="label">Standard Loan Period</span>
+                            <span class="value fw-medium">@Model.StandardLoanPeriodDays Days (Renewable 1x)</span>
+                        </div>
+                    </div>
+
+                    <div class="circ-spec-item">
+                        <div class="circ-spec-icon text-muted">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="16" rx="2" />
+                                <path d="M7 8h10M7 12h10" />
+                            </svg>
+                        </div>
+                        <div class="circ-spec-text">
+                            <span class="label">Access Status</span>
+                            <span class="value fw-medium text-emerald-700">@Model.AccessStatus</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barcode Container -->
+                <div class="barcode-strip">
+                    <div>
+                        <div class="barcode-label">INVENTORY BARCODE</div>
+                        <div class="barcode-code">@Model.Barcode</div>
+                    </div>
+                    <div class="barcode-visual" title="Code 128 Standard Barcode">
+                        <svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="7" y="2" width="4" height="28" fill="#1e293b"/>
+                            <rect x="14" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="18" y="2" width="5" height="28" fill="#1e293b"/>
+                            <rect x="26" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="30" y="2" width="3" height="28" fill="#1e293b"/>
+                            <rect x="36" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="41" y="2" width="6" height="28" fill="#1e293b"/>
+                            <rect x="50" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="55" y="2" width="3" height="28" fill="#1e293b"/>
+                            <rect x="61" y="2" width="5" height="28" fill="#1e293b"/>
+                            <rect x="69" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="74" y="2" width="4" height="28" fill="#1e293b"/>
+                            <rect x="81" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="86" y="2" width="5" height="28" fill="#1e293b"/>
+                            <rect x="94" y="2" width="3" height="28" fill="#1e293b"/>
+                            <rect x="100" y="2" width="2" height="28" fill="#1e293b"/>
+                            <rect x="105" y="2" width="4" height="28" fill="#1e293b"/>
+                            <rect x="112" y="2" width="2" height="28" fill="#1e293b"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Loan Details & Authorization Form -->
+        <div class="col-lg-6">
+            <div class="circulation-panel h-100">
+                <form asp-controller="Borrowings" asp-action="Confirm" method="post" id="borrowForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="BookId" />
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="Title" />
+                    <input type="hidden" asp-for="Author" />
+                    <input type="hidden" asp-for="ISBN" />
+                    <input type="hidden" asp-for="TotalCopies" />
+                    <input type="hidden" asp-for="AvailableCopies" />
+
+                    <!-- Panel Header -->
+                    <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#0284c7" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            <h2 class="panel-title mb-0">Loan Details</h2>
+                        </div>
+                        <span class="step-indicator">Step 2 of 2</span>
+                    </div>
+
+                    <!-- Borrower Profile Card -->
+                    <div class="borrower-badge-box mb-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="borrower-avatar">
+                                @Model.BorrowerInitials
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="borrower-sub-header">BORROWER ACCOUNT</div>
+                                <div class="borrower-name">@Model.BorrowerName</div>
+                                <div class="borrower-tier-text">Authorized Circulation Tier: @Model.BorrowerTier</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="borrower-sub-header">MEMBERSHIP ID</div>
+                                <div class="borrower-id-val">@Model.MemberId</div>
+                                <span class="badge bg-emerald-100 text-emerald-800 rounded-pill px-2 py-0" style="font-size: 0.75rem;">Member</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date Schedule Grid -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div class="date-card">
+                                <div class="date-header">
+                                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                    Checkout Date
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="date-value">@Model.CheckoutDate.ToString("MMMM dd, yyyy")</span>
+                                    <span class="badge bg-slate-200 text-slate-700 px-2 py-1 rounded-pill" style="font-size: 0.75rem;">Today</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="date-card">
+                                <div class="date-header">
+                                    <svg width="15" height="15" fill="none" stroke="#059669" viewBox="0 0 24 24" stroke-width="2">
+                                        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Scheduled Due Date
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="date-value text-emerald-700">@Model.ScheduledDueDate.ToString("MMMM dd, yyyy")</span>
+                                    <span class="badge bg-emerald-100 text-emerald-800 px-2 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">+14 Days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pickup Desk Row -->
+                    <div class="pickup-card mb-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Pickup Desk & Terminal</div>
+                                    <div class="fw-semibold text-dark" style="font-size: 0.9rem;">@Model.PickupDesk</div>
+                                </div>
+                            </div>
+                            <svg width="18" height="18" fill="#10b981" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Circulation Policy Callout Box -->
+                    <div class="policy-box mb-4">
+                        <div class="d-flex gap-3">
+                            <div class="policy-icon text-amber-600">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <div class="policy-body">
+                                <div class="policy-title">Circulation Policy & Terms</div>
+                                <div class="policy-desc">
+                                    By confirming, you agree to return or renew this title within 14 calendar days. Late returns may incur loan suspension and a late fee of $0.50/day. Books must be inspected upon physical pickup.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-confirm-borrow flex-grow-1" @(Model.AvailableCopies <= 0 ? "disabled" : "")>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" class="me-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Confirm Borrow
+                        </button>
+                        <a asp-controller="Borrowings" asp-action="Index" class="btn btn-cancel-borrow px-4">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" class="me-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Developer / Evaluator Sandbox: Feedback State Showcase (Bottom of Figma Design) -->
+    <div class="sandbox-section mt-5 pt-3">
+        <div class="sandbox-header d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <div>
+                <span class="sandbox-tag">DEVELOPER / EVALUATOR SANDBOX</span>
+                <h3 class="sandbox-h3 mt-1 mb-1">System Message Feedback States</h3>
+                <p class="text-muted mb-0" style="font-size: 0.85rem;">
+                    Examples of member feedback banners rendered for transaction events and guard rails:
+                </p>
+            </div>
+            <div class="simulator-buttons d-flex gap-2 mt-2 mt-sm-0">
+                <a asp-action="Confirm" asp-route-id="@Model.BookId" asp-route-simulate="success" class="btn btn-sm btn-outline-success">Simulate Success</a>
+                <a asp-action="Confirm" asp-route-id="@Model.BookId" asp-route-simulate="nostock" class="btn btn-sm btn-outline-danger">Simulate No Stock</a>
+                <a asp-action="Confirm" asp-route-id="@Model.BookId" asp-route-simulate="duplicate" class="btn btn-sm btn-outline-warning">Simulate Duplicate</a>
+                <a asp-action="Confirm" asp-route-id="@Model.BookId" class="btn btn-sm btn-outline-secondary">Reset</a>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+            <!-- 1. Success Feedback Preview -->
+            <div class="feedback-card feedback-card-success">
+                <div class="feedback-icon bg-emerald-100 text-emerald-600">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div class="feedback-content">
+                    <div class="feedback-title text-emerald-900">Book borrowed successfully</div>
+                    <div class="feedback-desc text-emerald-800">
+                        Your loan has been processed. Due date is Nov 7, 2024. Please pick up at Section T4. A receipt email has been sent to your registered address.
+                    </div>
+                </div>
+                <div class="feedback-badge-container">
+                    <span class="http-badge http-badge-success">HTTP 200 OK</span>
+                </div>
+            </div>
+
+            <!-- 2. No Copies / Conflict Feedback Preview -->
+            <div class="feedback-card feedback-card-danger">
+                <div class="feedback-icon bg-rose-100 text-rose-600">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="feedback-content">
+                    <div class="feedback-title text-rose-900">No available copies for this book</div>
+                    <div class="feedback-desc text-rose-800">
+                        All 5 copies are currently on loan. You may place a reservation hold from the catalog to be queued automatically once returned.
+                    </div>
+                </div>
+                <div class="feedback-badge-container">
+                    <span class="http-badge http-badge-danger">HTTP 409 Conflict</span>
+                </div>
+            </div>
+
+            <!-- 3. Duplicate Loan Policy Violation Preview -->
+            <div class="feedback-card feedback-card-danger">
+                <div class="feedback-icon bg-rose-100 text-rose-600">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="12" cy="12" r="9" stroke-width="2" />
+                        <path stroke-linecap="round" stroke-width="2.5" d="M12 8v4m0 4h.01" />
+                    </svg>
+                </div>
+                <div class="feedback-content">
+                    <div class="feedback-title text-rose-900">You already have this book</div>
+                    <div class="feedback-desc text-rose-800">
+                        Your account already has an active loan for 'Clean Code'. Members are strictly limited to 1 concurrent copy per title to ensure equitable catalog distribution.
+                    </div>
+                </div>
+                <div class="feedback-badge-container">
+                    <span class="http-badge http-badge-danger">Policy Violation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Scoped Design System Styles matching Figma Screen */
+    .borrow-flow-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #0f172a;
+    }
+
+    .text-slate-900 { color: #0f172a; }
+    .bg-emerald-100 { background-color: #d1fae5; }
+    .text-emerald-600 { color: #059669; }
+    .text-emerald-700 { color: #047857; }
+    .text-emerald-800 { color: #065f46; }
+    .text-emerald-900 { color: #064e3b; }
+    .bg-rose-100 { background-color: #ffe4e6; }
+    .text-rose-600 { color: #e11d48; }
+    .text-rose-800 { color: #9f1239; }
+    .text-rose-900 { color: #881337; }
+    .text-amber-600 { color: #d97706; }
+    .bg-slate-200 { background-color: #e2e8f0; }
+    .text-slate-700 { color: #334155; }
+
+    /* Status Pill */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        padding: 5px 12px;
+        border-radius: 9999px;
+    }
+    .status-pill-active {
+        background-color: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #10b981;
+    }
+
+    /* Panels */
+    .circulation-panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    }
+    .panel-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .step-indicator {
+        font-size: 0.8125rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* Stock Badge */
+    .badge-stock {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 9999px;
+    }
+    .badge-stock-available {
+        background-color: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+    .badge-stock-empty {
+        background-color: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+    .stock-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+    }
+
+    /* Book Showcase Box */
+    .book-showcase-box {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+    }
+    .book-mockup-wrapper {
+        flex-shrink: 0;
+    }
+    .book-cover-mockup {
+        width: 110px;
+        height: 155px;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 6px;
+        box-shadow: 0 8px 16px -2px rgba(15, 23, 42, 0.3);
+        position: relative;
+        padding: 10px;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+    }
+    .book-spine-line {
+        position: absolute;
+        top: 0;
+        left: 6px;
+        bottom: 0;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .book-cover-inner {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .cover-publisher {
+        font-size: 0.45rem;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .cover-main-title {
+        font-size: 0.8rem;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 0.5px;
+        margin-top: 6px;
+        color: #38bdf8;
+    }
+    .cover-sub-title {
+        font-size: 0.45rem;
+        color: #cbd5e1;
+        line-height: 1.2;
+    }
+    .cover-author {
+        font-size: 0.5rem;
+        color: #94a3b8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 4px;
+    }
+
+    .category-tag {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #b45309;
+        background-color: #fef3c7;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 6px;
+    }
+    .book-h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 3px;
+        line-height: 1.3;
+    }
+    .book-author-text {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+    .book-specs-list .spec-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        margin-bottom: 4px;
+    }
+    .spec-icon { color: #64748b; display: inline-flex; }
+    .spec-label { color: #64748b; font-weight: 500; }
+    .spec-val { color: #0f172a; font-weight: 600; }
+
+    /* Circulation Specs List */
+    .circulation-specs {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .circ-spec-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.85rem;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .circ-spec-item:last-child { border-bottom: none; }
+    .circ-spec-text {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .circ-spec-text .label { color: #64748b; }
+
+    /* Barcode Strip */
+    .barcode-strip {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .barcode-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        letter-spacing: 0.5px;
+    }
+    .barcode-code {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    /* Borrower Profile Card */
+    .borrower-badge-box {
+        background: #f0f7ff;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        padding: 14px 16px;
+    }
+    .borrower-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: #1e3a8a;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .borrower-sub-header {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: #64748b;
+        letter-spacing: 0.5px;
+    }
+    .borrower-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+    .borrower-tier-text {
+        font-size: 0.75rem;
+        color: #475569;
+    }
+    .borrower-id-val {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+
+    /* Date Cards */
+    .date-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 14px;
+    }
+    .date-header {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .date-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    /* Pickup Card */
+    .pickup-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+    }
+
+    /* Policy Box */
+    .policy-box {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+        border-radius: 10px;
+        padding: 14px 16px;
+    }
+    .policy-title {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: #92400e;
+        margin-bottom: 2px;
+    }
+    .policy-desc {
+        font-size: 0.75rem;
+        color: #78350f;
+        line-height: 1.45;
+    }
+
+    /* Buttons */
+    .btn-confirm-borrow {
+        background-color: #10b981;
+        border-color: #10b981;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-confirm-borrow:hover:not(:disabled) {
+        background-color: #059669;
+        border-color: #059669;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .btn-cancel-borrow {
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 10px 18px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .btn-cancel-borrow:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+    }
+
+    /* Sandbox & Feedback Cards */
+    .sandbox-tag {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #0284c7;
+        letter-spacing: 0.5px;
+    }
+    .sandbox-h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .feedback-card {
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .feedback-card-success {
+        background-color: #ecfdf5;
+        border: 1px solid #a7f3d0;
+    }
+    .feedback-card-danger {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+    }
+    .feedback-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .feedback-content {
+        flex-grow: 1;
+    }
+    .feedback-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+    .feedback-desc {
+        font-size: 0.8125rem;
+        line-height: 1.4;
+    }
+    .http-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .http-badge-success {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+    .http-badge-danger {
+        background-color: #ffe4e6;
+        color: #9f1239;
+        border: 1px solid #fda4af;
+    }
+</style>

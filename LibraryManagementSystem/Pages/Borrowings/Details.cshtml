@@ -1,0 +1,338 @@
+@page "{id:int}"
+@model LibraryManagementSystem.Pages.Borrowings.DetailsModel
+@{
+    ViewData["Title"] = "Borrowing Record Details";
+    var b = Model.Borrowing;
+    var isReturned = b?.ReturnDate.HasValue == true;
+    var isOverdue = !isReturned && b != null && DateTime.Today > b.BorrowDate.AddDays(14);
+    var loanRef = $"#LN-{(b?.Id ?? 1):D4}";
+    var memberId = $"#MB-{(b?.UserId ?? 1):D4}";
+    var initials = "MB";
+    if (!string.IsNullOrWhiteSpace(b?.User?.FullName))
+    {
+        var parts = b.User.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        initials = parts.Length == 1 ? parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant() : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+    }
+}
+
+<div class="circulation-container mt-2">
+    <!-- Module Tabs Switcher -->
+    <div class="circ-module-tabs">
+        <a asp-page="./Borrow" class="circ-tab-btn">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            Borrow a Book
+        </a>
+        <a asp-page="./Return" class="circ-tab-btn">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            Return a Book
+        </a>
+        <a asp-page="./Index" class="circ-tab-btn active">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Circulation History
+        </a>
+    </div>
+
+    <!-- Header Section Matching Figma -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <div class="circ-terminal-badge">CIRCULATION DESK • AUDIT RECORD @loanRef</div>
+            <h1 class="circ-title">Borrowing Record Details</h1>
+            <p class="circ-subtitle mb-0">
+                Review verified circulation terms, physical catalog item handover, and patron authorization record.
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-lg-0 align-items-center">
+            <button type="button" class="btn btn-outline-secondary px-3 py-2 rounded-3 fw-semibold d-inline-flex align-items-center gap-2" onclick="window.print()">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print Receipt
+            </button>
+            <a asp-page="./Index" class="circ-btn-secondary">
+                ← Back to List
+            </a>
+        </div>
+    </div>
+
+    @if (b == null)
+    {
+        <div class="circ-card p-5 text-center text-muted">
+            <h4 class="fw-bold">Borrowing record not found</h4>
+            <p>The requested circulation record could not be located in the database.</p>
+            <a asp-page="./Index" class="circ-btn-primary mt-2">Return to History</a>
+        </div>
+    }
+    else
+    {
+        <!-- Figma 2-Column Split: Selected Book (Left) & Loan Details (Right) -->
+        <div class="row g-4 circ-grid-split">
+            <!-- Left Column: Selected Book -->
+            <div class="col-lg-6">
+                <div class="circ-card h-100">
+                    <div class="circ-card-header">
+                        <span class="circ-card-title fs-6">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#2563eb">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            Selected Book
+                        </span>
+                        <span class="circ-badge circ-badge-emerald">
+                            • Available copies: @(b.Book?.AvailableCopies ?? 0)
+                        </span>
+                    </div>
+
+                    <div class="circ-card-body">
+                        <!-- Book Cover & Title Card matching Figma -->
+                        <div class="p-3 rounded-4 mb-4" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex gap-3 align-items-start">
+                                <!-- Realistic Blue Book Graphic from Figma -->
+                                <div class="rounded-3 p-3 text-white text-center flex-shrink-0 d-flex flex-column justify-content-between shadow-sm"
+                                     style="width: 100px; height: 130px; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);">
+                                    <div class="text-uppercase fw-bold opacity-75" style="font-size: 0.55rem; letter-spacing: 0.05em;">PRENTICE HALL</div>
+                                    <div class="fw-bold my-auto" style="font-size: 0.72rem; line-height: 1.2;">
+                                        @(b.Book?.Title?.Length > 28 ? b.Book.Title.Substring(0, 25) + "..." : (b.Book?.Title ?? "BOOK"))
+                                    </div>
+                                    <div class="text-muted opacity-75" style="font-size: 0.55rem;">Robert C. Martin</div>
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <span class="badge bg-light text-primary border mb-1" style="font-size: 0.7rem;">
+                                        @(b.Book?.Category?.Name ?? "ENGINEERING / TECH")
+                                    </span>
+                                    <h5 class="fw-bold text-slate-900 mb-1" style="font-size: 1.05rem;">
+                                        @b.Book?.Title
+                                    </h5>
+                                    <div class="text-muted small mb-2">
+                                        By @(b.Book?.Author ?? "Robert C. Martin (Uncle Bob)")
+                                    </div>
+
+                                    <div class="d-flex flex-column gap-1 small text-secondary">
+                                        <div><strong>ISBN:</strong> @(b.Book?.ISBN ?? "978-0132350884")</div>
+                                        <div><strong>Edition:</strong> 1st Edition (Revised)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata Row Items -->
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-muted" style="width: 22px;">
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Shelf Location</div>
+                                    <div class="fw-semibold text-slate-900">2nd Floor • Section T4, Shelf 12</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-muted" style="width: 22px;">
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Standard Loan Period</div>
+                                    <div class="fw-semibold text-slate-900">14 Days (Renewable 1x)</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-muted" style="width: 22px;">
+                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Access Status</div>
+                                    <div class="fw-semibold text-slate-900">
+                                        @(isReturned ? "Returned & Restored to Shelf" : "Active Physical Loan in Patron Handover")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barcode Banner matching Figma -->
+                        <div class="p-3 rounded-3" style="background: #f1f5f9; border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700;">INVENTORY BARCODE</div>
+                                    <div class="fw-bold font-monospace text-slate-900">BC-9942-0193-CC</div>
+                                </div>
+                                <!-- Authentic SVG Barcode Graphic -->
+                                <div class="d-flex align-items-center gap-1" style="height: 32px;">
+                                    <div style="width: 3px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 1px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 4px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 2px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 1px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 4px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 2px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 3px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 1px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 5px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 2px; height: 100%; background: #0f172a;"></div>
+                                    <div style="width: 3px; height: 100%; background: #0f172a;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Loan Details & Borrower Identity -->
+            <div class="col-lg-6">
+                <div class="circ-card h-100">
+                    <div class="circ-card-header">
+                        <span class="circ-card-title fs-6">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#059669">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Loan Details
+                        </span>
+                        <span class="text-muted small fw-semibold">Audit Record #@b.Id</span>
+                    </div>
+
+                    <div class="circ-card-body">
+                        <!-- Borrower Identity Banner matching Figma -->
+                        <div class="p-3 rounded-4 mb-4" style="background: #eff6ff; border: 1px solid #bfdbfe;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="circ-patron-avatar" style="width: 44px; height: 44px; font-size: 1rem;">
+                                        @initials
+                                    </div>
+                                    <div>
+                                        <div class="text-uppercase small text-primary fw-bold" style="font-size: 0.72rem; letter-spacing: 0.04em;">BORROWER ACCOUNT</div>
+                                        <h5 class="fw-bold text-slate-900 mb-0">@(b.User?.FullName ?? "Member")</h5>
+                                        <div class="text-muted small">Authorized Circulation Tier: Standard Academic</div>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="text-uppercase small text-muted" style="font-size: 0.7rem; font-weight: 700;">MEMBERSHIP ID</div>
+                                    <div class="fw-bold text-primary font-monospace">@memberId</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date Grid (Checkout & Due Date) matching Figma -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted small fw-semibold">Checkout Date</span>
+                                        <span class="badge bg-light text-secondary border">Borrow Date</span>
+                                    </div>
+                                    <div class="fw-bold text-slate-900 fs-6">
+                                        @b.BorrowDate.ToString("MMMM dd, yyyy")
+                                    </div>
+                                    <div class="text-muted small">@b.BorrowDate.ToString("hh:mm tt")</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted small fw-semibold">Scheduled Due Date</span>
+                                        <span class="circ-badge circ-badge-emerald">+14 Days</span>
+                                    </div>
+                                    <div class="fw-bold text-slate-900 fs-6">
+                                        @b.BorrowDate.AddDays(14).ToString("MMMM dd, yyyy")
+                                    </div>
+                                    <div class="text-muted small">Standard auto-policy applied</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Return Status Banner -->
+                        <div class="p-3 rounded-3 mb-3" style="background: @(isReturned ? "#f0fdf4" : isOverdue ? "#fff1f2" : "#fefce8"); border: 1px solid @(isReturned ? "#bbf7d0" : isOverdue ? "#fecdd3" : "#fef08a");">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="small fw-bold text-uppercase" style="font-size: 0.72rem; color: @(isReturned ? "#15803d" : isOverdue ? "#be123c" : "#854d0e");">
+                                        CIRCULATION LIFECYCLE STATUS
+                                    </div>
+                                    <div class="fw-bold text-slate-900 mt-1">
+                                        @if (isReturned)
+                                        {
+                                            <span>Returned on @b.ReturnDate!.Value.ToString("MMMM dd, yyyy hh:mm tt")</span>
+                                        }
+                                        else if (isOverdue)
+                                        {
+                                            <span class="text-danger">Overdue by @((DateTime.Today - b.BorrowDate.AddDays(14)).Days) days</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Currently Active Loan (Due in @((b.BorrowDate.AddDays(14) - DateTime.Today).Days) days)</span>
+                                        }
+                                    </div>
+                                </div>
+                                <span class="circ-badge @(isReturned ? "circ-badge-emerald" : isOverdue ? "circ-badge-rose" : "circ-badge-amber")">
+                                    @(isReturned ? "• Returned" : isOverdue ? "• Overdue" : "• Active Loan")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Pickup Desk & Terminal matching Figma -->
+                        <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="text-muted small fw-semibold mb-1">Pickup Desk & Terminal</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-slate-900">Central Academic Library - Main Desk (Level 1)</span>
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#059669">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Circulation Policy & Terms Card matching Figma -->
+                        <div class="circ-notice-box mb-4" style="background: #fffbeb; border-color: #fef3c7; border-left-color: #d97706;">
+                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#d97706" class="flex-shrink-0 mt-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div>
+                                <div class="circ-notice-title" style="color: #92400e;">Circulation Policy & Terms</div>
+                                <p class="circ-notice-desc" style="color: #78350f;">
+                                    Physical return or renewal must occur within 14 calendar days. Late returns may incur loan suspension and automated ledger adjustments.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                            @if (!isReturned)
+                            {
+                                <form method="post" asp-page="./Return" asp-page-handler="Return" class="d-inline">
+                                    <input type="hidden" name="id" value="@b.Id" />
+                                    <button type="submit" class="circ-btn-primary" onclick="return confirm('Process return check-in for this loan?');">
+                                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                        </svg>
+                                        Return Book Now
+                                    </button>
+                                </form>
+                            }
+
+                            <a asp-page="./Edit" asp-route-id="@b.Id" class="circ-btn-secondary">
+                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Edit Record
+                            </a>
+
+                            <a asp-page="./Index" class="circ-btn-secondary ms-auto">
+                                Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

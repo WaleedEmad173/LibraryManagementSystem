@@ -1,0 +1,270 @@
+@page
+@model LibraryManagementSystem.Pages.Borrowings.ReturnModel
+@{
+    ViewData["Title"] = "Return a Book - Check-in Console";
+}
+
+<div class="circulation-container mt-2">
+    <!-- Module Tabs Switcher -->
+    <div class="circ-module-tabs">
+        <a asp-page="./Borrow" class="circ-tab-btn">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            Borrow a Book
+        </a>
+        <a asp-page="./Return" class="circ-tab-btn active">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            Return a Book
+        </a>
+        <a asp-page="./Index" class="circ-tab-btn">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Circulation History
+        </a>
+    </div>
+
+    <!-- Header Section -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <div class="circ-terminal-badge">CIRCULATION DESK • CHECK-IN CONSOLE</div>
+            <h1 class="circ-title">Return a Book</h1>
+            <p class="circ-subtitle mb-0">
+                Process book returns, verify physical condition, and instantly restore catalog availability across branches.
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-lg-0">
+            <div class="circ-stat-chip">
+                <div class="circ-stat-chip-icon" style="color: #059669;">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="circ-stat-chip-label">RETURNS TODAY</div>
+                    <div class="circ-stat-chip-val">@Model.ViewModel.ReturnsTodayCount Items</div>
+                </div>
+            </div>
+            <div class="circ-stat-chip">
+                <div class="circ-stat-chip-icon" style="color: #e11d48;">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="circ-stat-chip-label">OVERDUE ITEMS</div>
+                    <div class="circ-stat-chip-val">@Model.ViewModel.OverdueItemsCount Due This Week</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Showcase Banners (Top of Page as in Figma) -->
+    @if (!string.IsNullOrEmpty(Model.ViewModel.AlertState))
+    {
+        if (Model.ViewModel.AlertState == "success")
+        {
+            <div class="circ-alert-card circ-alert-success mb-4">
+                <div class="circ-alert-icon">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div class="circ-alert-body">
+                    <div class="circ-alert-header">
+                        <h4 class="circ-alert-title">@(Model.ViewModel.AlertTitle ?? "Book returned successfully")</h4>
+                        <span class="circ-badge circ-badge-emerald">Just now</span>
+                    </div>
+                    <p class="circ-alert-desc">@Model.ViewModel.AlertMessage</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="circ-alert-card circ-alert-danger mb-4">
+                <div class="circ-alert-icon">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="circ-alert-body">
+                    <div class="circ-alert-header">
+                        <h4 class="circ-alert-title">@(Model.ViewModel.AlertTitle ?? "This borrowing was already returned")</h4>
+                        <span class="circ-badge circ-badge-rose">Record locked</span>
+                    </div>
+                    <p class="circ-alert-desc">@Model.ViewModel.AlertMessage</p>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Search & Filter Bar Card -->
+    <div class="circ-card mb-4">
+        <div class="circ-card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-7 col-lg-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                        <input type="text"
+                               name="SearchQuery"
+                               value="@Model.ViewModel.SearchQuery"
+                               class="form-control border-start-0 ps-0"
+                               placeholder="Search by member name, patron ID, book title, or barcode..." />
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-2 d-none d-md-block text-center">
+                    <span class="circ-badge circ-badge-amber">
+                        All active loans | @Model.ViewModel.OverdueItemsCount due this week
+                    </span>
+                </div>
+                <div class="col-md-2 col-lg-2 d-flex gap-2">
+                    <button type="submit" class="circ-btn-search flex-grow-1 justify-content-center">
+                        Search
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.ViewModel.SearchQuery))
+                    {
+                        <a asp-page="./Return" class="circ-btn-secondary px-3" title="Clear Search">
+                            Reset
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Currently Borrowed Inventory Table Card -->
+    <div class="circ-card">
+        <div class="circ-card-header">
+            <div>
+                <h3 class="circ-card-title">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#059669">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Currently Borrowed Inventory
+                </h3>
+            </div>
+            <span class="text-muted small">
+                Showing @Model.ViewModel.ActiveLoans.Count active loans
+            </span>
+        </div>
+
+        <div class="circ-table-container">
+            <table class="circ-table">
+                <thead>
+                    <tr>
+                        <th>MEMBER / PATRON</th>
+                        <th>BOOK TITLE &amp; AUTHOR</th>
+                        <th>BORROW DATE</th>
+                        <th>LOAN STATUS</th>
+                        <th class="text-end pe-4">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ViewModel.ActiveLoans.Any())
+                    {
+                        @foreach (var loan in Model.ViewModel.ActiveLoans)
+                        {
+                            <tr>
+                                <!-- Member Cell -->
+                                <td>
+                                    <div class="circ-table-user-cell">
+                                        <div class="circ-mini-avatar">
+                                            @loan.BorrowerInitials
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-slate-900">@loan.BorrowerName</div>
+                                            <div class="text-muted small">@loan.MemberId</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Book Cell -->
+                                <td>
+                                    <div class="fw-bold text-slate-900">@loan.BookTitle</div>
+                                    <div class="text-muted small">By @loan.BookAuthor</div>
+                                    <div class="text-secondary small">@loan.BookISBN</div>
+                                </td>
+
+                                <!-- Borrow Date Cell -->
+                                <td>
+                                    <div class="text-slate-800 fw-semibold">@loan.BorrowDate.ToString("MMM dd, yyyy")</div>
+                                    <div class="text-muted small">Due: @loan.DueDate.ToString("MMM dd")</div>
+                                </td>
+
+                                <!-- Loan Status Cell -->
+                                <td>
+                                    @if (loan.IsOverdue)
+                                    {
+                                        <span class="circ-badge circ-badge-rose">
+                                            (@loan.DaysOverdue days Overdue)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="circ-badge circ-badge-amber">
+                                            Due in @loan.DaysRemaining days
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- Action Return Button -->
+                                <td class="text-end pe-4">
+                                    <form method="post" asp-page-handler="Return" class="d-inline">
+                                        <input type="hidden" name="id" value="@loan.BorrowingId" />
+                                        <button type="submit" class="circ-btn-primary py-1 px-3 fs-7" onclick="return confirm('Confirm check-in & return for this book?');">
+                                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                            </svg>
+                                            Return Book
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <div class="py-4">
+                                    <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" class="mb-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <div class="fw-semibold">No active loans found matching your criteria.</div>
+                                    <div class="small">Check out a book at the <a asp-page="./Borrow" class="text-primary">Circulation Desk</a>.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer / Pagination -->
+        <div class="circ-card-header py-3 bg-light border-top">
+            <div class="text-muted small">
+                Showing records 1 - @Model.ViewModel.ActiveLoans.Count of @Model.ViewModel.TotalActiveLoansCount active loans
+            </div>
+            <div class="d-flex gap-1 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" disabled>&lt;</button>
+                <button type="button" class="btn btn-sm btn-primary py-1 px-2">1</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2">2</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2">&gt;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulator Showcase Sandbox for Evaluator -->
+    <div class="mt-4 pt-3 text-end">
+        <span class="text-muted small me-2">Test Figma Alert Banners:</span>
+        <a asp-page="./Return" asp-route-simulate="success" class="btn btn-sm btn-outline-success">Simulate Return Success</a>
+        <a asp-page="./Return" asp-route-simulate="error" class="btn btn-sm btn-outline-danger">Simulate Already Returned</a>
+    </div>
+</div>

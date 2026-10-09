@@ -1,0 +1,31 @@
+@page "{id:int}"
+@model LibraryManagementSystem.Pages.Borrowings.EditModel
+@{
+    ViewData["Title"] = "Edit Borrowing";
+}
+
+<div class="borrow-flow-container">
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h2 class="h3 fw-bold mb-3">Edit Borrowing</h2>
+        <form method="post">
+            <input type="hidden" asp-for="Borrowing.Id" />
+            <input type="hidden" asp-for="Borrowing.BookId" />
+            <input type="hidden" asp-for="Borrowing.UserId" />
+
+            <div class="mb-3">
+                <label asp-for="Borrowing.BorrowDate" class="form-label fw-semibold">Borrow Date</label>
+                <input asp-for="Borrowing.BorrowDate" class="form-control rounded-3" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Borrowing.ReturnDate" class="form-label fw-semibold">Return Date (Leave blank if currently borrowed)</label>
+                <input asp-for="Borrowing.ReturnDate" class="form-control rounded-3" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                <a asp-page="./Index" class="btn btn-light border px-3">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
