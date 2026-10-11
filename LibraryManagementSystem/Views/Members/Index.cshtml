@@ -1,0 +1,94 @@
+@model MemberListViewModel
+
+@{
+    ViewData["Title"] = "Members";
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+<h1>Members</h1>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Member</a>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="search" value="@Model.Search" class="form-control"
+               placeholder="Search by name or email" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-secondary">Search</button>
+        <a asp-action="Index" class="btn btn-outline-dark">Clear</a>
+    </div>
+</form>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (!Model.Members.Any())
+{
+    <div class="alert alert-info">No members found.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Join Date</th>
+                <th>Borrowing Now</th>
+                <th style="width: 220px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Model.Members)
+            {
+                <tr>
+                    <td>@member.FullName</td>
+                    <td>@member.Email</td>
+                    <td>@(member.Phone ?? "-")</td>
+                    <td>@member.JoinDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (member.ActiveBorrowings > 0)
+                        {
+                            <span class="badge bg-info text-dark">@member.ActiveBorrowings</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">0</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@member.Id" class="btn btn-sm btn-info">View</a>
+                        <a asp-action="Edit" asp-route-id="@member.Id" class="btn btn-sm btn-warning">Edit</a>
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Delete" asp-route-id="@member.Id" class="btn btn-sm btn-danger">Delete</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-search="@Model.Search" asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}
