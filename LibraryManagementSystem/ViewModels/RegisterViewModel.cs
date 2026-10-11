@@ -19,5 +19,7 @@ namespace LibraryManagementSystem.ViewModels
         [DataType(DataType.Password)]
         [Compare("Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        public bool AcceptTerms { get; set; }
     }
 }

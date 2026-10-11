@@ -17,18 +17,15 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult Login()
         {
-            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -41,17 +38,16 @@ namespace LibraryManagementSystem.Controllers
             }
 
             var result = await _signInManager.PasswordSignInAsync(
-                user, model.Password, model.RememberMe, lockoutOnFailure: false);
+                user,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
 
             if (result.Succeeded)
-            {
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return LocalRedirect(returnUrl);
-
                 return RedirectToAction("Index", "Home");
-            }
 
             ModelState.AddModelError("", "Invalid email or password.");
+
             return View(model);
         }
 
@@ -102,6 +98,44 @@ namespace LibraryManagementSystem.Controllers
             await _signInManager.SignOutAsync();
 
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // For security, don't reveal that the user does not exist
+                return RedirectToAction(nameof(ForgotPasswordConfirmation));
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // Here token can be emailed to user
+
+            return RedirectToAction(nameof(ForgotPasswordConfirmation));
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
