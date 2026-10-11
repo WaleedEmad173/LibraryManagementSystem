@@ -1,0 +1,59 @@
+@model LibraryManagementSystem.ViewModels.RegisterViewModel
+@{
+	ViewData["Title"] = "Register";
+}
+
+<div class="d-flex justify-content-center mt-5">
+	<div class="card shadow-sm" style="width:520px;">
+		<div class="card-body p-4">
+			<div class="text-center mb-3">
+				<img src="~/images/icons/BackgroundLogo.png" alt="logo" width="48" height="48" />
+				<h5 class="mt-2">Create an account</h5>
+				<p class="text-muted small">Join the Library Management System to borrow books and access digital resources.</p>
+			</div>
+
+			<form asp-action="Register" method="post">
+				<div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+				<div class="mb-3">
+					<label asp-for="FullName" class="form-label"></label>
+					<input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+					<span asp-validation-for="FullName" class="text-danger small"></span>
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Email" class="form-label"></label>
+					<input asp-for="Email" class="form-control" placeholder="Enter your email" />
+					<span asp-validation-for="Email" class="text-danger small"></span>
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Password" class="form-label"></label>
+					<input asp-for="Password" class="form-control" placeholder="Create a password" />
+					<span asp-validation-for="Password" class="text-danger small"></span>
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="ConfirmPassword" class="form-label"></label>
+					<input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
+					<span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+				</div>
+
+				<div class="form-check mb-3">
+					<input asp-for="AcceptTerms" class="form-check-input" />
+					<label asp-for="AcceptTerms" class="form-check-label small">I agree to the Library <a href="/Terms">Terms of Service</a> and <a href="/Policies/Borrowing">Borrowing Guidelines</a>.</label>
+				</div>
+
+				<button type="submit" class="btn text-white w-100 py-2 fw-semibold" style="background-color: #1e3f9e; border-radius: 8px;">Register</button>
+			</form>
+
+			<div class="text-center mt-3 small text-muted">
+				Already have an account? <a asp-action="Login">Login</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}
