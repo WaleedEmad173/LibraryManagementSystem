@@ -1,0 +1,25 @@
+﻿@model BookIndexViewModel
+
+<section class="card filters">
+    <form method="get" asp-action="Index" class="filter-form">
+        <div class="input-icon">
+            <i class="bi bi-search"></i>
+            <input type="text" name="search" value="@Model.Search" placeholder="Search by title, author, or ISBN..." />
+        </div>
+
+        <select name="categoryId" asp-items="Model.Categories" class="select">
+            <option value="">All Categories</option>
+        </select>
+
+        <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
+        <a class="btn btn-soft" asp-action="Index"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+    </form>
+
+    <div class="filter-stats">
+        <span><i class="dot dot-navy"></i> Total Books: <strong>@Model.TotalTitles.ToString("N0")</strong></span>
+        <span class="divider"></span>
+        <span><i class="dot dot-amber"></i> In Circulation: <strong>@Model.CopiesOnLoan.ToString("N0")</strong></span>
+    </div>
+</section>
