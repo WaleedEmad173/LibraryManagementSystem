@@ -1,0 +1,20 @@
+﻿<header class="topbar">
+    <div class="crumbs">
+        Librarian Portal <span>/</span> <strong>@(ViewData["Section"] ?? "Books")</strong>
+    </div>
+
+    <div class="topbar-right">
+        <div class="user">
+            <div class="avatar"><i class="bi bi-person"></i></div>
+            <div class="user-name">
+                @(User.Identity?.Name ?? "Guest")
+                <span class="chip chip-soft">Librarian</span>
+            </div>
+        </div>
+
+        @* Change Account/Logout if your AccountController uses different names *@
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="btn btn-ghost"><i class="bi bi-box-arrow-right"></i> Logout</button>
+        </form>
+    </div>
+</header>

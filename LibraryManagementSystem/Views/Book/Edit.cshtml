@@ -1,0 +1,82 @@
+﻿@model BookFormViewModel
+@{
+    ViewData["Title"] = "Edit Book";
+
+    // Stored (not posted) totals, so the donut stays correct even after a failed save
+    var storedTotal = Model.AvailableCopies + Model.CopiesOnLoan;
+    var availablePercent = storedTotal == 0 ? 0 : (int)Math.Round(Model.AvailableCopies * 100.0 / storedTotal);
+}
+
+<div class="crumb-line">
+    <a asp-action="Index"><i class="bi bi-book"></i> Books</a> <span>/</span> Edit Book <span>/</span>
+    <span class="chip chip-soft">@Model.Title</span>
+</div>
+
+<div class="page-title">
+    <h1>Edit Book</h1>
+    <p class="muted">Update catalog details, category classification, or inventory copy counts for this title.</p>
+</div>
+
+<div class="two-col">
+    <section class="card form-card">
+        <div class="record-banner">
+            <div class="record-cover"><i class="bi bi-book"></i></div>
+            <div>
+                <small>BOOK ASSET RECORD</small>
+                <h2>@Model.Title</h2>
+                <div class="mono muted">ISBN: @Model.ISBN</div>
+            </div>
+        </div>
+
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            <partial name="_BookFormFields" model="Model" />
+
+            <div class="form-footer">
+                <span class="muted"><i class="bi bi-arrow-repeat"></i> Loans stay intact when you save</span>
+                <div class="form-footer-right">
+                    <a class="btn btn-soft" asp-action="Index">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <aside class="side-stack">
+        <section class="card">
+            <div class="side-title between">
+                <h3>Circulation Pulse</h3>
+                @if (Model.CopiesOnLoan > 0)
+                {
+                    <span class="chip chip-amber">@Model.CopiesOnLoan ON LOAN</span>
+                }
+            </div>
+
+            <div class="pulse">
+                <div class="donut" style="--p:@availablePercent">
+                    <div class="donut-inner">
+                        <strong>@Model.AvailableCopies</strong>
+                        <small>AVAIL</small>
+                    </div>
+                </div>
+                <ul class="legend">
+                    <li><i class="dot dot-green"></i> Available on Shelf <strong>@Model.AvailableCopies</strong></li>
+                    <li><i class="dot dot-amber"></i> Active Borrows <strong>@Model.CopiesOnLoan</strong></li>
+                    <li class="legend-total">Total Registered <strong>@storedTotal</strong></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="card note-card">
+            <div class="side-title"><i class="bi bi-shield-check"></i> <h3>Cataloguing Guidelines</h3></div>
+            <p class="muted">
+                Ensure the ISBN matches the physical book's barcode to prevent scan mismatches at
+                self-checkout terminals. For major edition changes, create a new record rather than
+                modifying this listing.
+            </p>
+        </section>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

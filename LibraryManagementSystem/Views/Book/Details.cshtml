@@ -1,0 +1,109 @@
+﻿@model BookDetailsViewModel
+@{
+    ViewData["Title"] = Model.Book.Title;
+    var categoryName = Model.Book.Category?.Name ?? "Uncategorized";
+    var availablePercent = 100 - Model.LoanedPercent;
+}
+
+<section class="card detail-bar">
+    <div class="crumb-inline">
+        <a asp-action="Index"><i class="bi bi-book"></i> Books</a> <span>/</span>
+        <strong>@Model.Book.Title</strong>
+        @if (Model.Available > 0)
+        {
+            <span class="chip chip-green">AVAILABLE</span>
+        }
+        else
+        {
+            <span class="chip chip-red">ALL ON LOAN</span>
+        }
+    </div>
+    <div class="head-actions">
+        <a class="btn btn-outline" asp-action="Index"><i class="bi bi-arrow-left"></i> Back to Books</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Book.Id"><i class="bi bi-pencil"></i> Edit Book</a>
+    </div>
+</section>
+
+<section class="card detail-card">
+    <div class="detail-side">
+        <div class="cover">
+            <i class="bi bi-book"></i>
+            <strong>@Model.Book.Title</strong>
+            <span>@Model.Book.Author</span>
+        </div>
+        <div class="info-tile">
+            <small>ISBN</small>
+            <strong class="mono">@Model.Book.ISBN</strong>
+        </div>
+        <div class="info-tile">
+            <small>Category</small>
+            <strong>@categoryName</strong>
+        </div>
+    </div>
+
+    <div class="detail-body">
+        <div class="chips">
+            <span class="chip cat">@categoryName</span>
+            <span class="chip chip-soft">ISBN <strong class="mono">@Model.Book.ISBN</strong></span>
+        </div>
+
+        <h1>@Model.Book.Title</h1>
+        <div class="author-line">By @Model.Book.Author</div>
+
+        <h3 class="mini-title">Synopsis &amp; Summary</h3>
+        <p class="synopsis">
+            @(string.IsNullOrWhiteSpace(Model.Book.Description) ? "No description has been added for this book yet." : Model.Book.Description)
+        </p>
+
+        <div class="inventory">
+            <div class="inv-head">
+                <div class="side-title">
+                    <span class="icon-tile"><i class="bi bi-archive"></i></span>
+                    <div>
+                        <h3>Circulation &amp; Inventory State</h3>
+                        <small class="muted">Live shelf availability</small>
+                    </div>
+                </div>
+                <span class="chip @(Model.Available > 0 ? "chip-green-solid" : "chip-red")">@Model.Available @(Model.Available == 1 ? "Copy" : "Copies") Available</span>
+            </div>
+
+            <div class="inv-tiles">
+                <div class="inv-tile"><small>TOTAL INVENTORY</small><div class="num">@Model.Total</div><span class="muted">Registered physical books</span></div>
+                <div class="inv-tile"><small>ON LOAN</small><div class="num num-amber">@Model.OnLoan</div><span class="muted">Active borrowings</span></div>
+                <div class="inv-tile"><small>AVAILABLE</small><div class="num num-green">@Model.Available</div><span class="muted">Ready for checkout</span></div>
+            </div>
+
+            <div class="seg-bar">
+                <span class="seg seg-green" style="width:@(availablePercent)%"></span>
+                <span class="seg seg-amber" style="width:@(Model.LoanedPercent)%"></span>
+            </div>
+            <div class="seg-legend">
+                <span><i class="dot dot-green"></i> Available (@Model.Available)</span>
+                <span><i class="dot dot-amber"></i> Currently borrowed (@Model.OnLoan)</span>
+            </div>
+        </div>
+
+        <div class="head-actions left">
+            @* Hooked up later when the Borrow / Return pages exist *@
+            <button type="button" class="btn btn-primary" disabled><i class="bi bi-box-arrow-in-down"></i> Issue New Loan</button>
+            <button type="button" class="btn btn-soft" disabled><i class="bi bi-box-arrow-in-up"></i> Accept Return</button>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Borrowing history of this book</h2>
+    <p class="muted">Audit log of all member circulation transactions for this catalog item.</p>
+    <div class="empty-state">
+        <i class="bi bi-clock-history"></i>
+        <div>@Model.HistoryCount borrowing record(s) on file. The detailed log will appear here once we wire in the Borrowing model.</div>
+    </div>
+</section>
+
+<section class="card detail-bar">
+    <span class="muted"><i class="bi bi-patch-check"></i> Catalog record #@Model.Book.Id</span>
+    <div class="head-actions">
+        <a class="btn btn-soft" asp-action="Index"><i class="bi bi-arrow-left"></i> Back to Books</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Book.Id"><i class="bi bi-pencil"></i> Edit Book Details</a>
+    </div>
+</section>

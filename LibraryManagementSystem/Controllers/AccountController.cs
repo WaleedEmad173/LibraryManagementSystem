@@ -17,15 +17,18 @@ namespace LibraryManagementSystem.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -38,16 +41,17 @@ namespace LibraryManagementSystem.Controllers
             }
 
             var result = await _signInManager.PasswordSignInAsync(
-                user,
-                model.Password,
-                model.RememberMe,
-                lockoutOnFailure: false);
+                user, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return LocalRedirect(returnUrl);
+
                 return RedirectToAction("Index", "Home");
+            }
 
             ModelState.AddModelError("", "Invalid email or password.");
-
             return View(model);
         }
 
