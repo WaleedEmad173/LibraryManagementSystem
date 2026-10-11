@@ -1,0 +1,95 @@
+﻿@model BookDetailsViewModel
+@{
+    ViewData["Title"] = "Delete Book";
+    var categoryName = Model.Book.Category?.Name ?? "Uncategorized";
+}
+
+<div class="crumb-line">
+    <a asp-action="Index"><i class="bi bi-book"></i> Books</a> <span>/</span>
+    <strong class="text-red">Delete Book</strong> <span>/</span>
+    <span class="chip chip-soft">@Model.Book.Title</span>
+</div>
+
+<div class="two-col">
+    <section class="card delete-card">
+        <div class="warn-tile"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="eyebrow">CATALOG DELETION SAFETY CHECK</div>
+        <h1>Delete Book Confirmation</h1>
+        <p class="muted">Are you sure you want to permanently remove <strong>"@Model.Book.Title"</strong> from the library catalog?</p>
+
+        <div class="summary-box">
+            <div class="chips">
+                <span class="chip cat">@categoryName</span>
+            </div>
+            <h2>@Model.Book.Title</h2>
+            <div class="muted">By @Model.Book.Author</div>
+
+            <div class="meta-row">
+                <div><small>ISBN</small><strong class="mono">@Model.Book.ISBN</strong></div>
+                <div><small>Total Copies</small><strong>@Model.Total Units</strong></div>
+                <div><small>On Shelf</small><strong class="text-green">@Model.Available Available</strong></div>
+            </div>
+
+            <div class="irrev">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span><strong>Irreversible deletion:</strong> This removes the catalog record permanently. This cannot be undone.</span>
+            </div>
+        </div>
+
+        <form asp-action="Delete" asp-route-id="@Model.Book.Id" method="post" class="card-actions">
+            <a class="btn btn-soft" asp-action="Index"><i class="bi bi-x-lg"></i> Cancel &amp; Keep Book</a>
+            <button type="submit" class="btn btn-danger" disabled="@(!Model.CanDelete)">
+                <i class="bi bi-trash3"></i> Confirm Delete
+            </button>
+        </form>
+    </section>
+
+    <aside class="side-stack">
+        <section class="card">
+            <div class="side-title between">
+                <h3><i class="bi bi-shield-lock"></i> Circulation Integrity Guard</h3>
+                @if (Model.CanDelete)
+                {
+                    <span class="chip chip-green">CLEAR</span>
+                }
+                else
+                {
+                    <span class="chip chip-red">BLOCKED</span>
+                }
+            </div>
+
+            @if (Model.CanDelete)
+            {
+                <div class="ok-box">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>This book is safe to delete.</strong>
+                        <p>No copies are on loan and there is no borrowing history attached to this title.</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="block-box">
+                    <i class="bi bi-slash-circle-fill"></i>
+                    <div>
+                        @if (Model.HasActiveLoans)
+                        {
+                            <strong>This book cannot be deleted because it has active borrowings.</strong>
+                            <p>There @(Model.OnLoan == 1 ? "is" : "are") currently @Model.OnLoan @(Model.OnLoan == 1 ? "copy" : "copies") on loan. All copies must be returned before the catalog record can be removed.</p>
+                        }
+                        else
+                        {
+                            <strong>This book cannot be deleted because it has borrowing history.</strong>
+                            <p>@Model.HistoryCount borrowing record(s) are linked to this title and would be orphaned.</p>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="card-actions between">
+                <a class="btn btn-ghost" asp-action="Details" asp-route-id="@Model.Book.Id"><i class="bi bi-eye"></i> View Book Details</a>
+            </div>
+        </section>
+    </aside>
+</div>

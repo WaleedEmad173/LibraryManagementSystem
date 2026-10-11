@@ -1,0 +1,29 @@
+﻿@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-logo"><i class="bi bi-book-half"></i></div>
+        <div>
+            <div class="brand-name">Library System</div>
+            <div class="brand-sub">LIBRARIAN PORTAL</div>
+        </div>
+    </div>
+
+    <div class="nav-label">CORE MENU</div>
+    <nav class="nav">
+        <a class="nav-link @(controller == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">Dashboard</a>
+        <a class="nav-link @(controller == "Book" ? "active" : "")" asp-controller="Book" asp-action="Index">Books</a>
+        @* These pages don't exist yet - replace "#" with asp-controller/asp-action when you build them *@
+        <a class="nav-link" href="#">Categories</a>
+        <a class="nav-link" href="#">Members</a>
+        <a class="nav-link" href="#">Borrow</a>
+        <a class="nav-link" href="#">Return</a>
+        <a class="nav-link" href="#">History</a>
+    </nav>
+
+    <div class="mode-badge">
+        <span class="dot"></span> Librarian Mode &bull; v1.0
+        <i class="bi bi-shield-check"></i>
+    </div>
+</aside>
