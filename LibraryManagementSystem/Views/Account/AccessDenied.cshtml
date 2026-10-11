@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Access denied";
+}
+
+<section class="card delete-card">
+    <div class="warn-tile"><i class="bi bi-shield-lock"></i></div>
+    <h1>You don't have access to this page</h1>
+    <p class="muted">Your account doesn't have the permissions this action needs. Ask an administrator if you think this is a mistake.</p>
+    <div class="card-actions" style="justify-content:center">
+        <a class="btn btn-primary" asp-controller="Book" asp-action="Index">Back to Books</a>
+    </div>
+</section>

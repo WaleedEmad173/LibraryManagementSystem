@@ -1,0 +1,66 @@
+﻿@model BookFormViewModel
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-error">
+        <i class="bi bi-exclamation-octagon-fill"></i>
+        <span>
+            <strong>Couldn't save the book: please fix the @ViewData.ModelState.ErrorCount highlighted error(s) below.</strong>
+        </span>
+    </div>
+}
+
+<input type="hidden" asp-for="Id" />
+
+<div class="form-grid">
+    <div class="field full">
+        <label asp-for="Title">Title <span class="req">*</span></label>
+        <input asp-for="Title" placeholder="e.g. Clean Code" autocomplete="off" />
+        <span asp-validation-for="Title" class="field-msg"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="ISBN">ISBN <span class="req">*</span></label>
+        <input asp-for="ISBN" class="mono" placeholder="e.g. 9780132350884" autocomplete="off" />
+        <span asp-validation-for="ISBN" class="field-msg"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="Author">Author <span class="req">*</span></label>
+        <input asp-for="Author" placeholder="e.g. Robert C. Martin" autocomplete="off" />
+        <span asp-validation-for="Author" class="field-msg"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="CategoryId">Category <span class="req">*</span></label>
+        <select asp-for="CategoryId" asp-items="Model.Categories">
+            <option value="">Select Category</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="field-msg"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="TotalCopies">
+            Total Copies <span class="req">*</span>
+            @if (Model.CopiesOnLoan > 0)
+            {
+                <span class="label-note">Min allowed: @Model.CopiesOnLoan</span>
+            }
+        </label>
+        <input asp-for="TotalCopies" type="number" min="0" placeholder="e.g. 5" />
+        <span asp-validation-for="TotalCopies" class="field-msg"></span>
+        @if (Model.CopiesOnLoan > 0)
+        {
+            <div class="hint hint-warn">
+                <i class="bi bi-info-circle"></i>
+                Currently @Model.CopiesOnLoan copies are checked out; total copies cannot be reduced below active loans.
+            </div>
+        }
+    </div>
+
+    <div class="field full">
+        <label asp-for="Description">Description <span class="label-note">Optional &bull; Plain text</span></label>
+        <textarea asp-for="Description" rows="5" placeholder="Enter book synopsis, overview, or catalog notes..."></textarea>
+        <span asp-validation-for="Description" class="field-msg"></span>
+    </div>
+</div>
