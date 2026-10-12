@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Helpers;
 using LibraryManagementSystem.Models;
@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Controllers
 {
+    [Authorize]
     public class BookController : Controller
     {
         private const int PageSize = 8;
@@ -84,7 +85,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         // GET: /Book/Create
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Librarian")]
         public async Task<IActionResult> Create()
         {
             return View(new BookFormViewModel
@@ -95,7 +96,7 @@ namespace LibraryManagementSystem.Controllers
 
         // POST: /Book/Create
         [HttpPost, ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Librarian")]
         public async Task<IActionResult> Create(BookFormViewModel vm)
         {
             await ValidateIsbnAndCategoryAsync(vm, currentBookId: 0);
@@ -125,7 +126,7 @@ namespace LibraryManagementSystem.Controllers
         }
 
         // GET: /Book/Edit/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Librarian")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -150,7 +151,7 @@ namespace LibraryManagementSystem.Controllers
 
         // POST: /Book/Edit/5
         [HttpPost, ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Librarian")]
         public async Task<IActionResult> Edit(int id, BookFormViewModel vm)
         {
             if (id != vm.Id) return NotFound();

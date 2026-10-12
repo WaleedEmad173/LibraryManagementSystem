@@ -1,4 +1,4 @@
-﻿@model BookDetailsViewModel
+@model BookDetailsViewModel
 @{
     ViewData["Title"] = Model.Book.Title;
     var categoryName = Model.Book.Category?.Name ?? "Uncategorized";
@@ -20,7 +20,10 @@
     </div>
     <div class="head-actions">
         <a class="btn btn-outline" asp-action="Index"><i class="bi bi-arrow-left"></i> Back to Books</a>
-        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Book.Id"><i class="bi bi-pencil"></i> Edit Book</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+        {
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Book.Id"><i class="bi bi-pencil"></i> Edit Book</a>
+        }
     </div>
 </section>
 

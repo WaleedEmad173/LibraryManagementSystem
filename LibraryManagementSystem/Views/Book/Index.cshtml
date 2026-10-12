@@ -1,4 +1,4 @@
-﻿@model BookIndexViewModel
+@model BookIndexViewModel
 @{
     ViewData["Title"] = "Books";
 
@@ -14,7 +14,10 @@
     </div>
     <div class="head-actions">
         <button type="button" class="btn btn-soft" disabled title="Coming soon"><i class="bi bi-download"></i> Export CSV</button>
-        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Add New Book</a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+        {
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Add New Book</a>
+        }
     </div>
 </section>
 
