@@ -10,6 +10,7 @@
         public string? ImageUrl { get; set; }
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
+        public string? ImageUrl { get; set; }
 
         public int CategoryId { get; set; }
         public Category? Category { get; set; }

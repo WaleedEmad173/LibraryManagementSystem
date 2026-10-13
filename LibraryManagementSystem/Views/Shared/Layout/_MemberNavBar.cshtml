@@ -1,0 +1,167 @@
+@using Microsoft.AspNetCore.Identity
+@using LibraryManagementSystem.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var fullName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? "Sara Ahmed");
+    var memberId = user != null ? $"#MB-{user.Id:D4}" : "#MB-4820";
+    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+    var primaryRole = roles.FirstOrDefault() ?? "Member";
+}
+
+<header class="app-top-navbar bg-white">
+    <div class="navbar-content d-flex align-items-center justify-content-between">
+        <!-- Left Side: Title -->
+        <div class="portal-title-wrapper">
+            <h1 class="portal-title mb-0">Member Portal</h1>
+        </div>
+
+        <!-- Right Side: User Profile & Actions -->
+        <div class="user-actions d-flex align-items-center">
+            <!-- User Info Card -->
+            <div class="user-profile-badge d-flex align-items-center me-3">
+                <!-- Avatar Icon -->
+                <div class="user-avatar-box me-2">
+                    <img src="~/Images/icons/person.png" alt="User Avatar" width="16" height="16" class="avatar-icon" />
+                </div>
+
+                <!-- Name and ID -->
+                <div class="user-text-info me-3">
+                    <div class="user-fullname">@fullName</div>
+                    <div class="user-id">ID: @memberId</div>
+                </div>
+
+                <!-- Role Pill -->
+                <span class="role-badge">@primaryRole</span>
+            </div>
+
+            <!-- Divider -->
+            <div class="nav-divider"></div>
+
+            <!-- Logout Button Form -->
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-logout" title="Sign out">
+                    <svg class="logout-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<style>
+    .app-top-navbar {
+        border-bottom: 1px solid #edf2f7;
+        padding: 14px 28px;
+        background-color: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 1010;
+    }
+
+    .portal-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.2px;
+    }
+
+    .user-avatar-box {
+        width: 36px;
+        height: 36px;
+        background: #0f2756;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .avatar-icon {
+        filter: brightness(0) invert(1);
+        display: block;
+    }
+
+    .user-text-info {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+
+    .user-fullname {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .user-id {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-top: 1px;
+    }
+
+    .role-badge {
+        background-color: #dcfce7;
+        color: #15803d;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.2px;
+    }
+
+    .nav-divider {
+        width: 1px;
+        height: 24px;
+        background-color: #e2e8f0;
+        margin: 0 14px;
+    }
+
+    .btn-logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+        text-decoration: none;
+    }
+
+    .btn-logout:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border-color: #cbd5e1;
+    }
+
+    .logout-icon {
+        stroke: currentColor;
+    }
+
+    @@media (max-width: 768px) {
+        .app-top-navbar {
+            padding: 12px 16px;
+        }
+
+        .portal-title {
+            font-size: 1rem;
+        }
+
+        .user-id {
+            display: none;
+        }
+    }
+</style>

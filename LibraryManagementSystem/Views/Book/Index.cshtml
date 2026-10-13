@@ -1,0 +1,80 @@
+@model BookIndexViewModel
+@{
+    ViewData["Title"] = "Books";
+
+    // Clicking a header toggles asc/desc; other filters are kept
+    var titleSort = Model.SortOrder == "title_desc" ? null : "title_desc";
+    var authorSort = Model.SortOrder == "author" ? "author_desc" : "author";
+}
+
+<section class="card page-head">
+    <div>
+        <h1>Books <span class="chip chip-navy">Master Catalog</span></h1>
+        <p class="muted">Manage library inventory, catalog new acquisitions, and monitor copy availability.</p>
+    </div>
+    <div class="head-actions">
+        <button type="button" class="btn btn-soft" disabled title="Coming soon"><i class="bi bi-download"></i> Export CSV</button>
+        @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+        {
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Add New Book</a>
+        }
+    </div>
+</section>
+
+<partial name="_StatsCards" model="Model" />
+<partial name="_Filters" model="Model" />
+
+<section class="card table-card">
+    <div class="table-wrap">
+        <table class="books-table">
+            <thead>
+                <tr>
+                    <th>
+                        <a class="sort-link" asp-action="Index" asp-route-search="@Model.Search"
+                           asp-route-categoryId="@Model.CategoryId" asp-route-sortOrder="@titleSort">
+                            Title
+                            @if (Model.SortOrder == null || Model.SortOrder == "title_desc")
+                            {
+                                <i class="bi @(Model.SortOrder == "title_desc" ? "bi-arrow-down" : "bi-arrow-up")"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link" asp-action="Index" asp-route-search="@Model.Search"
+                           asp-route-categoryId="@Model.CategoryId" asp-route-sortOrder="@authorSort">
+                            Author
+                            @if (Model.SortOrder == "author" || Model.SortOrder == "author_desc")
+                            {
+                                <i class="bi @(Model.SortOrder == "author_desc" ? "bi-arrow-down" : "bi-arrow-up")"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>ISBN</th>
+                    <th>Category</th>
+                    <th>Copies <span class="th-sub">(Available / Total)</span></th>
+                    <th class="actions-col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Books.Any())
+                {
+                    foreach (var book in Model.Books)
+                    {
+                        <partial name="_BookRow" model="book" />
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="bi bi-search"></i>
+                            <div>No books match your search.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <partial name="_Pagination" model="Model" />
+</section>

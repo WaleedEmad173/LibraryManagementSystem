@@ -1,0 +1,60 @@
+﻿@model BookFormViewModel
+@{
+    ViewData["Title"] = "Add New Book";
+}
+
+<div class="crumb-line">
+    <a asp-action="Index">Books</a> <span>/</span> <strong>Add New Book</strong>
+</div>
+
+<div class="page-title">
+    <h1>Add New Book</h1>
+    <p class="muted">Enter catalog metadata and copy quantities to register a new book in the library collection.</p>
+</div>
+
+<div class="two-col">
+    <section class="card form-card accent-navy">
+        <div class="card-head">
+            <span class="icon-tile"><i class="bi bi-book"></i></span>
+            <div>
+                <h2>Book Information</h2>
+                <small class="muted">Fields marked with an asterisk are required</small>
+            </div>
+            <span class="chip chip-navy push-right">ISBN-13 CATALOGING</span>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+            <div class="form-group" style="margin-bottom: 1rem; padding: 0 1.5rem;">
+                <label asp-for="Image" class="form-label">Book Cover Image</label>
+                <input asp-for="Image" type="file" id="coverImage" class="form-control" accept="image/*" />
+                <span asp-validation-for="Image" class="text-danger"></span>
+            </div>
+
+            <partial name="_BookFormFields" model="Model" />
+
+            <div class="form-footer">
+                <button type="reset" class="btn btn-ghost"><i class="bi bi-arrow-repeat"></i> Reset Fields</button>
+                <div class="form-footer-right">
+                    <a class="btn btn-outline" asp-action="Index"><i class="bi bi-x-lg"></i> Cancel</a>
+                    <button type="submit" class="btn btn-green"><i class="bi bi-check-lg"></i> Save</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <aside class="side-stack">
+        <section class="card">
+            <div class="side-title"><span class="icon-tile"><i class="bi bi-shield-check"></i></span> <h3>Cataloging Rules</h3></div>
+            <ul class="rules">
+                <li><i class="bi bi-check-circle"></i><span><strong>ISBN format:</strong> Accepts 10 or 13 numerical digits. Hyphens are stripped automatically.</span></li>
+                <li><i class="bi bi-check-circle"></i><span><strong>Unique constraint:</strong> Each ISBN must be unique across the catalog.</span></li>
+                <li><i class="bi bi-check-circle"></i><span><strong>Stock allocation:</strong> Newly added copies are all marked as available on the shelf.</span></li>
+            </ul>
+        </section>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
