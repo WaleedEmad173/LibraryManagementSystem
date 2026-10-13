@@ -20,162 +20,16 @@ namespace LibraryManagementSystem.Controllers
 
         // GET: /Borrowings/ or /Borrowings/Index (My Borrowings & Circulation List)
         [HttpGet]
-        public async Task<IActionResult> Index(string? status, DateTime? fromDate, DateTime? toDate)
+        public IActionResult Index(string? status, DateTime? fromDate, DateTime? toDate)
         {
-            var query = _context.Borrowings
-                .Include(b => b.Book)
-                .ThenInclude(bk => bk!.Category)
-                .Include(b => b.User)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                if (status.Equals("Borrowed", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(b => b.ReturnDate == null);
-                }
-                else if (status.Equals("Returned", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(b => b.ReturnDate != null);
-                }
-            }
-
-            if (fromDate.HasValue)
-            {
-                query = query.Where(b => b.BorrowDate >= fromDate.Value);
-            }
-
-            if (toDate.HasValue)
-            {
-                query = query.Where(b => b.BorrowDate <= toDate.Value.AddDays(1));
-            }
-
-            var borrowingsList = await query
-                .OrderByDescending(b => b.BorrowDate)
-                .ToListAsync();
-
-            var viewModel = new BorrowingIndexViewModel
-            {
-                StatusFilter = status,
-                FromDate = fromDate,
-                ToDate = toDate,
-                TotalBorrowedCount = await _context.Borrowings.CountAsync(),
-                CurrentlyBorrowedCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null),
-                OverdueCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(14) < DateTime.Now),
-                Borrowings = borrowingsList.Select(b => new BorrowingHistoryItemViewModel
-                {
-                    BorrowingId = b.Id,
-                    BookId = b.BookId,
-                    BookTitle = b.Book?.Title ?? "Unknown Title",
-                    BookAuthor = b.Book?.Author ?? "Unknown Author",
-                    BookISBN = b.Book?.ISBN ?? "N/A",
-                    CategoryName = b.Book?.Category?.Name ?? "General",
-                    BorrowerName = b.User?.FullName ?? (b.User?.UserName ?? "Member"),
-                    MemberId = $"#MB-{b.UserId:D4}",
-                    BorrowDate = b.BorrowDate,
-                    ReturnDate = b.ReturnDate
-                }).ToList()
-            };
-
-            return View(viewModel);
+            return RedirectToPage("/Borrowings/Index", new { status, fromDate, toDate });
         }
 
         // GET: /Borrowings/Confirm/{bookId?} (Figma design view)
         [HttpGet]
-        public async Task<IActionResult> Confirm(int? id, string? simulate)
+        public IActionResult Confirm(int? id)
         {
-            // Resolve Book
-            Book? book = null;
-            if (id.HasValue && id.Value > 0)
-            {
-                book = await _context.Books
-                    .Include(b => b.Category)
-                    .FirstOrDefaultAsync(b => b.Id == id.Value);
-            }
-
-            if (book == null)
-            {
-                book = await _context.Books
-                    .Include(b => b.Category)
-                    .FirstOrDefaultAsync() ?? new Book
-                    {
-                        Id = 1,
-                        Title = "Clean Code: A Handbook of Agile Software Craftsmanship",
-                        Author = "Robert C. Martin (Uncle Bob)",
-                        ISBN = "978-0132350884",
-                        TotalCopies = 5,
-                        AvailableCopies = 3,
-                        Description = "A Handbook of Agile Software Craftsmanship"
-                    };
-            }
-
-            // Resolve Borrower (Current logged-in user or fallback to demo member)
-            ApplicationUser? borrower = null;
-            if (User?.Identity?.IsAuthenticated == true)
-            {
-                borrower = await _userManager.GetUserAsync(User);
-            }
-
-            if (borrower == null)
-            {
-                borrower = await _userManager.FindByEmailAsync("sara@library.com")
-                    ?? await _userManager.Users.FirstOrDefaultAsync()
-                    ?? new ApplicationUser
-                    {
-                        Id = 4820,
-                        FullName = "Sara Ahmed",
-                        Email = "sara@library.com",
-                        UserName = "sara@library.com"
-                    };
-            }
-
-            var model = new ConfirmBorrowViewModel
-            {
-                BookId = book.Id,
-                Title = book.Title,
-                Author = string.IsNullOrWhiteSpace(book.Author) ? "Robert C. Martin (Uncle Bob)" : book.Author,
-                ISBN = string.IsNullOrWhiteSpace(book.ISBN) ? "978-0132350884" : book.ISBN,
-                CategoryName = book.Category?.Name ?? "ENGINEERING / TECH",
-                TotalCopies = book.TotalCopies > 0 ? book.TotalCopies : 5,
-                AvailableCopies = book.AvailableCopies,
-                Edition = "1st Edition (Revised)",
-                ShelfLocation = "2nd Floor • Section T4, Shelf 12",
-                Barcode = "BC-9942-0193-CC",
-                AccessStatus = book.AvailableCopies > 0 ? "Ready for immediate pickup" : "Currently Unavailable",
-                StandardLoanPeriodDays = 14,
-                UserId = borrower.Id,
-                BorrowerName = string.IsNullOrWhiteSpace(borrower.FullName) ? "Sara Ahmed" : borrower.FullName,
-                MemberId = $"#MB-{borrower.Id:D4}",
-                BorrowerTier = "Standard Academic",
-                BorrowerInitials = GetInitials(borrower.FullName),
-                CheckoutDate = DateTime.Today,
-                ScheduledDueDate = DateTime.Today.AddDays(14),
-                PickupDesk = "Central Academic Library - Main Desk (Level 1)"
-            };
-
-            // Developer / Sandbox Simulation States (from query parameter)
-            if (!string.IsNullOrEmpty(simulate))
-            {
-                model.IsSimulated = true;
-                model.ActiveFeedbackState = simulate.ToLowerInvariant();
-                switch (model.ActiveFeedbackState)
-                {
-                    case "success":
-                        model.FeedbackBadge = "HTTP 200 OK";
-                        model.FeedbackMessage = $"Your loan has been processed. Due date is {model.ScheduledDueDate:MMM dd, yyyy}. Please pick up at Section T4. A receipt email has been sent to your registered address.";
-                        break;
-                    case "nostock":
-                        model.FeedbackBadge = "HTTP 409 Conflict";
-                        model.FeedbackMessage = $"All {model.TotalCopies} copies are currently on loan. You may place a reservation hold from the catalog to be queued automatically once returned.";
-                        break;
-                    case "duplicate":
-                        model.FeedbackBadge = "Policy Violation";
-                        model.FeedbackMessage = $"Your account already has an active loan for '{model.Title}'. Members are strictly limited to 1 concurrent copy per title to ensure equitable catalog distribution.";
-                        break;
-                }
-            }
-
-            return View(model);
+            return RedirectToPage("/Borrowings/Borrow", new { bookId = id });
         }
 
         // POST: /Borrowings/Confirm
@@ -204,11 +58,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-            {
-                user = await _userManager.FindByEmailAsync("sara@library.com");
-                if (user != null) userId = user.Id;
-            }
+            if (user == null) return BadRequest("A valid member must be selected.");
 
             // Guard Rail 1: Inventory stock availability
             if (book.AvailableCopies <= 0)
@@ -217,7 +67,8 @@ namespace LibraryManagementSystem.Controllers
                 input.FeedbackBadge = "HTTP 409 Conflict";
                 input.FeedbackMessage = $"All {book.TotalCopies} copies are currently on loan. You may place a reservation hold from the catalog to be queued automatically once returned.";
                 input.AvailableCopies = 0;
-                return View(input);
+                TempData["Error"] = "No copies are available for this book.";
+                return RedirectToPage("/Borrowings/Borrow", new { bookId = book.Id, userId });
             }
 
             // Guard Rail 2: Prevent duplicate active borrowing of the same book by the same member
@@ -229,7 +80,8 @@ namespace LibraryManagementSystem.Controllers
                 input.ActiveFeedbackState = "duplicate";
                 input.FeedbackBadge = "Policy Violation";
                 input.FeedbackMessage = $"Your account already has an active loan for '{book.Title}'. Members are strictly limited to 1 concurrent copy per title to ensure equitable catalog distribution.";
-                return View(input);
+                TempData["Error"] = "This member already has an active loan for this book.";
+                return RedirectToPage("/Borrowings/Borrow", new { bookId = book.Id, userId });
             }
 
             // Process Loan Transaction
@@ -250,9 +102,8 @@ namespace LibraryManagementSystem.Controllers
             input.AvailableCopies = book.AvailableCopies;
             input.ActiveFeedbackState = "success";
             input.FeedbackBadge = "HTTP 200 OK";
-            input.FeedbackMessage = $"Your loan has been processed. Due date is {DateTime.Today.AddDays(14):MMM dd, yyyy}. Please pick up at Section T4. A receipt email has been sent to your registered address.";
-
-            return View(input);
+            TempData["Success"] = $"Loan #{borrowing.Id:D4} recorded. Due date: {borrowing.BorrowDate.AddDays(14):MMM dd, yyyy}.";
+            return RedirectToPage("/Borrowings/Borrow", new { bookId = book.Id, userId });
         }
 
         // POST: /Borrowings/Return/{id}

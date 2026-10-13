@@ -23,7 +23,7 @@ namespace LibraryManagementSystem.ViewModels
         public string Author { get; set; } = string.Empty;
         public string ISBN { get; set; } = string.Empty;
         public string CategoryName { get; set; } = string.Empty;
-        public string ShelfLocation { get; set; } = "2nd Floor • Section T4, Shelf 12";
+        public string? ImageUrl { get; set; }
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
         public int ActiveLoans => Math.Max(0, TotalCopies - AvailableCopies);
@@ -74,10 +74,13 @@ namespace LibraryManagementSystem.ViewModels
     public class CirculationReturnPageViewModel
     {
         public string? SearchQuery { get; set; }
-        public string Filter { get; set; } = "all";
         public int ReturnsTodayCount { get; set; }
         public int OverdueItemsCount { get; set; }
+        public int DueThisWeekCount { get; set; }
         public int TotalActiveLoansCount { get; set; }
+        public int MatchingActiveLoansCount { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int TotalPages { get; set; } = 1;
 
         public List<ActiveLoanItemViewModel> ActiveLoans { get; set; } = new();
 

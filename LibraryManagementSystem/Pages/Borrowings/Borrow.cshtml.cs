@@ -31,32 +31,9 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
         public CirculationBorrowPageViewModel ViewModel { get; set; } = new();
 
-        public async Task<IActionResult> OnGetAsync(int? bookId, int? userId, string? simulate)
+        public async Task<IActionResult> OnGetAsync(int? bookId, int? userId)
         {
             await LoadCirculationDataAsync(bookId, userId);
-
-            if (!string.IsNullOrEmpty(simulate))
-            {
-                ViewModel.AlertState = simulate.ToLowerInvariant();
-                if (ViewModel.AlertState == "success")
-                {
-                    ViewModel.AlertTitle = "Book borrowed successfully";
-                    ViewModel.AlertReference = "#LN-3827";
-                    ViewModel.AlertDueDate = DateTime.Today.AddDays(14);
-                    ViewModel.AlertMessage = $"Inventory status updated instantly. Transaction permitted with reference {ViewModel.AlertReference}. Assigned to member {ViewModel.SelectedMember?.FullName ?? "Sara Ahmed"}.";
-                }
-                else if (ViewModel.AlertState == "nostock")
-                {
-                    ViewModel.AlertTitle = "No available copies for this book";
-                    ViewModel.AlertMessage = $"All {ViewModel.SelectedBook?.TotalCopies ?? 5} registered copies of this title are currently loaned out or placed on hold. Checkout cannot proceed until an active loan is cleared.";
-                }
-                else if (ViewModel.AlertState == "duplicate")
-                {
-                    ViewModel.AlertTitle = "Member already has an active loan for this book";
-                    ViewModel.AlertMessage = $"The selected patron already holds an active checkout of '{ViewModel.SelectedBook?.Title ?? "Clean Code"}'. Duplicate loans of identical titles are restricted.";
-                }
-            }
-
             return Page();
         }
 
@@ -149,21 +126,11 @@ namespace LibraryManagementSystem.Pages.Borrowings
                     Title = b.Title,
                     Author = b.Author,
                     ISBN = b.ISBN,
-                    CategoryName = b.Category?.Name ?? "General Catalog",
-                    TotalCopies = b.TotalCopies > 0 ? b.TotalCopies : 5,
+                    CategoryName = b.Category?.Name ?? string.Empty,
+                    ImageUrl = b.ImageUrl,
+                    TotalCopies = b.TotalCopies,
                     AvailableCopies = b.AvailableCopies,
-                    ShelfLocation = "2nd Floor • Section T4, Shelf 12"
                 }).ToList();
-            }
-            else
-            {
-                // Fallback catalog if DB not populated yet
-                ViewModel.Books = new List<BookOptionViewModel>
-                {
-                    new() { Id = 1, Title = "Clean Code: A Handbook of Agile Software Craftsmanship", Author = "Robert C. Martin (Uncle Bob)", ISBN = "978-0132350884", CategoryName = "Software Dev", TotalCopies = 5, AvailableCopies = 3 },
-                    new() { Id = 2, Title = "System Design Interview – An Insider's Guide", Author = "Alex Xu", ISBN = "979-8664653403", CategoryName = "Architecture", TotalCopies = 4, AvailableCopies = 2 },
-                    new() { Id = 3, Title = "Designing Data-Intensive Applications", Author = "Martin Kleppmann", ISBN = "978-1449373320", CategoryName = "Engineering", TotalCopies = 6, AvailableCopies = 0 }
-                };
             }
 
             // Load Members
@@ -177,8 +144,8 @@ namespace LibraryManagementSystem.Pages.Borrowings
                     return new PatronOptionViewModel
                     {
                         Id = u.Id,
-                        FullName = string.IsNullOrWhiteSpace(u.FullName) ? (u.UserName ?? $"Member {u.Id}") : u.FullName,
-                        Email = u.Email ?? $"user{u.Id}@library.org",
+                        FullName = u.FullName,
+                        Email = u.Email ?? string.Empty,
                         MemberId = $"#MB-{u.Id:D4}",
                         Initials = GetInitials(u.FullName),
                         ActiveLoansCount = activeLoans,
@@ -188,20 +155,12 @@ namespace LibraryManagementSystem.Pages.Borrowings
                     };
                 }).ToList();
             }
-            else
-            {
-                // Fallback members if DB not populated yet
-                ViewModel.Members = new List<PatronOptionViewModel>
-                {
-                    new() { Id = 1, FullName = "Sara Ahmed", Email = "sara.ahmed@example.com", MemberId = "#MB-4820", Initials = "SA", ActiveLoansCount = 2, MaxQuota = 3, OverdueCount = 0, Standing = "Good Standing" },
-                    new() { Id = 2, FullName = "David Kahanan", Email = "david.k@example.com", MemberId = "#MB-1904", Initials = "DK", ActiveLoansCount = 1, MaxQuota = 3, OverdueCount = 0, Standing = "Good Standing" },
-                    new() { Id = 3, FullName = "Maya Lin", Email = "maya.lin@example.com", MemberId = "#MB-3211", Initials = "ML", ActiveLoansCount = 3, MaxQuota = 3, OverdueCount = 1, Standing = "Action Required" }
-                };
-            }
 
             // Counts
-            var count = await _context.Borrowings.CountAsync();
-            ViewModel.TransactedCount = count > 0 ? count : 42;
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var count = await _context.Borrowings.CountAsync(b => b.BorrowDate >= today && b.BorrowDate < tomorrow);
+            ViewModel.TransactedCount = count;
 
             // Resolve selection
             if (preferredBookId.HasValue && ViewModel.Books.Any(b => b.Id == preferredBookId.Value))
@@ -229,7 +188,7 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
         private static string GetInitials(string? name)
         {
-            if (string.IsNullOrWhiteSpace(name)) return "MB";
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
             var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
             return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();

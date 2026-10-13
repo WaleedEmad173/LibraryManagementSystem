@@ -5,9 +5,9 @@
     var b = Model.Borrowing;
     var isReturned = b?.ReturnDate.HasValue == true;
     var isOverdue = !isReturned && b != null && DateTime.Today > b.BorrowDate.AddDays(14);
-    var loanRef = $"#LN-{(b?.Id ?? 1):D4}";
-    var memberId = $"#MB-{(b?.UserId ?? 1):D4}";
-    var initials = "MB";
+    var loanRef = b == null ? string.Empty : $"#LN-{b.Id:D4}";
+    var memberId = b == null ? string.Empty : $"#MB-{b.UserId:D4}";
+    var initials = string.Empty;
     if (!string.IsNullOrWhiteSpace(b?.User?.FullName))
     {
         var parts = b.User.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -94,27 +94,24 @@
                                 <!-- Realistic Blue Book Graphic from Figma -->
                                 <div class="rounded-3 p-3 text-white text-center flex-shrink-0 d-flex flex-column justify-content-between shadow-sm"
                                      style="width: 100px; height: 130px; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);">
-                                    <div class="text-uppercase fw-bold opacity-75" style="font-size: 0.55rem; letter-spacing: 0.05em;">PRENTICE HALL</div>
                                     <div class="fw-bold my-auto" style="font-size: 0.72rem; line-height: 1.2;">
-                                        @(b.Book?.Title?.Length > 28 ? b.Book.Title.Substring(0, 25) + "..." : (b.Book?.Title ?? "BOOK"))
+                                        @(b.Book?.Title?.Length > 28 ? b.Book.Title.Substring(0, 25) + "..." : b.Book?.Title)
                                     </div>
-                                    <div class="text-muted opacity-75" style="font-size: 0.55rem;">Robert C. Martin</div>
                                 </div>
 
                                 <div class="flex-grow-1">
                                     <span class="badge bg-light text-primary border mb-1" style="font-size: 0.7rem;">
-                                        @(b.Book?.Category?.Name ?? "ENGINEERING / TECH")
+                                        @b.Book?.Category?.Name
                                     </span>
                                     <h5 class="fw-bold text-slate-900 mb-1" style="font-size: 1.05rem;">
                                         @b.Book?.Title
                                     </h5>
                                     <div class="text-muted small mb-2">
-                                        By @(b.Book?.Author ?? "Robert C. Martin (Uncle Bob)")
+                                        @b.Book?.Author
                                     </div>
 
                                     <div class="d-flex flex-column gap-1 small text-secondary">
-                                        <div><strong>ISBN:</strong> @(b.Book?.ISBN ?? "978-0132350884")</div>
-                                        <div><strong>Edition:</strong> 1st Edition (Revised)</div>
+                                        <div><strong>ISBN:</strong> @b.Book?.ISBN</div>
                                     </div>
                                 </div>
                             </div>
@@ -129,10 +126,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <div class="text-muted small">Shelf Location</div>
-                                    <div class="fw-semibold text-slate-900">2nd Floor • Section T4, Shelf 12</div>
-                                </div>
                             </div>
 
                             <div class="d-flex align-items-center gap-3">
@@ -143,7 +136,7 @@
                                 </div>
                                 <div>
                                     <div class="text-muted small">Standard Loan Period</div>
-                                    <div class="fw-semibold text-slate-900">14 Days (Renewable 1x)</div>
+                                    <div class="fw-semibold text-slate-900">14 Days</div>
                                 </div>
                             </div>
 
@@ -162,30 +155,7 @@
                             </div>
                         </div>
 
-                        <!-- Barcode Banner matching Figma -->
-                        <div class="p-3 rounded-3" style="background: #f1f5f9; border: 1px solid #e2e8f0;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700;">INVENTORY BARCODE</div>
-                                    <div class="fw-bold font-monospace text-slate-900">BC-9942-0193-CC</div>
-                                </div>
-                                <!-- Authentic SVG Barcode Graphic -->
-                                <div class="d-flex align-items-center gap-1" style="height: 32px;">
-                                    <div style="width: 3px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 1px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 4px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 2px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 1px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 4px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 2px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 3px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 1px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 5px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 2px; height: 100%; background: #0f172a;"></div>
-                                    <div style="width: 3px; height: 100%; background: #0f172a;"></div>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -213,8 +183,7 @@
                                     </div>
                                     <div>
                                         <div class="text-uppercase small text-primary fw-bold" style="font-size: 0.72rem; letter-spacing: 0.04em;">BORROWER ACCOUNT</div>
-                                        <h5 class="fw-bold text-slate-900 mb-0">@(b.User?.FullName ?? "Member")</h5>
-                                        <div class="text-muted small">Authorized Circulation Tier: Standard Academic</div>
+                                        <h5 class="fw-bold text-slate-900 mb-0">@b.User?.FullName</h5>
                                     </div>
                                 </div>
                                 <div class="text-end">
@@ -280,16 +249,7 @@
                             </div>
                         </div>
 
-                        <!-- Pickup Desk & Terminal matching Figma -->
-                        <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                            <div class="text-muted small fw-semibold mb-1">Pickup Desk & Terminal</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-semibold text-slate-900">Central Academic Library - Main Desk (Level 1)</span>
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#059669">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                        </div>
+
 
                         <!-- Circulation Policy & Terms Card matching Figma -->
                         <div class="circ-notice-box mb-4" style="background: #fffbeb; border-color: #fef3c7; border-left-color: #d97706;">
@@ -299,7 +259,7 @@
                             <div>
                                 <div class="circ-notice-title" style="color: #92400e;">Circulation Policy & Terms</div>
                                 <p class="circ-notice-desc" style="color: #78350f;">
-                                    Physical return or renewal must occur within 14 calendar days. Late returns may incur loan suspension and automated ledger adjustments.
+                                    The due date is calculated from the checkout date using the standard loan duration.
                                 </p>
                             </div>
                         </div>

@@ -6,29 +6,29 @@ namespace LibraryManagementSystem.ViewModels
     {
         // Book Details
         public int BookId { get; set; }
-        public string Title { get; set; } = "Clean Code: A Handbook of Agile Software Craftsmanship";
-        public string Author { get; set; } = "Robert C. Martin (Uncle Bob)";
-        public string ISBN { get; set; } = "978-0132350884";
-        public string CategoryName { get; set; } = "ENGINEERING / TECH";
-        public string Edition { get; set; } = "1st Edition (Revised)";
-        public string ShelfLocation { get; set; } = "2nd Floor • Section T4, Shelf 12";
-        public string Barcode { get; set; } = "BC-9942-0193-CC";
-        public string AccessStatus { get; set; } = "Ready for immediate pickup";
+        public string Title { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public string ISBN { get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
+        public string Edition { get; set; } = string.Empty;
+        public string ShelfLocation { get; set; } = string.Empty;
+        public string Barcode { get; set; } = string.Empty;
+        public string AccessStatus { get; set; } = string.Empty;
         public int StandardLoanPeriodDays { get; set; } = 14;
-        public int TotalCopies { get; set; } = 5;
-        public int AvailableCopies { get; set; } = 3;
+        public int TotalCopies { get; set; }
+        public int AvailableCopies { get; set; }
 
         // Borrower Details
         public int UserId { get; set; }
-        public string BorrowerName { get; set; } = "Sara Ahmed";
-        public string MemberId { get; set; } = "#MB-4820";
-        public string BorrowerTier { get; set; } = "Standard Academic";
-        public string BorrowerInitials { get; set; } = "SA";
+        public string BorrowerName { get; set; } = string.Empty;
+        public string MemberId { get; set; } = string.Empty;
+        public string BorrowerTier { get; set; } = string.Empty;
+        public string BorrowerInitials { get; set; } = string.Empty;
 
         // Loan Timing
         public DateTime CheckoutDate { get; set; } = DateTime.Today;
         public DateTime ScheduledDueDate { get; set; } = DateTime.Today.AddDays(14);
-        public string PickupDesk { get; set; } = "Central Academic Library - Main Desk (Level 1)";
+        public string PickupDesk { get; set; } = string.Empty;
 
         // Feedback / Result States
         public string? ActiveFeedbackState { get; set; } // "success", "nostock", "duplicate", or null
@@ -48,7 +48,7 @@ namespace LibraryManagementSystem.ViewModels
         public string BorrowerName { get; set; } = string.Empty;
         public string BorrowerEmail { get; set; } = string.Empty;
         public string MemberId { get; set; } = string.Empty;
-        public string BorrowerInitials { get; set; } = "MB";
+        public string BorrowerInitials { get; set; } = string.Empty;
         public DateTime BorrowDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public DateTime DueDate => BorrowDate.AddDays(14);
@@ -70,5 +70,8 @@ namespace LibraryManagementSystem.ViewModels
         public string? SearchBook { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public int MatchingRecordsCount { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int TotalPages { get; set; } = 1;
     }
 }
