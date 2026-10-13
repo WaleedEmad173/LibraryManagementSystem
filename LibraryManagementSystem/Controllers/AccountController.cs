@@ -19,6 +19,9 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 
@@ -54,6 +57,9 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+
             return View();
         }
 

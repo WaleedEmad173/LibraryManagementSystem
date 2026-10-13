@@ -1,4 +1,4 @@
-﻿@model Book
+@model Book
 @{
     var available = Model.AvailableCopies;
     var total = Model.TotalCopies;
@@ -55,7 +55,13 @@
     </td>
     <td class="actions-col">
         <a class="icon-btn" asp-action="Details" asp-route-id="@Model.Id" title="View details"><i class="bi bi-eye"></i></a>
-        <a class="icon-btn" asp-action="Edit" asp-route-id="@Model.Id" title="Edit"><i class="bi bi-pencil"></i></a>
-        <a class="icon-btn" asp-action="Delete" asp-route-id="@Model.Id" title="Delete"><i class="bi bi-trash3"></i></a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+        {
+            <a class="icon-btn" asp-action="Edit" asp-route-id="@Model.Id" title="Edit"><i class="bi bi-pencil"></i></a>
+        }
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="icon-btn" asp-action="Delete" asp-route-id="@Model.Id" title="Delete"><i class="bi bi-trash3"></i></a>
+        }
     </td>
 </tr>

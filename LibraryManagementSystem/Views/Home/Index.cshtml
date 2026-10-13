@@ -1,8 +1,995 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model LibraryManagementSystem.ViewModels.GuestHomeViewModel
+@{
+    ViewData["Title"] = "Discover Your Next Great Read";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="guest-home-container py-4">
+    <!-- Hero Section -->
+    <section class="hero-section text-center py-4">
+        <div class="announcement-pill mb-3">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Over 50,000+ Titles Available Immediately & 8 Rooms</span>
+        </div>
+
+        <h1 class="hero-headline">Find your next great read</h1>
+        <p class="hero-subtitle">
+            Explore thousands of books, academic journals, and digital audiobooks across diverse genres. Search our unified catalog or visit our modern branch locations today.
+        </p>
+
+        <!-- Search Bar -->
+        <form asp-controller="Book" asp-action="Index" method="get" class="search-bar-form mt-4">
+            <div class="search-input-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="search" class="search-input" placeholder="Search by title, author, ISBN, or topic..." />
+            </div>
+
+            <div class="category-dropdown-wrapper">
+                <select name="categoryId" class="category-select">
+                    <option value="">All Categories</option>
+                    @if (Model.Categories != null && Model.Categories.Any())
+                    {
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="1">Computer Science</option>
+                        <option value="2">Fiction</option>
+                        <option value="3">Popular Science</option>
+                        <option value="4">Psychology</option>
+                        <option value="5">History</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn-search-submit">
+                <span>Search</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Topic Pills -->
+        <div class="topic-pills-row mt-3">
+            <a asp-controller="Book" asp-action="Index" class="topic-pill active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                    <path d="M6 6h10"></path>
+                    <path d="M6 10h10"></path>
+                </svg>
+                <span>Browse Books</span>
+            </a>
+            <a asp-controller="Book" asp-action="Index" asp-route-search="Fiction" class="topic-pill">Fiction</a>
+            <a asp-controller="Book" asp-action="Index" asp-route-search="Computer Science" class="topic-pill">Computer Science</a>
+            <a asp-controller="Book" asp-action="Index" asp-route-search="History" class="topic-pill">History</a>
+            <a asp-controller="Book" asp-action="Index" asp-route-search="Psychology" class="topic-pill">Psychology</a>
+            <a asp-controller="Book" asp-action="Index" asp-route-search="Biographies" class="topic-pill">Biographies</a>
+        </div>
+    </section>
+
+    <!-- Key Stats 4-Grid Bar -->
+    <section class="stats-grid-section my-5">
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <div class="stat-box-card">
+                    <div class="stat-box-icon text-primary bg-primary-soft">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="stat-number">45,000+</div>
+                        <div class="stat-label">Active Textbooks</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="stat-box-card">
+                    <div class="stat-box-icon text-amber bg-amber-soft">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="stat-number">12,000+</div>
+                        <div class="stat-label">Active Members</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="stat-box-card">
+                    <div class="stat-box-icon text-success bg-success-soft">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="stat-number">8 Rooms</div>
+                        <div class="stat-label">Quiet Study Suites</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="stat-box-card">
+                    <div class="stat-box-icon text-indigo bg-indigo-soft">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="stat-number">24/7 Portal</div>
+                        <div class="stat-label">Online Reservations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Books Section -->
+    <section class="featured-books-section my-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
+            <div>
+                <span class="spotlight-tag">#WEEKLY SPOTLIGHT</span>
+                <h2 class="featured-heading">Featured Books</h2>
+                <p class="featured-sub mb-0">Curated staff recommendations and popular choices this week across key academic fields.</p>
+            </div>
+            <a asp-controller="Book" asp-action="Index" class="view-all-link">
+                <span>View all titles</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var book in Model.FeaturedBooks)
+            {
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="book-card-item">
+                        <!-- Book Cover Graphic -->
+                        <div class="book-cover-banner" style="background: @book.BgGradient;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge-available">
+                                    <span class="pulse-dot"></span> Available
+                                </span>
+                                <button type="button" class="btn-bookmark" title="Save book">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="cover-meta-tag">@book.CategoryName</div>
+                            <h4 class="cover-title">@book.Title</h4>
+                            <div class="cover-author">@book.Author</div>
+                        </div>
+
+                        <!-- Card Body Details -->
+                        <div class="book-card-details">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="category-pill-badge">@book.CategoryName</span>
+                                <span class="publisher-meta">@book.PublisherYear</span>
+                            </div>
+
+                            <h5 class="book-info-title text-truncate" title="@book.Title">@book.Title</h5>
+                            <div class="book-info-author">@book.Author</div>
+
+                            <div class="rating-row mt-2">
+                                <span class="stars">★ @book.Rating.ToString("F1")</span>
+                                <span class="reviews-count">(@book.ReviewCount reviews)</span>
+                            </div>
+
+                            <a asp-controller="Book" asp-action="@(book.Id > 0 ? "Details" : "Index")" asp-route-id="@(book.Id > 0 ? book.Id : null)" class="btn btn-outline-custom w-100 mt-3">
+                                <span>View Details</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Sanctuary / Facilities Section -->
+    <section class="sanctuary-section my-5">
+        <div class="sanctuary-card">
+            <div class="row g-0 align-items-stretch">
+                <!-- Left Photo -->
+                <div class="col-lg-5 position-relative sanctuary-img-col">
+                    <img src="~/Images/library-hall.jpg" alt="University Library Modern Study Hall" class="sanctuary-img" />
+                    <div class="branch-pill-overlay">
+                        <span>Central Branch • Floor 2</span>
+                    </div>
+                </div>
+
+                <!-- Right Information -->
+                <div class="col-lg-7 p-4 p-md-5 d-flex flex-column justify-content-center">
+                    <div class="architectural-tag mb-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                            <path d="M3 21h18"></path>
+                            <path d="M9 8h1"></path>
+                            <path d="M9 12h1"></path>
+                            <path d="M9 16h1"></path>
+                            <path d="M14 8h1"></path>
+                            <path d="M14 12h1"></path>
+                            <path d="M14 16h1"></path>
+                            <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                        </svg>
+                        <span>Architectural Spaces</span>
+                    </div>
+
+                    <h2 class="sanctuary-title">A quiet sanctuary engineered for deep research and discovery</h2>
+                    <p class="sanctuary-desc">
+                        Whether you need an individual carrel for focused writes, collaborative media dens, or high-resolution scanning suites, our branches offer spaces tailored to modern scholars.
+                    </p>
+
+                    <div class="row g-3 my-2">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="amenity-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                                        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="amenity-name">Gigabit Research Wi-Fi</div>
+                                    <div class="amenity-desc">Seamless encrypted connection campus-wide</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="amenity-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="amenity-name">Audiobook Listening Pods</div>
+                                    <div class="amenity-desc">Dedicated spatial listening acoustics</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3 mt-4 pt-2">
+                        <a asp-controller="Book" asp-action="Index" class="btn btn-primary-auth py-2 px-3">
+                            <span>Explore Branch Amenities</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                        <span class="hours-text">Open Mon-Sun 7:00 AM - 11:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How Our Library Works -->
+    <section class="how-it-works-section my-5 text-center">
+        <h2 class="how-title">How Our Library Works</h2>
+        <p class="how-subtitle">Experience a streamlined borrowing system built for research speed, digital nobility, and convenience.</p>
+
+        <div class="row g-4 mt-2 text-start">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-icon-box text-primary bg-primary-soft mb-3">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                            <path d="M7 15h0M2 9.5h20"></path>
+                        </svg>
+                    </div>
+                    <div class="step-tag">STEP 01</div>
+                    <h4 class="step-title">Browse & Reserve</h4>
+                    <p class="step-desc">
+                        Search from our online Catalog, explore open shelves, and place reservations on print or digital editions with a single click.
+                    </p>
+                    <a asp-controller="Book" asp-action="Index" class="step-link">
+                        <span>View availability guidelines</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-icon-box text-amber bg-amber-soft mb-3">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="5" height="5" x="3" y="3" rx="1"></rect>
+                            <rect width="5" height="5" x="16" y="3" rx="1"></rect>
+                            <rect width="5" height="5" x="3" y="16" rx="1"></rect>
+                            <path d="M21 16h-3a2 2 0 0 0-2 2v3"></path>
+                            <path d="M21 21v.01"></path>
+                            <path d="M12 7v3a2 2 0 0 1-2 2H7"></path>
+                            <path d="M3 12h.01"></path>
+                            <path d="M12 3h.01"></path>
+                            <path d="M12 16v.01"></path>
+                            <path d="M16 12h1"></path>
+                            <path d="M21 12v.01"></path>
+                            <path d="M12 21v-1"></path>
+                        </svg>
+                    </div>
+                    <div class="step-tag">STEP 02</div>
+                    <h4 class="step-title">Instant Borrowing</h4>
+                    <p class="step-desc">
+                        Pick up loans from automated lockers or scan book barcodes on self-checkout tablets using your mobile member QR card.
+                    </p>
+                    <a asp-controller="Account" asp-action="Login" class="step-link">
+                        <span>Learn self-pickup steps</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-icon-box text-success bg-success-soft mb-3">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <div class="step-tag">STEP 03</div>
+                    <h4 class="step-title">Free Digital Access</h4>
+                    <p class="step-desc">
+                        Enjoy unlimited access to audiobooks, journals, and peer-reviewed papers on your laptop, e-reader, or smartphone anytime.
+                    </p>
+                    <a asp-controller="Book" asp-action="Index" class="step-link">
+                        <span>Read on more devices now</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Banner -->
+    <section class="cta-banner my-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+            <div>
+                <h3 class="cta-title">Ready to start exploring 50,000+ titles?</h3>
+                <p class="cta-sub mb-0">Membership is completely free for all active students and accredited university researchers. Get approved in under 2 minutes.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-warning-custom">
+                    <span>Register for Free</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                </a>
+                <a asp-controller="Book" asp-action="Index" class="btn btn-outline-white">Borrowing Rules</a>
+            </div>
+        </div>
+    </section>
 </div>
+
+<style>
+    /* Hero */
+    .announcement-pill {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #dbeafe;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        padding: 6px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .hero-headline {
+        font-size: 2.85rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.8px;
+        margin-top: 10px;
+    }
+
+    .hero-subtitle {
+        max-width: 680px;
+        margin: 0 auto;
+        color: #64748b;
+        font-size: 1.05rem;
+        line-height: 1.55;
+    }
+
+    /* Search Bar */
+    .search-bar-form {
+        max-width: 760px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+        border-radius: 12px;
+        padding: 6px 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .search-input-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+    }
+
+    .search-icon {
+        color: #94a3b8;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .search-input {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 0.95rem;
+        color: #0f172a;
+        background: transparent;
+    }
+
+    .category-dropdown-wrapper {
+        border-left: 1px solid #e2e8f0;
+        padding-left: 10px;
+        margin-right: 6px;
+    }
+
+    .category-select {
+        border: none;
+        outline: none;
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: #475569;
+        background: transparent;
+        cursor: pointer;
+        padding: 4px 6px;
+    }
+
+    .btn-search-submit {
+        background-color: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 22px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .btn-search-submit:hover {
+        background-color: #172554;
+    }
+
+    /* Topic Pills */
+    .topic-pills-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .topic-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: #475569;
+        background: #f1f5f9;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .topic-pill:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .topic-pill.active {
+        background: #ffffff;
+        border: 1px solid #1e3a8a;
+        color: #1e3a8a;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* Stat Box */
+    .stat-box-card {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+    }
+
+    .stat-box-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .bg-primary-soft { background: #eff6ff; }
+    .bg-amber-soft { background: #fef3c7; }
+    .bg-success-soft { background: #dcfce7; }
+    .bg-indigo-soft { background: #e0e7ff; }
+
+    .text-amber { color: #d97706; }
+    .text-indigo { color: #4f46e5; }
+
+    .stat-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* Featured Books */
+    .spotlight-tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #d97706;
+        letter-spacing: 0.8px;
+    }
+
+    .featured-heading {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 2px;
+    }
+
+    .featured-sub {
+        font-size: 0.88rem;
+        color: #64748b;
+    }
+
+    .view-all-link {
+        color: #1e3a8a;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .view-all-link:hover {
+        text-decoration: underline;
+    }
+
+    .book-card-item {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .book-card-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08);
+    }
+
+    .book-cover-banner {
+        padding: 16px 18px 22px;
+        color: #ffffff;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .badge-available {
+        background: rgba(16, 185, 129, 0.2);
+        color: #ffffff;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        padding: 3px 8px;
+        border-radius: 9999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+    }
+
+    .btn-bookmark {
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        color: #ffffff;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .cover-meta-tag {
+        font-size: 0.68rem;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        opacity: 0.8;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .cover-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+        line-height: 1.3;
+    }
+
+    .cover-author {
+        font-size: 0.8rem;
+        opacity: 0.85;
+    }
+
+    .book-card-details {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .category-pill-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #2563eb;
+        background: #eff6ff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+    .publisher-meta {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .book-info-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 2px;
+    }
+
+    .book-info-author {
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    .rating-row {
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .stars {
+        color: #f59e0b;
+        font-weight: 600;
+    }
+
+    .reviews-count {
+        color: #94a3b8;
+    }
+
+    .btn-outline-custom {
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+    }
+
+    .btn-outline-custom:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    /* Sanctuary */
+    .sanctuary-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .sanctuary-img-col {
+        min-height: 280px;
+    }
+
+    .sanctuary-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .branch-pill-overlay {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(4px);
+        color: #ffffff;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .architectural-tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #2563eb;
+        display: inline-flex;
+        align-items: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .sanctuary-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.35;
+    }
+
+    .sanctuary-desc {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .amenity-icon {
+        width: 32px;
+        height: 32px;
+        background: #eff6ff;
+        color: #1e40af;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .amenity-name {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .amenity-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .hours-text {
+        font-size: 0.82rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* How it works */
+    .how-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .how-subtitle {
+        font-size: 0.92rem;
+        color: #64748b;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .step-card {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 14px;
+        padding: 24px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .step-icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .step-tag {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 0.8px;
+        margin-bottom: 4px;
+    }
+
+    .step-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 8px;
+    }
+
+    .step-desc {
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 16px;
+    }
+
+    .step-link {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #1e3a8a;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .step-link:hover {
+        text-decoration: underline;
+    }
+
+    /* CTA */
+    .cta-banner {
+        background-color: #1e3a8a;
+        color: #ffffff;
+        border-radius: 14px;
+        padding: 32px 36px;
+    }
+
+    .cta-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .cta-sub {
+        font-size: 0.88rem;
+        color: #bfdbfe;
+        max-width: 580px;
+        line-height: 1.45;
+    }
+
+    .btn-warning-custom {
+        background-color: #f59e0b;
+        color: #0f172a;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: background-color 0.15s ease;
+    }
+
+    .btn-warning-custom:hover {
+        background-color: #d97706;
+        color: #ffffff;
+    }
+
+    .btn-outline-white {
+        background: transparent;
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 8px;
+        padding: 9px 16px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.15s ease;
+    }
+
+    .btn-outline-white:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-headline {
+            font-size: 2.1rem;
+        }
+        .search-bar-form {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px;
+        }
+        .category-dropdown-wrapper {
+            border-left: none;
+            border-top: 1px solid #e2e8f0;
+            padding-left: 0;
+            padding-top: 8px;
+            margin-right: 0;
+        }
+        .sanctuary-img-col {
+            min-height: 220px;
+        }
+    }
+</style>

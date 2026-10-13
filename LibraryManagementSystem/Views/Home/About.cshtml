@@ -1,0 +1,628 @@
+@{
+    ViewData["Title"] = "About Us";
+}
+
+<div class="about-page-container py-4">
+    <!-- Hero Header Section -->
+    <section class="about-hero text-center py-5">
+        <div class="about-pill mb-3">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>ABOUT OUR INSTITUTION</span>
+        </div>
+
+        <h1 class="about-hero-title">Connecting Curious Minds with Infinite Knowledge</h1>
+        <p class="about-hero-subtitle">
+            Founded in 1984, the Central Academic Library serves as the intellectual cornerstone for thousands of undergraduate, graduate, and faculty scholars. We blend centuries of archival tradition with frictionless modern digital workflows.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary-auth px-4 py-2">
+                <span>Get a Library Card</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+            <a asp-controller="Book" asp-action="Index" class="btn btn-outline-custom px-4 py-2">Explore Catalog</a>
+        </div>
+    </section>
+
+    <!-- Key Numerical Milestones Bar -->
+    <section class="stats-bar-section my-4">
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-primary">50,000+</div>
+                    <div class="metric-title">Catalog Titles</div>
+                    <div class="metric-desc">Physical textbooks, rare manuscripts, & journals</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-amber">12,400+</div>
+                    <div class="metric-title">Active Scholars</div>
+                    <div class="metric-desc">Undergraduate, Master's, & Doctoral members</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-success">8 Suites</div>
+                    <div class="metric-title">Acoustic Study Rooms</div>
+                    <div class="metric-desc">Equipped with gigabit Wi-Fi & quiet carrels</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-indigo">40 Years</div>
+                    <div class="metric-title">Academic Heritage</div>
+                    <div class="metric-desc">Continually serving research & discovery since 1984</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision 3 Cards -->
+    <section class="pillars-section my-5">
+        <div class="text-center mb-5">
+            <span class="section-tag">CORE PRINCIPLES</span>
+            <h2 class="section-title">The Pillars of Our Academic Mission</h2>
+            <p class="section-desc">Guided by a steadfast commitment to accessibility, intellectual freedom, and state-of-the-art research resources.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon bg-primary-soft text-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="pillar-title">Democratizing Access</h4>
+                    <p class="pillar-text">
+                        We believe that scholarly knowledge belongs to all. Every registered student and researcher enjoys open borrowing, unrestricted database access, and inter-library loan privileges.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon bg-amber-soft text-amber">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h4 class="pillar-title">Digital Excellence</h4>
+                    <p class="pillar-text">
+                        From automated self-checkout kiosks to seamless cloud reservations, our unified portal guarantees that securing the resources you need takes seconds, not hours.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon bg-success-soft text-success">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="pillar-title">Archival Preservation</h4>
+                    <p class="pillar-text">
+                        Our climate-controlled archival vaults protect thousands of delicate historical volumes, early faculty manuscripts, and rare scientific journals for future generations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facility Sanctuary Spotlight -->
+    <section class="facility-spotlight-section my-5">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-6">
+                    <img src="~/Images/library-hall.jpg" alt="Central Reading Hall" class="facility-img w-100" />
+                </div>
+                <div class="col-lg-6 p-4 p-md-5">
+                    <span class="spotlight-badge">CAMPUS LANDMARK</span>
+                    <h3 class="facility-heading mt-2">The Central Reading Hall & Research Commons</h3>
+                    <p class="facility-text">
+                        Designed with towering glass facades and handcrafted oak workstations, our main study hall provides natural daylight, ambient noise control, and individual charging terminals for over 450 concurrent readers.
+                    </p>
+
+                    <ul class="facility-features-list list-unstyled mt-3 mb-4">
+                        <li class="d-flex align-items-center gap-2 mb-2">
+                            <span class="check-bullet">✓</span>
+                            <span>Dedicated quiet zones for deep uninterrupted dissertation writing.</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2 mb-2">
+                            <span class="check-bullet">✓</span>
+                            <span>High-resolution document scanners and digital microfiche stations.</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <span class="check-bullet">✓</span>
+                            <span>On-site research librarians ready for one-on-one citation guidance.</span>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-light text-dark border p-2">📍 North Quad, Building B</span>
+                        <span class="text-muted small">Open Mon-Sun: 7:00 AM – 11:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leadership & Curators -->
+    <section class="team-section my-5">
+        <div class="text-center mb-5">
+            <span class="section-tag">LEADERSHIP & CURATION</span>
+            <h2 class="section-title">Meet the Library Custodians</h2>
+            <p class="section-desc">Passionate information specialists dedicated to guiding your research endeavors.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-navy-subtle">
+                        <span class="avatar-initials">EV</span>
+                    </div>
+                    <h5 class="team-name mb-1">Dr. Eleanor Vance</h5>
+                    <div class="team-role">Head of Library Services</div>
+                    <p class="team-bio mt-2">Ph.D. in Information Science with 18 years of archival curation experience.</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-amber-subtle">
+                        <span class="avatar-initials">MS</span>
+                    </div>
+                    <h5 class="team-name mb-1">Dr. Marcus Sterling</h5>
+                    <div class="team-role">Head of Digital Collections</div>
+                    <p class="team-bio mt-2">Specialist in open research repositories, metadata indexing, and digital catalogs.</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-emerald-subtle">
+                        <span class="avatar-initials">SA</span>
+                    </div>
+                    <h5 class="team-name mb-1">Sophia Al-Mansoor</h5>
+                    <div class="team-role">Senior Research Curator</div>
+                    <p class="team-bio mt-2">Directs graduate research seminars and bibliographic literature reviews.</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-purple-subtle">
+                        <span class="avatar-initials">DC</span>
+                    </div>
+                    <h5 class="team-name mb-1">David Chen</h5>
+                    <div class="team-role">Lead Systems Architect</div>
+                    <p class="team-bio mt-2">Maintains high availability for online reservations and catalog databases.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Historic Milestones Timeline -->
+    <section class="timeline-section my-5">
+        <div class="text-center mb-5">
+            <span class="section-tag">OUR JOURNEY</span>
+            <h2 class="section-title">Four Decades of Growth</h2>
+            <p class="section-desc">Key milestones in our evolution into a modern academic learning hub.</p>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">1984</div>
+                    <h6 class="milestone-title">Foundation</h6>
+                    <p class="milestone-desc">Central Library opened its doors with an initial collection of 8,500 core print volumes.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">2003</div>
+                    <h6 class="milestone-title">Digital Catalogs</h6>
+                    <p class="milestone-desc">Transitioned from physical card catalogs to our first computerized indexing system.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">2018</div>
+                    <h6 class="milestone-title">Modern Sanctuaries</h6>
+                    <p class="milestone-desc">Expanded Floor 2 study suites, introducing acoustic isolation and gigabit student Wi-Fi.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">2024</div>
+                    <h6 class="milestone-title">Smart Academic Portal</h6>
+                    <p class="milestone-desc">Launched the unified real-time reservation system with instant member barcode checkouts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Call To Action -->
+    <section class="cta-banner my-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+            <div>
+                <h3 class="cta-title">Ready to start your research journey?</h3>
+                <p class="cta-sub mb-0">Join over 12,000 university scholars. Register for your free library credentials in less than two minutes.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-warning-custom">
+                    <span>Register for Free</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-white">Sign In</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    /* Hero */
+    .about-pill {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #dbeafe;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        border-radius: 9999px;
+        padding: 6px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .about-hero-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.6px;
+        max-width: 820px;
+        margin: 12px auto 14px;
+        line-height: 1.25;
+    }
+
+    .about-hero-subtitle {
+        font-size: 1.05rem;
+        color: #64748b;
+        max-width: 680px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Stats Bar */
+    .stat-card-metric {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 14px;
+        padding: 22px 20px;
+        box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.04);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .metric-num {
+        font-size: 1.85rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .metric-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 4px;
+    }
+
+    .metric-desc {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: 2px;
+        line-height: 1.4;
+    }
+
+    /* Pillars */
+    .section-tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #2563eb;
+        letter-spacing: 1px;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-top: 2px;
+    }
+
+    .section-desc {
+        font-size: 0.92rem;
+        color: #64748b;
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    .pillar-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 28px;
+        height: 100%;
+        box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.03);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .pillar-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.06);
+    }
+
+    .pillar-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+    }
+
+    .pillar-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 10px;
+    }
+
+    .pillar-text {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.55;
+        margin-bottom: 0;
+    }
+
+    /* Facility */
+    .facility-img {
+        height: 100%;
+        min-height: 360px;
+        object-fit: cover;
+    }
+
+    .spotlight-badge {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #d97706;
+        letter-spacing: 0.8px;
+    }
+
+    .facility-heading {
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+    }
+
+    .facility-text {
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.55;
+    }
+
+    .check-bullet {
+        color: #10b981;
+        font-weight: 800;
+        font-size: 0.95rem;
+    }
+
+    /* Team */
+    .team-card {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 14px;
+        height: 100%;
+        box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.03);
+        transition: transform 0.15s ease;
+    }
+
+    .team-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .avatar-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bg-navy-subtle { background: #dbeafe; color: #1e3a8a; }
+    .bg-amber-subtle { background: #fef3c7; color: #d97706; }
+    .bg-emerald-subtle { background: #d1fae5; color: #059669; }
+    .bg-purple-subtle { background: #ede9fe; color: #7c3aed; }
+
+    .avatar-initials {
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .team-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .team-role {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #2563eb;
+    }
+
+    .team-bio {
+        font-size: 0.78rem;
+        color: #64748b;
+        line-height: 1.45;
+        margin-bottom: 0;
+    }
+
+    /* Timeline */
+    .milestone-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        height: 100%;
+        position: relative;
+    }
+
+    .milestone-year {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #1e3a8a;
+        margin-bottom: 4px;
+    }
+
+    .milestone-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 6px;
+    }
+
+    .milestone-desc {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.45;
+        margin-bottom: 0;
+    }
+
+    /* Utilities */
+    .bg-primary-soft { background: #eff6ff; }
+    .bg-amber-soft { background: #fef3c7; }
+    .bg-success-soft { background: #dcfce7; }
+    .text-amber { color: #d97706; }
+    .text-indigo { color: #4f46e5; }
+
+    .btn-primary-auth {
+        background-color: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: background-color 0.15s ease;
+    }
+
+    .btn-primary-auth:hover {
+        background-color: #172554;
+        color: #ffffff;
+    }
+
+    .btn-outline-custom {
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        font-size: 0.92rem;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        background: #ffffff;
+        transition: all 0.15s ease;
+    }
+
+    .btn-outline-custom:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a;
+    }
+
+    .cta-banner {
+        background-color: #1e3a8a;
+        color: #ffffff;
+        border-radius: 14px;
+        padding: 32px 36px;
+    }
+
+    .cta-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .cta-sub {
+        font-size: 0.88rem;
+        color: #bfdbfe;
+        max-width: 580px;
+        line-height: 1.45;
+    }
+
+    .btn-warning-custom {
+        background-color: #f59e0b;
+        color: #0f172a;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: background-color 0.15s ease;
+    }
+
+    .btn-warning-custom:hover {
+        background-color: #d97706;
+        color: #ffffff;
+    }
+
+    .btn-outline-white {
+        background: transparent;
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 8px;
+        padding: 9px 16px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.15s ease;
+    }
+
+    .btn-outline-white:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    @@media (max-width: 768px) {
+        .about-hero-title {
+            font-size: 2.1rem;
+        }
+    }
+</style>
