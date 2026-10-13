@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -43,6 +44,7 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while migrating or seeding the database.");
     }
 }
+// Configure the HTTP request pipeline.
 
 if (!app.Environment.IsDevelopment())
 {
@@ -68,6 +70,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+app.MapRazorPages();
 
 
 app.Run();

@@ -1,4 +1,4 @@
-﻿using LibraryManagementSystem.Models;
+using LibraryManagementSystem.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace LibraryManagementSystem.Data

@@ -7,6 +7,7 @@
         public string Author { get; set; } = string.Empty;
         public string ISBN { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public string? ImageUrl { get; set; }
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
         public string? ImageUrl { get; set; }

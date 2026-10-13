@@ -1,0 +1,121 @@
+@page
+@using System.Collections.Generic
+@model LibraryManagementSystem.Pages.Borrowings.IndexModel
+@{
+    ViewData["Title"] = "Borrowing History";
+    var view = Model.ViewModel;
+    var firstRecord = view.MatchingRecordsCount == 0 ? 0 : (view.PageNumber - 1) * 10 + 1;
+    var lastRecord = Math.Min(view.PageNumber * 10, view.MatchingRecordsCount);
+    var visiblePages = new SortedSet<int> { 1, view.TotalPages };
+    if (view.PageNumber > 1) visiblePages.Add(view.PageNumber - 1);
+    visiblePages.Add(view.PageNumber);
+    if (view.PageNumber < view.TotalPages) visiblePages.Add(view.PageNumber + 1);
+}
+<div class="circulation-container history-page">
+    <header class="history-heading">
+        <div>
+            <div class="circ-terminal-badge">CIRCULATION AUDIT LEDGER <span>•</span> LIVE DATABASE</div>
+            <h1 class="circ-title">Borrowing History</h1>
+            <p class="circ-subtitle mb-0">Complete audit log of all patron circulation events, active checkouts, and historical returns.</p>
+        </div>
+        <div class="history-heading-actions">
+            <a asp-page="./Index" asp-page-handler="Export" asp-route-status="@view.StatusFilter" asp-route-searchMember="@view.SearchMember" asp-route-searchBook="@view.SearchBook" asp-route-fromDate="@view.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@view.ToDate?.ToString("yyyy-MM-dd")" class="history-export">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v4h14v-4" /></svg>
+                Export CSV / Report
+            </a>
+            <button type="button" class="history-refresh" onclick="location.reload()" aria-label="Refresh history">↻</button>
+        </div>
+    </header>
+
+    <section class="history-stats" aria-label="Circulation summary">
+        <article class="history-stat-card">
+            <span class="history-stat-icon history-stat-blue"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10v18H5V5a2 2 0 0 1 2-2Zm1 5h6M8 12h8m-8 4h8" /></svg></span>
+            <div><div class="history-stat-label">TOTAL RECORDS</div><div class="history-stat-value">@view.TotalBorrowedCount <small>All Time</small></div></div>
+        </article>
+        <article class="history-stat-card">
+            <span class="history-stat-icon history-stat-amber"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+            <div><div class="history-stat-label">ACTIVE LOANS</div><div class="history-stat-value">@view.CurrentlyBorrowedCount <small>Requires Return</small></div></div>
+        </article>
+        <article class="history-stat-card">
+            <span class="history-stat-icon history-stat-green"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+            <div><div class="history-stat-label">COMPLETED RETURNS</div><div class="history-stat-value">@view.CompletedReturnsCount <small>Restocked</small></div></div>
+        </article>
+    </section>
+
+    <section class="circ-card history-filter-card">
+        <div class="history-filter-heading">
+            <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16l-6 7v6l-4 2v-8L4 5Z" /></svg>Filter Audit Trails</h2>
+            <span>Refining @view.MatchingRecordsCount historical entries</span>
+        </div>
+        <form method="get" class="history-filter-form">
+            <label><span>Status</span>
+                <select name="status" class="circ-select">
+                    <option value="" selected="@(string.IsNullOrEmpty(view.StatusFilter))">All (Selected)</option>
+                    <option value="Borrowed" selected="@(view.StatusFilter == "Borrowed")">Active Loans</option>
+                    <option value="Returned" selected="@(view.StatusFilter == "Returned")">Returned</option>
+                </select>
+            </label>
+            <label><span>Member</span><input name="searchMember" value="@view.SearchMember" class="circ-input" placeholder="Search by member name or ID" /></label>
+            <label><span>Book</span><input name="searchBook" value="@view.SearchBook" class="circ-input" placeholder="Search by book title or ISBN" /></label>
+            <label><span>From</span><input type="date" name="fromDate" value="@view.FromDate?.ToString("yyyy-MM-dd")" class="circ-input" /></label>
+            <label><span>To</span><input type="date" name="toDate" value="@view.ToDate?.ToString("yyyy-MM-dd")" class="circ-input" /></label>
+            <div class="history-filter-actions">
+                <a asp-page="./Index" class="circ-btn-secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M5 15a8 8 0 1 0 2-8L4 10" /></svg>Reset</a>
+                <button type="submit" class="circ-btn-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="m16 16 5 5" /></svg>Apply Filters</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="circ-card history-table-card">
+        <div class="circ-table-container">
+            <table class="circ-table history-table" id="ledgerTable">
+                <thead><tr><th>MEMBER</th><th>BOOK TITLE</th><th>BORROW DATE</th><th>RETURN DATE</th><th>STATUS</th><th class="text-end">ACTIONS</th></tr></thead>
+                <tbody>
+                @if (view.Borrowings.Count > 0)
+                {
+                    @foreach (var item in view.Borrowings)
+                    {
+                        <tr>
+                            <td><div class="circ-table-user-cell"><div class="circ-mini-avatar">@item.BorrowerInitials</div><div><div class="history-person-name">@item.BorrowerName</div><div class="text-muted small">@item.MemberId</div></div></div></td>
+                            <td><div class="history-book-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v19H7.5A2.5 2.5 0 0 0 5 23V4.5ZM5 4.5V22" /></svg>@item.BookTitle</div></td>
+                            <td>@item.BorrowDate.ToString("MMM dd, yyyy")</td>
+                            <td>@(item.ReturnDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                            <td>
+                                @if (item.IsReturned) { <span class="circ-badge circ-badge-emerald">• Returned</span> }
+                                else { <span class="circ-badge circ-badge-amber">• Borrowed</span> }
+                            </td>
+                            <td class="text-end"><a asp-page="./Details" asp-route-id="@item.BorrowingId" class="history-view-action" title="View record" aria-label="View record"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg></a></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="6" class="history-empty">No circulation records match these filters.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <footer class="history-table-footer">
+            <div>Showing <strong>@firstRecord-@lastRecord</strong> of <strong>@view.MatchingRecordsCount</strong> records <span>•</span> Page @view.PageNumber of @view.TotalPages</div>
+            @if (view.TotalPages > 1)
+            {
+                <nav class="circ-pagination" aria-label="History pages">
+                    <a asp-page="./Index" asp-route-status="@view.StatusFilter" asp-route-searchMember="@view.SearchMember" asp-route-searchBook="@view.SearchBook" asp-route-fromDate="@view.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@view.ToDate?.ToString("yyyy-MM-dd")" asp-route-pageNumber="@(view.PageNumber - 1)" class="@(view.PageNumber == 1 ? "disabled" : "")" aria-label="Previous">‹</a>
+                    @{ var previousPage = 0; }
+                    @foreach (var pageNumber in visiblePages)
+                    {
+                        if (previousPage > 0 && pageNumber > previousPage + 1) { <span class="page-ellipsis">…</span> }
+                        <a asp-page="./Index" asp-route-status="@view.StatusFilter" asp-route-searchMember="@view.SearchMember" asp-route-searchBook="@view.SearchBook" asp-route-fromDate="@view.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@view.ToDate?.ToString("yyyy-MM-dd")" asp-route-pageNumber="@pageNumber" class="@(pageNumber == view.PageNumber ? "active" : "")">@pageNumber</a>
+                        previousPage = pageNumber;
+                    }
+                    <a asp-page="./Index" asp-route-status="@view.StatusFilter" asp-route-searchMember="@view.SearchMember" asp-route-searchBook="@view.SearchBook" asp-route-fromDate="@view.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@view.ToDate?.ToString("yyyy-MM-dd")" asp-route-pageNumber="@(view.PageNumber + 1)" class="@(view.PageNumber == view.TotalPages ? "disabled" : "")" aria-label="Next">›</a>
+                </nav>
+            }
+        </footer>
+    </section>
+
+    <footer class="history-ledger-summary">
+        <span>● Summary Ledger: Total Records: <strong>@view.TotalBorrowedCount</strong> | Active Loans: <strong>@view.CurrentlyBorrowedCount</strong> | Completed Returns: <strong>@view.CompletedReturnsCount</strong></span>
+        <span>Audited from live database</span>
+    </footer>
+</div>
