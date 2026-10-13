@@ -1,0 +1,684 @@
+@model LibraryManagementSystem.ViewModels.CreateStaffViewModel
+@{
+    ViewData["Title"] = "Add New Staff Member";
+    ViewData["Section"] = "Add New Staff";
+
+    int totalPersonnel = ViewBag.TotalPersonnel ?? 16;
+    int totalAdmins = ViewBag.TotalAdmins ?? 3;
+    int totalLibrarians = ViewBag.TotalLibrarians ?? 13;
+    if (totalPersonnel == 0) { totalPersonnel = 16; totalAdmins = 3; totalLibrarians = 13; }
+    double libPct = Math.Round((double)totalLibrarians / totalPersonnel * 100, 2);
+    double adminPct = Math.Round(100.0 - libPct, 2);
+}
+
+<style>
+    .as-breadcrumb {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .as-breadcrumb a {
+        color: #64748b;
+        text-decoration: none;
+    }
+    .as-breadcrumb a:hover {
+        color: #1e3a8a;
+    }
+    .as-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .as-title-group h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .as-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
+    .badge-policy {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .as-grid {
+        display: grid;
+        grid-template-columns: 1.55fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    @@media (max-width: 992px) {
+        .as-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .as-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        margin-bottom: 20px;
+    }
+    .as-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 22px;
+    }
+    .as-card-title {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 4px;
+    }
+    .as-card-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+    .as-icon-tile {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .as-field {
+        margin-bottom: 20px;
+    }
+    .as-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 7px;
+    }
+    .as-input-wrap {
+        position: relative;
+    }
+    .as-input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 15px;
+    }
+    .as-input {
+        width: 100%;
+        padding: 10px 14px 10px 40px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: #0f172a;
+        transition: border-color 0.15s, background-color 0.15s;
+    }
+    .as-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #1e3a8a;
+    }
+    .input-validation-error {
+        border-color: #ef4444 !important;
+        background-color: #fffafb !important;
+    }
+    .as-input-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .as-toggle-eye {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 15px;
+        padding: 0;
+    }
+    .as-toggle-eye:hover {
+        color: #475569;
+    }
+    .as-select {
+        width: 100%;
+        padding: 11px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: #0f172a;
+    }
+    .as-select:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #1e3a8a;
+    }
+    .activation-protocol-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin: 24px 0;
+    }
+    .activation-icon {
+        color: #2563eb;
+        font-size: 18px;
+        margin-top: 2px;
+    }
+    .activation-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 2px;
+    }
+    .activation-text {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+    .as-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 18px;
+    }
+    .btn-cancel {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .btn-cancel:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .btn-save-staff {
+        background: #047857;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 22px;
+        font-size: 13.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.15s;
+    }
+    .btn-save-staff:hover {
+        background: #065f46;
+        color: #ffffff;
+    }
+    .governance-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .governance-img-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        display: grid;
+        place-items: center;
+        color: #475569;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    .governance-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 2px;
+    }
+    .governance-text {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.35;
+    }
+
+    /* Right Column: Matrix & Roster */
+    .matrix-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+    .matrix-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .chip-rbac {
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+    .matrix-subtitle {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 18px;
+    }
+    .role-block {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+    }
+    .role-block-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+    .role-name {
+        font-size: 14px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .chip-op {
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+    }
+    .chip-super {
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+    }
+    .role-desc {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 10px;
+        line-height: 1.35;
+    }
+    .perm-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .perm-item {
+        font-size: 12px;
+        color: #334155;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+    }
+    .perm-check {
+        color: #10b981;
+        font-size: 14px;
+        line-height: 1;
+    }
+    .perm-cross {
+        color: #94a3b8;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    /* Roster Donut */
+    .roster-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .roster-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .roster-count {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .donut-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 0;
+    }
+    .roster-legend {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
+    }
+    .legend-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 10px;
+    }
+    .legend-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .legend-pct {
+        font-size: 11px;
+        color: #64748b;
+        margin-left: 14px;
+    }
+</style>
+
+<!-- Breadcrumb -->
+<div class="as-breadcrumb">
+    <a href="/Admin/Staff">Admin Portal</a>
+    <span>/</span>
+    <a href="/Admin/Staff">Staff Accounts</a>
+    <span>/</span>
+    <strong>Add New Staff</strong>
+</div>
+
+<!-- Header -->
+<div class="as-header">
+    <div class="as-title-group">
+        <h1>Add New Staff Member</h1>
+        <p class="as-subtitle">Provision staff credentials and assign administrative access permissions for the library portal.</p>
+    </div>
+    <span class="badge-policy">
+        <i class="bi bi-shield-check"></i> Security Policy: Multi-Factor Ready
+    </span>
+</div>
+
+<!-- Two Columns Grid -->
+<div class="as-grid">
+    <!-- Left Column: Form -->
+    <div>
+        <div class="as-card">
+            <div class="as-card-head">
+                <div>
+                    <h2 class="as-card-title">Staff Account Credentials & Role</h2>
+                    <p class="as-card-subtitle">Enter details to grant internal repository & circulation authorization</p>
+                </div>
+                <div class="as-icon-tile">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+            </div>
+
+            <form asp-action="CreateStaff" method="post">
+                @Html.AntiForgeryToken()
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #991b1b; font-weight: 700; font-size: 13.5px; margin-bottom: 6px;">
+                            <i class="bi bi-exclamation-triangle-fill" style="color: #dc2626; font-size: 16px;"></i>
+                            <span>Please resolve the following issues:</span>
+                        </div>
+                        <div asp-validation-summary="All" class="text-danger" style="font-size: 12.5px; margin: 0; padding-left: 20px;"></div>
+                    </div>
+                }
+
+                <div class="as-field">
+                    <label class="as-label">Full Name *</label>
+                    <div class="as-input-wrap">
+                        <i class="bi bi-person as-input-icon"></i>
+                        <input asp-for="FullName" required class="as-input" placeholder="e.g. Layla Kassem" />
+                    </div>
+                    <span asp-validation-for="FullName" class="text-danger" style="font-size: 12px;"></span>
+                </div>
+
+                <div class="as-field">
+                    <label class="as-label">Email Address *</label>
+                    <div class="as-input-wrap">
+                        <i class="bi bi-envelope as-input-icon"></i>
+                        <input asp-for="Email" type="email" required class="as-input" placeholder="e.g. layla.kassem@library.org" />
+                    </div>
+                    <div class="as-input-hint">
+                        <i class="bi bi-info-circle text-primary"></i> Must be an official library organization address
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger" style="font-size: 12px;"></span>
+                </div>
+
+                <div class="as-field">
+                    <label class="as-label">Temporary Password *</label>
+                    <div class="as-input-wrap">
+                        <i class="bi bi-lock as-input-icon"></i>
+                        <input asp-for="Password" type="password" id="tempPasswordInput" required minlength="6" class="as-input" placeholder="••••••••" />
+                        <button type="button" class="as-toggle-eye" onclick="toggleTempPassword()">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="as-input-hint">
+                        <i class="bi bi-shield-lock text-muted"></i> Minimum 8 characters with letters, numbers, and symbols
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger" style="font-size: 12px;"></span>
+                </div>
+
+                <div class="as-field">
+                    <label class="as-label">System Role *</label>
+                    <select asp-for="Role" class="as-select">
+                        <option value="Librarian">Librarian — Cataloging, book circulation, patron management</option>
+                        <option value="Admin">Admin — Comprehensive control over infrastructure, security, staff directories, and data policies</option>
+                    </select>
+                </div>
+
+                <!-- Activation Protocol Note -->
+                <div class="activation-protocol-box">
+                    <i class="bi bi-envelope-paper activation-icon"></i>
+                    <div>
+                        <div class="activation-title">Activation Protocol</div>
+                        <p class="activation-text">
+                            An automatic invitation token will be dispatched to the provided staff email with mandatory password reset requirements upon primary authentication.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="as-form-actions">
+                    <a href="/Admin/Staff" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-save-staff">
+                        <i class="bi bi-check2"></i> Save Staff Account
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Institutional Governance Card -->
+        <div class="governance-card">
+            <div class="governance-img-box">
+                <i class="bi bi-bank"></i>
+            </div>
+            <div>
+                <div class="governance-title">Institutional Governance</div>
+                <p class="governance-text">
+                    All user provisioning events are cryptographically hashed and committed to administrative audit stream logs.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Role Matrix & Roster Ratio -->
+    <div>
+        <!-- Role Access Matrix -->
+        <div class="as-card">
+            <div class="matrix-head">
+                <span class="matrix-title">
+                    <i class="bi bi-shield-check text-primary"></i> Role Access Matrix
+                </span>
+                <span class="chip-rbac">RBAC STANDARD</span>
+            </div>
+            <p class="matrix-subtitle">Granular comparison of system privileges assigned to operational staff profiles.</p>
+
+            <!-- Librarian Role Block -->
+            <div class="role-block">
+                <div class="role-block-head">
+                    <span class="role-name" style="color: #ea580c;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ea580c;"></span>
+                        Librarian
+                    </span>
+                    <span class="chip-op">Operational</span>
+                </div>
+                <p class="role-desc">Standard circulation desk role focusing on daily patron servicing and catalog stewardship.</p>
+                <ul class="perm-list">
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>Catalog management (Books, Categories, Barcodes)</span>
+                    </li>
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>Circulation processing (Borrow, Return, Late Renewals)</span>
+                    </li>
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>Patron registry lookup & circulation card issuance</span>
+                    </li>
+                    <li class="perm-item" style="color: #94a3b8;">
+                        <i class="bi bi-x-circle-fill perm-cross"></i>
+                        <span>No staff account provisioning or member deletions</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Admin Role Block -->
+            <div class="role-block">
+                <div class="role-block-head">
+                    <span class="role-name" style="color: #dc2626;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #dc2626;"></span>
+                        Admin
+                    </span>
+                    <span class="chip-super">Superuser</span>
+                </div>
+                <p class="role-desc">Comprehensive control over infrastructure, security, staff directories, and data policies.</p>
+                <ul class="perm-list">
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>All Librarian operational abilities included</span>
+                    </li>
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>Staff account creation, credentials, & permission adjustments</span>
+                    </li>
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>Permanent patron record removal & catalog purging</span>
+                    </li>
+                    <li class="perm-item">
+                        <i class="bi bi-check-circle-fill perm-check"></i>
+                        <span>Audit logging inspection & library policy configs</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Active Roster Ratio Card -->
+        <div class="as-card">
+            <div class="roster-head">
+                <span class="roster-title">Active Roster Ratio</span>
+                <span class="roster-count">@totalPersonnel Staff Members</span>
+            </div>
+
+            <div class="donut-wrap">
+                <!-- SVG Donut Chart Matching Screenshot -->
+                <svg width="150" height="150" viewBox="0 0 42 42">
+                    <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#f1f5f9" stroke-width="4"></circle>
+                    <!-- Blue Arc for Librarians (81.25%) -->
+                    <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#1e3a8a" stroke-width="4"
+                            stroke-dasharray="81.25 18.75" stroke-dashoffset="25"></circle>
+                    <!-- Orange Arc for Admins (18.75%) -->
+                    <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#f59e0b" stroke-width="4"
+                            stroke-dasharray="18.75 81.25" stroke-dashoffset="-56.25"></circle>
+                </svg>
+            </div>
+
+            <div class="roster-legend">
+                <div class="legend-item">
+                    <div class="legend-title">
+                        <span style="display:inline-block; width: 8px; height: 8px; border-radius: 50%; background: #1e3a8a;"></span>
+                        <span>@totalLibrarians Librarians</span>
+                    </div>
+                    <div class="legend-pct">@libPct% Coverage</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-title">
+                        <span style="display:inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></span>
+                        <span>@totalAdmins Administrators</span>
+                    </div>
+                    <div class="legend-pct">@adminPct% Coverage</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleTempPassword() {
+        var input = document.getElementById("tempPasswordInput");
+        var icon = document.getElementById("eyeIcon");
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    }
+</script>

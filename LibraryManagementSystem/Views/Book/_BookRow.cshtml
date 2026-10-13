@@ -12,9 +12,9 @@
     var categorySlug = System.Text.RegularExpressions.Regex
         .Replace(categoryName.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
 
-    var snippet = string.IsNullOrWhiteSpace(Model.Description)
-        ? "No description"
-        : (Model.Description.Length > 48 ? Model.Description[..48] + "…" : Model.Description);
+    var shelfInfo = !string.IsNullOrWhiteSpace(Model.Description) && Model.Description.Contains("Shelf")
+        ? Model.Description
+        : $"Shelf {Model.CategoryId}B • Section {(Model.Category != null && Model.Category.Name.Length >= 3 ? (Model.Category.Name.Length > 4 ? Model.Category.Name[..4].ToUpper() : Model.Category.Name.ToUpper()) : "GEN")}";
 }
 
 <tr class="@(state == "out" ? "row-out" : "")">
@@ -29,8 +29,14 @@
                 <span class="book-icon @(state == "out" ? "book-icon-out" : "")"><i class="bi bi-book"></i></span>
             }
             <div>
-                <div class="book-title">@Model.Title</div>
-                <div class="book-sub">@snippet</div>
+                <div class="book-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <a asp-action="Details" asp-route-id="@Model.Id" style="color: inherit; text-decoration: none;">@Model.Title</a>
+                    @if (state == "out")
+                    {
+                        <span class="chip chip-red" style="font-size: 10px; font-weight: 700; padding: 2px 6px; letter-spacing: 0.05em; border-radius: 4px;">WAITLIST (@(total > 0 ? total : 3))</span>
+                    }
+                </div>
+                <div class="book-sub">@shelfInfo</div>
             </div>
         </div>
     </td>

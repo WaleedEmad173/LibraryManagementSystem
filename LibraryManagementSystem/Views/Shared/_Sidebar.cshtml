@@ -1,29 +1,53 @@
-﻿@{
+@{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var isAdmin = User.IsInRole("Admin");
 }
 <aside class="sidebar">
     <div class="brand">
-        <div class="brand-logo"><i class="bi bi-book-half"></i></div>
+        <div class="brand-logo" style="@(isAdmin ? "background: #2563eb;" : "")">
+            <i class="bi bi-book-half"></i>
+        </div>
         <div>
             <div class="brand-name">Library System</div>
-            <div class="brand-sub">LIBRARIAN PORTAL</div>
+            <div class="brand-sub">@(isAdmin ? "ADMIN PORTAL" : "LIBRARIAN PORTAL")</div>
         </div>
     </div>
 
     <div class="nav-label">CORE MENU</div>
     <nav class="nav">
-        <a class="nav-link @(controller == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">Dashboard</a>
-        <a class="nav-link @(controller == "Book" ? "active" : "")" asp-controller="Book" asp-action="Index">Books</a>
-        @* These pages don't exist yet - replace "#" with asp-controller/asp-action when you build them *@
-        <a class="nav-link" href="#">Categories</a>
-        <a class="nav-link" href="#">Members</a>
-        <a class="nav-link" href="#">Borrow</a>
-        <a class="nav-link" href="#">Return</a>
-        <a class="nav-link" href="#">History</a>
+        <a class="nav-link @(controller == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-grid me-2"></i>Dashboard
+        </a>
+        <a class="nav-link @(controller == "Book" ? "active" : "")" asp-controller="Book" asp-action="Index">
+            <i class="bi bi-book me-2"></i>Books
+        </a>
+        <a class="nav-link @(controller == "Categories" ? "active" : "")" asp-controller="Categories" asp-action="Index">
+            <i class="bi bi-tags me-2"></i>Categories
+        </a>
+        <a class="nav-link @(controller == "Members" ? "active" : "")" asp-controller="Members" asp-action="Index">
+            <i class="bi bi-people me-2"></i>Members
+        </a>
+        <a class="nav-link" href="/Borrow">
+            <i class="bi bi-box-arrow-up-right me-2"></i>Borrow
+        </a>
+        <a class="nav-link" href="/Return">
+            <i class="bi bi-box-arrow-in-down-left me-2"></i>Return
+        </a>
+        <a class="nav-link" href="/History">
+            <i class="bi bi-clock-history me-2"></i>History
+        </a>
+        @if (isAdmin)
+        {
+            <a class="nav-link @(controller == "Admin" && (action == "Staff" || action == "Index") ? "active" : "")" asp-controller="Admin" asp-action="Staff" style="margin-top: 14px;">
+                <i class="bi bi-shield-check me-2"></i>Staff Accounts
+            </a>
+        }
     </nav>
 
     <div class="mode-badge">
-        <span class="dot"></span> Librarian Mode &bull; v1.0
-        <i class="bi bi-shield-check"></i>
+        <span class="dot" style="@(isAdmin ? "background: #60a5fa;" : "")"></span>
+        <span>@(isAdmin ? "Admin Mode" : "Librarian Mode") &bull; v1.0</span>
+        <i class="bi @(isAdmin ? "bi-shield-lock" : "bi-shield-check")"></i>
     </div>
 </aside>
