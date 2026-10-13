@@ -23,7 +23,14 @@
             <span class="chip chip-navy push-right">ISBN-13 CATALOGING</span>
         </div>
 
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+            <div class="form-group" style="margin-bottom: 1rem; padding: 0 1.5rem;">
+                <label asp-for="Image" class="form-label">Book Cover Image</label>
+                <input asp-for="Image" type="file" id="coverImage" class="form-control" accept="image/*" />
+                <span asp-validation-for="Image" class="text-danger"></span>
+            </div>
+
             <partial name="_BookFormFields" model="Model" />
 
             <div class="form-footer">

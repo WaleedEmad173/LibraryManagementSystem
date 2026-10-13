@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using LibraryManagementSystem.Data;
+﻿using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Helpers;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.ViewModels;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace LibraryManagementSystem.Controllers
 {
@@ -115,7 +115,13 @@ namespace LibraryManagementSystem.Controllers
                 CategoryId = vm.CategoryId!.Value,
                 TotalCopies = vm.TotalCopies!.Value,
                 AvailableCopies = vm.TotalCopies.Value // new books start fully available
+
             };
+
+            if (vm.Image != null)
+            {
+                book.ImageUrl = Upload.UploadFile("Images", vm.Image);
+            }
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
@@ -144,6 +150,7 @@ namespace LibraryManagementSystem.Controllers
                 TotalCopies = book.TotalCopies,
                 AvailableCopies = book.AvailableCopies,
                 CopiesOnLoan = book.TotalCopies - book.AvailableCopies,
+                ImageUrl = book.ImageUrl,
                 Categories = await GetCategoriesSelectListAsync(book.CategoryId)
             });
         }
@@ -184,6 +191,15 @@ namespace LibraryManagementSystem.Controllers
             book.TotalCopies = vm.TotalCopies!.Value;
             book.AvailableCopies = book.TotalCopies - onLoan; // keep loans intact
 
+            if (vm.Image != null)
+            {
+                if (!string.IsNullOrEmpty(book.ImageUrl))
+                {
+                    Upload.RemoveFile("Images", book.ImageUrl);
+                }
+                book.ImageUrl = Upload.UploadFile("Images", vm.Image);
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"\"{book.Title}\" was updated.";
@@ -215,6 +231,12 @@ namespace LibraryManagementSystem.Controllers
             }
 
             var book = await _context.Books.FindAsync(id);
+
+            if (book != null && !string.IsNullOrEmpty(book.ImageUrl))
+            {
+                Upload.RemoveFile("Images", book.ImageUrl);
+            }
+
             _context.Books.Remove(book!);
             await _context.SaveChangesAsync();
 

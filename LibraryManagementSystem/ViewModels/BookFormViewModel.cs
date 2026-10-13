@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagementSystem.ViewModels
 {
@@ -36,5 +36,8 @@ namespace LibraryManagementSystem.ViewModels
 
         // Must be nullable, otherwise MVC treats it as a required form field
         public SelectList? Categories { get; set; }
+
+        public IFormFile? Image { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
