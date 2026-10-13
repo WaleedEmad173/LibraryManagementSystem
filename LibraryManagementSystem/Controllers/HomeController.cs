@@ -19,7 +19,6 @@ namespace LibraryManagementSystem.Controllers
             _context = context;
             _userManager = userManager;
         }
-
         // GET: / (or /Home/Index)
         public async Task<IActionResult> Index()
         {

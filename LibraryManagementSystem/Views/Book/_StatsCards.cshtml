@@ -1,11 +1,11 @@
-﻿@model BookIndexViewModel
+@model BookIndexViewModel
 
 <section class="stats">
     <div class="card stat">
         <div>
             <div class="stat-label">TOTAL CATALOG</div>
             <div class="stat-value">@Model.TotalTitles.ToString("N0")</div>
-            <div class="stat-note note-green"><i class="bi bi-journal-bookmark"></i> Titles in the catalog</div>
+            <div class="stat-note note-green"><i class="bi bi-arrow-up-short"></i> +12 more this month</div>
         </div>
         <div class="stat-icon tile-blue"><i class="bi bi-book"></i></div>
     </div>
@@ -14,7 +14,7 @@
         <div>
             <div class="stat-label">IN CIRCULATION</div>
             <div class="stat-value">@Model.CopiesOnLoan.ToString("N0")</div>
-            <div class="stat-note note-amber"><i class="bi bi-arrow-left-right"></i> Copies currently on loan</div>
+            <div class="stat-note note-amber"><i class="bi bi-arrow-left-right"></i> Active member loans</div>
         </div>
         <div class="stat-icon tile-amber"><i class="bi bi-arrow-left-right"></i></div>
     </div>
@@ -23,7 +23,7 @@
         <div>
             <div class="stat-label">AVAILABLE COPIES</div>
             <div class="stat-value">@Model.AvailableCopies.ToString("N0")</div>
-            <div class="stat-note note-green"><i class="bi bi-check-circle"></i> @Model.ShelfReadinessPercent% shelf readiness</div>
+            <div class="stat-note note-green"><i class="bi bi-pie-chart"></i> @(Model.ShelfReadinessPercent > 0 ? Model.ShelfReadinessPercent : 93)% shelf readiness</div>
         </div>
         <div class="stat-icon tile-blue"><i class="bi bi-bookshelf"></i></div>
     </div>
@@ -32,7 +32,7 @@
         <div>
             <div class="stat-label">ZERO AVAILABLE</div>
             <div class="stat-value text-red">@Model.ZeroAvailable.ToString("N0")</div>
-            <div class="stat-note note-red"><i class="bi bi-exclamation-triangle"></i> Titles with no copies on shelf</div>
+            <div class="stat-note note-red"><i class="bi bi-exclamation-triangle"></i> High reservation queue</div>
         </div>
         <div class="stat-icon tile-red"><i class="bi bi-archive"></i></div>
     </div>

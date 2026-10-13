@@ -59,13 +59,27 @@ namespace LibraryManagementSystem.ViewModels
         public List<BorrowingRowViewModel> Borrowings { get; set; } = new();
     }
 
+    public class ActiveLoanItemViewModel
+    {
+        public int Id { get; set; }
+        public string BookTitle { get; set; } = string.Empty;
+        public string Barcode { get; set; } = string.Empty;
+        public DateTime DueDate { get; set; }
+        public bool IsOverdue => DateTime.UtcNow > DueDate;
+    }
+
     public class MemberDeleteViewModel
     {
         public int Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string MemberCode { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
         public DateTime JoinDate { get; set; }
+        public int CompletedLoansCount { get; set; }
         public bool CanDelete { get; set; } = true;
         public string? BlockMessage { get; set; }
+        public List<ActiveLoanItemViewModel> ActiveLoans { get; set; } = new();
     }
 }

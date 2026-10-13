@@ -1,0 +1,575 @@
+@model LibraryManagementSystem.ViewModels.StaffListViewModel
+@{
+    ViewData["Title"] = "Staff Accounts";
+}
+
+<style>
+    .staff-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+    .staff-title-group h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .chip-directory {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 99px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .staff-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
+    .btn-add-staff {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.15s ease;
+    }
+    .btn-add-staff:hover {
+        background: #172554;
+        color: #ffffff;
+    }
+    .staff-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+    @@media (max-width: 900px) {
+        .staff-stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .staff-stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+    .staff-stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .staff-stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+    .staff-stat-val-group {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+    .staff-stat-num {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+    .staff-stat-badge-green {
+        color: #10b981;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .staff-stat-badge-red {
+        color: #dc2626;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .staff-stat-badge-blue {
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .staff-stat-icon-tile {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .staff-stat-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #64748b;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 12px;
+    }
+    .staff-filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .staff-search-box {
+        position: relative;
+        flex: 1;
+    }
+    .staff-search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    .staff-search-input {
+        width: 100%;
+        padding: 9px 14px 9px 40px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #0f172a;
+    }
+    .staff-search-input:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #1e3a8a;
+    }
+    .staff-select {
+        padding: 9px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #0f172a;
+        min-width: 150px;
+    }
+    .btn-filter {
+        padding: 9px 16px;
+        background: #eff6ff;
+        color: #1e3a8a;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-filter:hover {
+        background: #dbeafe;
+        color: #1e3a8a;
+    }
+    .staff-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .staff-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .staff-table th {
+        background: #f8fafc;
+        padding: 14px 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+    .staff-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        font-size: 13.5px;
+    }
+    .staff-table tr:last-child td {
+        border-bottom: none;
+    }
+    .staff-user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .staff-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 13px;
+        position: relative;
+        flex-shrink: 0;
+    }
+    .staff-status-dot {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+    }
+    .staff-name-wrap {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+    .staff-name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .staff-name-bold {
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .chip-current-session {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 99px;
+    }
+    .staff-code {
+        font-size: 12px;
+        color: #64748b;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin-top: 2px;
+    }
+    .staff-email {
+        color: #475569;
+        font-size: 13.5px;
+    }
+    .role-badge-admin {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .role-badge-librarian {
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .staff-actions {
+        text-align: right;
+    }
+    .action-pencil-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 15px;
+        padding: 6px;
+        border-radius: 6px;
+        transition: color 0.15s, background 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .action-pencil-btn:hover {
+        color: #1e3a8a;
+        background: #f1f5f9;
+    }
+    .action-trash-btn {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 15px;
+        padding: 6px;
+        border-radius: 6px;
+        transition: color 0.15s, background 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-trash-btn:hover:not(:disabled) {
+        color: #dc2626;
+        background: #fee2e2;
+    }
+    .staff-footer {
+        padding: 14px 20px;
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #64748b;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .iam-policy-note {
+        color: #059669;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>
+
+<!-- Header -->
+<div class="staff-header">
+    <div class="staff-title-group">
+        <h1>Staff Accounts <span class="chip-directory">Internal Directory</span></h1>
+        <p class="staff-subtitle">Manage system access, administrative privileges, and staff roles across the library portal.</p>
+    </div>
+    <a href="/Admin/AddStaff" class="btn-add-staff" style="text-decoration: none;">
+        <i class="bi bi-person-plus-fill"></i>
+        <span>+ Add Staff</span>
+    </a>
+</div>
+
+<!-- Stat Cards -->
+<div class="staff-stats-grid">
+    <!-- Card 1: Total Personnel -->
+    <div class="staff-stat-card">
+        <div class="staff-stat-top">
+            <div>
+                <div class="staff-stat-label">TOTAL PERSONNEL</div>
+                <div class="staff-stat-val-group">
+                    <span class="staff-stat-num">@Model.TotalPersonnel</span>
+                    <span class="staff-stat-badge-green">Active Staff</span>
+                </div>
+            </div>
+            <div class="staff-stat-icon-tile" style="background: #eff6ff; color: #2563eb;">
+                <i class="bi bi-person-badge"></i>
+            </div>
+        </div>
+        <div class="staff-stat-bottom">
+            <span>100% capacity assigned</span>
+            <div style="width: 76px; height: 5px; background: #e2e8f0; border-radius: 99px; overflow: hidden;">
+                <div style="width: 100%; height: 100%; background: #1e3a8a; border-radius: 99px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Administrative Access -->
+    <div class="staff-stat-card">
+        <div class="staff-stat-top">
+            <div>
+                <div class="staff-stat-label">ADMINISTRATIVE ACCESS</div>
+                <div class="staff-stat-val-group">
+                    <span class="staff-stat-num">@Model.TotalAdmins</span>
+                    <span class="staff-stat-badge-red">Admins</span>
+                </div>
+            </div>
+            <div class="staff-stat-icon-tile" style="background: #fee2e2; color: #dc2626;">
+                <i class="bi bi-shield-fill"></i>
+            </div>
+        </div>
+        <div class="staff-stat-bottom">
+            <span>Full system access</span>
+            <span style="color: #dc2626; font-weight: 600;">Elevated keys (@Model.TotalAdmins)</span>
+        </div>
+    </div>
+
+    <!-- Card 3: Circulation Operations -->
+    <div class="staff-stat-card">
+        <div class="staff-stat-top">
+            <div>
+                <div class="staff-stat-label">CIRCULATION OPERATIONS</div>
+                <div class="staff-stat-val-group">
+                    <span class="staff-stat-num">@Model.TotalLibrarians</span>
+                    <span class="staff-stat-badge-blue">Librarians</span>
+                </div>
+            </div>
+            <div class="staff-stat-icon-tile" style="background: #f5f3ff; color: #7c3aed;">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+        </div>
+        <div class="staff-stat-bottom">
+            <span>Counter & catalog ops</span>
+            <span style="color: #2563eb; font-weight: 600;">On Shift: (@Model.TotalLibrarians)</span>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<form method="get" asp-action="Staff" class="staff-filter-card">
+    <div class="staff-search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" name="search" value="@Model.Search" class="staff-search-input" placeholder="Search staff by name or email..." />
+    </div>
+
+    <select name="role" class="staff-select">
+        <option value="" selected="@(string.IsNullOrEmpty(Model.SelectedRole) ? "selected" : null)">All Roles</option>
+        <option value="Admin" selected="@(Model.SelectedRole == "Admin" ? "selected" : null)">Admin</option>
+        <option value="Librarian" selected="@(Model.SelectedRole == "Librarian" ? "selected" : null)">Librarian</option>
+    </select>
+
+    <button type="submit" class="btn-filter">
+        <i class="bi bi-sliders"></i>
+        <span>Filter</span>
+    </button>
+
+    @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.SelectedRole))
+    {
+        <a asp-action="Staff" class="btn btn-ghost" style="font-size: 13px;" title="Reset Filters">
+            <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
+    }
+</form>
+
+<!-- Staff Table -->
+<div class="staff-table-card">
+    <table class="staff-table">
+        <thead>
+            <tr>
+                <th style="width: 32%;">NAME</th>
+                <th style="width: 35%;">EMAIL</th>
+                <th style="width: 23%;">ROLE</th>
+                <th style="width: 10%; text-align: right;">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.StaffMembers.Any())
+            {
+                foreach (var s in Model.StaffMembers)
+                {
+                    <tr>
+                        <td>
+                            <div class="staff-user-cell">
+                                <div class="staff-avatar" style="background-color: @s.AvatarBg; color: @s.AvatarColor;">
+                                    @s.Initials
+                                    @if (s.IsCurrentSession)
+                                    {
+                                        <span class="staff-status-dot" style="background-color: #10b981;"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="staff-status-dot" style="background-color: #cbd5e1;"></span>
+                                    }
+                                </div>
+                                <div class="staff-name-wrap">
+                                    <div class="staff-name-row">
+                                        <span class="staff-name-bold">@s.FullName</span>
+                                        @if (s.IsCurrentSession)
+                                        {
+                                            <span class="chip-current-session">Current Session</span>
+                                        }
+                                    </div>
+                                    <div class="staff-code">@s.StaffCode</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="staff-email">@s.Email</span>
+                        </td>
+                        <td>
+                            @if (s.Role == "Admin")
+                            {
+                                <span class="role-badge-admin">
+                                    <i class="bi bi-shield"></i>
+                                    <span>Admin</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="role-badge-librarian">
+                                    <i class="bi bi-book"></i>
+                                    <span>Librarian</span>
+                                </span>
+                            }
+                        </td>
+                        <td class="staff-actions">
+                            <div style="display: inline-flex; align-items: center; gap: 4px;">
+                                <a href="/Admin/EditRole/@s.Id" class="action-pencil-btn" title="Edit Staff Role">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (!s.IsCurrentSession)
+                                {
+                                    <form asp-action="DeleteStaff" asp-route-id="@s.Id" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to remove the staff account for \'@s.FullName\'?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="action-trash-btn" title="Delete Staff Account">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="action-trash-btn" disabled style="opacity: 0.35; cursor: not-allowed;" title="Cannot delete current active session account">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="bi bi-person-x" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+                        <div>No staff accounts found matching your filter.</div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="staff-footer">
+        <div>Showing <strong>@Model.StaffMembers.Count</strong> of <strong>@Model.TotalPersonnel</strong> staff accounts</div>
+        <div class="iam-policy-note">
+            <i class="bi bi-shield-check"></i>
+            <span>Access control synced with IAM Security Policy v2.4</span>
+        </div>
+    </div>
+</div>
+
