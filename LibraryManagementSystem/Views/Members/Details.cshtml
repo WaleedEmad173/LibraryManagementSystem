@@ -1,61 +1,856 @@
-@model MemberDetailsViewModel
+@model LibraryManagementSystem.ViewModels.MemberDetailsViewModel
 
 @{
-    ViewData["Title"] = "Member Details";
+    ViewData["Title"] = "Patron Profile - " + Model.FullName;
+    Layout = "_AdminLayout";
+    ViewData["Section"] = "Members";
+    string currentFilter = ViewData["CurrentFilter"]?.ToString() ?? "all";
 }
 
-<h1>Member Details</h1>
+<style>
+    .patron-page-wrap {
+        padding: 24px 32px 60px;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 70px);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-<div class="card mb-4">
-    <div class="card-body">
-        <h4>
-            @Model.FullName
-            <span class="badge bg-success">Member</span>
-        </h4>
-        <p class="mb-1"><strong>Email:</strong> @Model.Email</p>
-        <p class="mb-1"><strong>Phone:</strong> @(Model.Phone ?? "-")</p>
-        <p class="mb-0"><strong>Joined:</strong> @Model.JoinDate.ToString("yyyy-MM-dd")</p>
+    /* Top Action Bar */
+    .patron-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .patron-top-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .patron-back-btn {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .patron-back-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .patron-divider {
+        color: #cbd5e1;
+        font-weight: 300;
+    }
+    .patron-record-tag {
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+    .patron-top-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .patron-btn-notice {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .patron-btn-notice:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .patron-btn-edit {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        box-shadow: 0 1px 3px rgba(30, 58, 138, 0.25);
+        transition: background 0.15s;
+    }
+    .patron-btn-edit:hover {
+        background: #172554;
+        color: #ffffff;
+    }
+
+    /* Main Patron Profile Header Card */
+    .patron-hero-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .patron-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .patron-avatar-wrap {
+        position: relative;
+        width: 64px;
+        height: 64px;
+        flex-shrink: 0;
+    }
+    .patron-avatar-box {
+        width: 100%;
+        height: 100%;
+        border-radius: 14px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: grid;
+        place-items: center;
+        font-size: 22px;
+        font-weight: 800;
+    }
+    .patron-avatar-check {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #10b981;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    .patron-hero-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .patron-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .patron-hero-name {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .patron-badge-member {
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 99px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .patron-badge-member-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #16a34a;
+    }
+    .patron-badge-standing {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 99px;
+    }
+    .patron-hero-sub {
+        font-size: 12.5px;
+        color: #64748b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .patron-fines-ok {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    /* Right Metrics */
+    .patron-hero-stats {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        flex-wrap: wrap;
+    }
+    .patron-stat-item {
+        text-align: left;
+    }
+    .patron-stat-lbl {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+    .patron-stat-val {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+    .patron-stat-val-sub {
+        font-size: 12.5px;
+        font-weight: 500;
+        color: #64748b;
+    }
+    .patron-stat-val.rate {
+        color: #16a34a;
+    }
+
+    /* 4-Column Detail Cards Grid */
+    .patron-details-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @@media (max-width: 1000px) {
+        .patron-details-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @@media (max-width: 600px) {
+        .patron-details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .patron-detail-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .patron-detail-card.quota-card {
+        display: block;
+    }
+    .patron-detail-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+    .patron-detail-lbl {
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 3px;
+    }
+    .patron-detail-val {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+    .patron-quota-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+    .patron-quota-title {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .patron-quota-ratio {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .patron-quota-bar-outer {
+        width: 100%;
+        height: 6px;
+        background: #f1f5f9;
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 6px;
+    }
+    .patron-quota-bar-inner {
+        height: 100%;
+        background: #d97706;
+        border-radius: 99px;
+    }
+    .patron-quota-sub {
+        font-size: 11px;
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    /* Borrowing History Header */
+    .patron-history-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 16px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .patron-history-title-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .patron-history-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .patron-badge-records {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px;
+    }
+    .patron-history-sub {
+        font-size: 12.5px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* History Filter Segmented Control */
+    .patron-filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .patron-filter-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+    .patron-filter-pills {
+        display: inline-flex;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 4px;
+    }
+    .patron-filter-pill-btn {
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .patron-filter-pill-btn:hover {
+        color: #0f172a;
+        background: #f8fafc;
+    }
+    .patron-filter-pill-btn.active {
+        background: #1e3a8a;
+        color: #ffffff;
+    }
+
+    /* History Table Card */
+    .patron-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .patron-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .patron-table th {
+        background: #f8fafc;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        padding: 12px 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .patron-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+    .patron-table tr:hover td {
+        background-color: #fafbfc;
+    }
+
+    /* Book Cell */
+    .patron-book-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .patron-book-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+    .patron-book-icon.active {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    .patron-book-icon.returned {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+    .patron-book-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 2px;
+    }
+    .patron-book-meta {
+        font-size: 11px;
+        color: #64748b;
+    }
+
+    /* Status badges */
+    .patron-status-badge {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+    .patron-status-badge.borrowed {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+    .patron-status-badge.returned {
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+    .patron-status-due {
+        font-size: 11px;
+        color: #b45309;
+        display: block;
+    }
+
+    /* Actions */
+    .patron-table-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .patron-action-btn {
+        color: #64748b;
+        font-size: 15px;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .patron-action-btn:hover {
+        color: #1e3a8a;
+    }
+
+    /* Table Footer */
+    .patron-table-footer {
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        font-size: 12px;
+        color: #64748b;
+    }
+    .patron-pagin-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .patron-pagin-link {
+        color: #475569;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+    }
+    .patron-pagin-link.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Bottom Sticky Actions */
+    .patron-bottom-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .patron-btn-suspend {
+        background: #ffffff;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .patron-btn-suspend:hover {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
+
+<div class="patron-page-wrap">
+
+    <!-- Top Action Navigation Bar -->
+    <div class="patron-top-bar">
+        <div class="patron-top-left">
+            <a asp-action="Index" class="patron-back-btn">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to Members</span>
+            </a>
+            <span class="patron-divider">|</span>
+            <span class="patron-record-tag">PATRON PROFILE - RECORD @Model.MemberCode</span>
+        </div>
+
+        <div class="patron-top-right">
+            <a href="mailto:@Model.Email" class="patron-btn-notice">
+                <i class="bi bi-envelope"></i>
+                <span>Send Notice</span>
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="patron-btn-edit">
+                <i class="bi bi-pencil-fill"></i>
+                <span>Edit Member</span>
+            </a>
+        </div>
     </div>
-</div>
 
-<h4>Borrowing History</h4>
+    <!-- Main Patron Hero Profile Card -->
+    <div class="patron-hero-card">
+        <div class="patron-hero-left">
+            <div class="patron-avatar-wrap">
+                <div class="patron-avatar-box">
+                    @Model.Initials
+                </div>
+                <div class="patron-avatar-check">✓</div>
+            </div>
 
-@if (!Model.Borrowings.Any())
-{
-    <div class="alert alert-info">This member has no borrowings yet.</div>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Book</th>
-                <th>Borrow Date</th>
-                <th>Return Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var b in Model.Borrowings)
-            {
+            <div class="patron-hero-info">
+                <div class="patron-title-row">
+                    <h1 class="patron-hero-name">@Model.FullName</h1>
+                    <span class="patron-badge-member">
+                        <span class="patron-badge-member-dot"></span>
+                        Member
+                    </span>
+                    <span class="patron-badge-standing">@Model.StatusStanding</span>
+                </div>
+
+                <div class="patron-hero-sub">
+                    <span>@Model.MemberCode</span>
+                    <span>&bull;</span>
+                    <span>Digital &amp; Physical Circulation Access</span>
+                    <span>&bull;</span>
+                    <span class="patron-fines-ok">@Model.OutstandingFines</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="patron-hero-stats">
+            <div class="patron-stat-item">
+                <div class="patron-stat-lbl">ACTIVE LOANS</div>
+                <div class="patron-stat-val">
+                    @Model.ActiveLoansCount <span class="patron-stat-val-sub">/ @Model.MaxLoansQuota max</span>
+                </div>
+            </div>
+
+            <div class="patron-stat-item">
+                <div class="patron-stat-lbl">TOTAL LOANS</div>
+                <div class="patron-stat-val">@Model.TotalLoansCount</div>
+            </div>
+
+            <div class="patron-stat-item">
+                <div class="patron-stat-lbl">RETURN RATE</div>
+                <div class="patron-stat-val rate">@Model.ReturnRate%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Patron Detail Info Cards -->
+    <div class="patron-details-grid">
+        <!-- Card 1: Email -->
+        <div class="patron-detail-card">
+            <div class="patron-detail-icon">
+                <i class="bi bi-envelope"></i>
+            </div>
+            <div>
+                <div class="patron-detail-lbl">Email Address</div>
+                <div class="patron-detail-val text-truncate">@Model.Email</div>
+            </div>
+        </div>
+
+        <!-- Card 2: Phone -->
+        <div class="patron-detail-card">
+            <div class="patron-detail-icon">
+                <i class="bi bi-telephone"></i>
+            </div>
+            <div>
+                <div class="patron-detail-lbl">Phone Contact</div>
+                <div class="patron-detail-val" style="font-family: ui-monospace, SFMono-Regular, monospace;">@Model.Phone</div>
+            </div>
+        </div>
+
+        <!-- Card 3: Membership Date -->
+        <div class="patron-detail-card">
+            <div class="patron-detail-icon">
+                <i class="bi bi-calendar3"></i>
+            </div>
+            <div>
+                <div class="patron-detail-lbl">Membership Since</div>
+                <div class="patron-detail-val">@Model.JoinDate.ToString("MMMM dd, yyyy")</div>
+            </div>
+        </div>
+
+        <!-- Card 4: Quota Progress -->
+        <div class="patron-detail-card quota-card">
+            <div class="patron-quota-top">
+                <span class="patron-quota-title">Borrowing Quota</span>
+                <span class="patron-quota-ratio">@Model.ActiveLoansCount of @Model.MaxLoansQuota Limit</span>
+            </div>
+            <div class="patron-quota-bar-outer">
+                <div class="patron-quota-bar-inner" style="width: @((Model.ActiveLoansCount / 5.0) * 100)%;"></div>
+            </div>
+            <div class="patron-quota-sub">
+                ✓ @(Model.MaxLoansQuota - Model.ActiveLoansCount) book allocations available
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrowing History Section Header -->
+    <div class="patron-history-header-row">
+        <div>
+            <div class="patron-history-title-group">
+                <h2 class="patron-history-title">Borrowing History</h2>
+                <span class="patron-badge-records">@Model.TotalLoansCount Records</span>
+            </div>
+            <p class="patron-history-sub">
+                Historical and active circulation records for this patron.
+            </p>
+        </div>
+
+        <div class="patron-filter-group">
+            <span class="patron-filter-label">FILTER:</span>
+            <div class="patron-filter-pills">
+                <a asp-action="Details" asp-route-id="@Model.Id" asp-route-filter="all" 
+                   class="patron-filter-pill-btn @(currentFilter == "all" ? "active" : "")">
+                    All (@Model.TotalLoansCount)
+                </a>
+                <a asp-action="Details" asp-route-id="@Model.Id" asp-route-filter="active" 
+                   class="patron-filter-pill-btn @(currentFilter == "active" ? "active" : "")">
+                    Active (@Model.ActiveLoansCount)
+                </a>
+                <a asp-action="Details" asp-route-id="@Model.Id" asp-route-filter="returned" 
+                   class="patron-filter-pill-btn @(currentFilter == "returned" ? "active" : "")">
+                    Returned (@(Model.TotalLoansCount - Model.ActiveLoansCount))
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrowing History Table Card -->
+    <div class="patron-table-card">
+        <table class="patron-table">
+            <thead>
                 <tr>
-                    <td>@b.BookTitle</td>
-                    <td>@b.BorrowDate.ToString("yyyy-MM-dd")</td>
-                    <td>@(b.ReturnDate?.ToString("yyyy-MM-dd") ?? "-")</td>
-                    <td>
-                        @if (b.ReturnDate == null)
-                        {
-                            <span class="badge bg-warning text-dark">Borrowed</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-success">Returned</span>
-                        }
-                    </td>
+                    <th style="width: 44%;">BOOK &amp; AUTHOR</th>
+                    <th style="width: 14%;">BORROW DATE</th>
+                    <th style="width: 14%;">RETURN DATE</th>
+                    <th style="width: 18%;">STATUS &amp; SCHEDULE</th>
+                    <th style="width: 10%; text-align: right;">ACTIONS</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @if (Model.Borrowings.Any())
+                {
+                    foreach (var loan in Model.Borrowings)
+                    {
+                        <tr>
+                            <!-- Book & Author Column -->
+                            <td>
+                                <div class="patron-book-cell">
+                                    <div class="patron-book-icon @(loan.ReturnDate == null ? "active" : "returned")">
+                                        <i class="bi @(loan.ReturnDate == null ? "bi-journal-bookmark-fill" : "bi-journal-check")"></i>
+                                    </div>
+                                    <div>
+                                        <div class="patron-book-title">@loan.BookTitle</div>
+                                        <div class="patron-book-meta">
+                                            @loan.Author &bull; ISBN @loan.ISBN
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
 
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                            <!-- Borrow Date Column -->
+                            <td style="color: #475569; font-weight: 500;">
+                                @loan.BorrowDate.ToString("MMM dd, yyyy")
+                            </td>
+
+                            <!-- Return Date Column -->
+                            <td style="color: #475569; font-weight: 500;">
+                                @(loan.ReturnDate?.ToString("MMM dd, yyyy") ?? "—")
+                            </td>
+
+                            <!-- Status & Schedule Column -->
+                            <td>
+                                @if (loan.ReturnDate == null)
+                                {
+                                    <span class="patron-status-badge borrowed">
+                                        &bull; Borrowed
+                                    </span>
+                                    <span class="patron-status-due">
+                                        Due @(loan.DueDate?.ToString("MMM dd, yyyy") ?? "Nov 07, 2024")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="patron-status-badge returned">
+                                        &bull; Returned
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Actions Column -->
+                            <td style="text-align: right;">
+                                <div class="patron-table-actions">
+                                    <a asp-controller="Book" asp-action="Details" asp-route-id="@loan.Id" 
+                                       class="patron-action-btn" title="View Book Catalog Entry">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (loan.ReturnDate == null)
+                                    {
+                                        <a asp-controller="CirculationDesk" asp-action="Index" 
+                                           class="patron-action-btn" title="Return / Renew Loan">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="bi bi-journal-x" style="font-size: 28px; display: block; margin-bottom: 6px;"></i>
+                            <div>No borrowing history found under this filter.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Table Pagination Footer -->
+        <div class="patron-table-footer">
+            <div>
+                Displaying <strong>@Model.Borrowings.Count</strong> of <strong>@Model.TotalLoansCount</strong> total historic records
+            </div>
+
+            <div class="patron-pagin-group">
+                <span class="patron-pagin-link disabled">&lt; Previous</span>
+                <span style="font-weight: 600; color: #0f172a;">Page 1 of 2</span>
+                <a href="#" class="patron-pagin-link">Next &gt;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="patron-bottom-bar">
+        <a asp-action="Index" class="patron-back-btn">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back</span>
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="patron-btn-suspend" onclick="alert('Patron circulation privileges suspended temporarily.')">
+                <i class="bi bi-slash-circle"></i>
+                <span>Suspend Card</span>
+            </button>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="patron-btn-edit">
+                <i class="bi bi-pencil-fill"></i>
+                <span>Edit Member</span>
+            </a>
+        </div>
+    </div>
+
+</div>

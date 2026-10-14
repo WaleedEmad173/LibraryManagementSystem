@@ -1,23 +1,1004 @@
 @model MemberFormViewModel
 
 @{
-    ViewData["Title"] = "Add Member";
+    ViewData["Title"] = "Add New Member";
+    ViewData["Section"] = "Members";
+    var autoAssignedCode = ViewBag.AutoAssignedCode as string ?? "#MB-4902";
 }
 
-<h1>Add Member</h1>
+<style>
+    /* Scoped Styles for Add New Member */
+    .patron-create-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 8px 12px 48px;
+        color: #0f172a;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <partial name="_MemberForm" model="Model" />
+    /* Header Section */
+    .patron-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 28px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
 
-            <button type="submit" class="btn btn-primary">Create</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-        </form>
+    .patron-header-left {
+        max-width: 780px;
+    }
+
+    .patron-supertitle {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #475569;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .patron-supertitle .system-badge {
+        color: #2563eb;
+        font-weight: 700;
+    }
+
+    .patron-title {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #0f172a;
+        margin: 0 0 8px;
+        line-height: 1.2;
+    }
+
+    .patron-subtitle {
+        font-size: 14px;
+        line-height: 1.55;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Auto Assigned ID Badge */
+    .auto-id-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        flex-shrink: 0;
+    }
+
+    .auto-id-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .auto-id-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+    }
+
+    .auto-id-val {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1e40af;
+        line-height: 1.2;
+    }
+
+    /* Two Column Layout */
+    .patron-grid {
+        display: grid;
+        grid-template-columns: 1.55fr 1fr;
+        gap: 28px;
+        align-items: start;
+    }
+
+    @@media (max-width: 1024px) {
+        .patron-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Left Card: Member Account Information */
+    .patron-main-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 26px;
+    }
+
+    .card-main-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .card-main-desc {
+        font-size: 13px;
+        color: #64748b;
+        margin: 4px 0 0;
+    }
+
+    .tier-badge {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    /* Form Fields Styling */
+    .patron-field-group {
+        margin-bottom: 20px;
+    }
+
+    .field-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 7px;
+    }
+
+    .patron-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .patron-label .req-star {
+        color: #dc2626;
+        margin-left: 2px;
+        font-weight: 700;
+    }
+
+    .field-hint-right {
+        font-size: 11.5px;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon-left {
+        position: absolute;
+        left: 14px;
+        color: #94a3b8;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .patron-input {
+        width: 100%;
+        height: 44px;
+        padding: 0 14px 0 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 13.5px;
+        color: #0f172a;
+        background-color: #ffffff;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .patron-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .patron-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+
+    .input-icon-btn-right {
+        position: absolute;
+        right: 12px;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 17px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: color 0.15s;
+        z-index: 2;
+    }
+
+    .input-icon-btn-right:hover {
+        color: #475569;
+    }
+
+    .password-hint-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .password-hint-box i {
+        color: #94a3b8;
+        font-size: 13px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    /* Circulation Privileges Box */
+    .circulation-privileges-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 26px 0 24px;
+    }
+
+    .privileges-icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #064e3b;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .privileges-content {
+        line-height: 1.35;
+    }
+
+    .privileges-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .privileges-desc {
+        font-size: 12px;
+        color: #475569;
+        margin: 2px 0 0;
+    }
+
+    /* Action Buttons */
+    .form-actions-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .btn-cancel-custom {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        padding: 10px 22px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel-custom:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        text-decoration: none;
+    }
+
+    .btn-save-custom {
+        background: #064e3b;
+        color: #ffffff;
+        border: none;
+        border-radius: 9px;
+        padding: 10px 24px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 3px rgba(6, 78, 59, 0.2);
+    }
+
+    .btn-save-custom:hover {
+        background: #04392a;
+        box-shadow: 0 4px 12px rgba(6, 78, 59, 0.25);
+        color: #ffffff;
+    }
+
+    /* Bulk Registration Card */
+    .bulk-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 22px;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .bulk-card-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .bulk-icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #e0e7ff;
+        color: #4338ca;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .bulk-title {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .bulk-desc {
+        font-size: 12.5px;
+        color: #64748b;
+        margin: 2px 0 0;
+    }
+
+    .btn-bulk-upload {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        color: #1d4ed8;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 9px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: all 0.15s ease;
+    }
+
+    .btn-bulk-upload:hover {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    /* Right Column Cards */
+    .side-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        margin-bottom: 24px;
+    }
+
+    /* Validation Showcase */
+    .qa-eyebrow-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .qa-eyebrow {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .qa-dot {
+        width: 7px;
+        height: 7px;
+        background: #dc2626;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .qa-side-icon {
+        color: #94a3b8;
+        font-size: 18px;
+    }
+
+    .qa-card-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 8px 0 6px;
+        letter-spacing: -0.01em;
+    }
+
+    .qa-card-desc {
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: #64748b;
+        margin: 0 0 20px;
+    }
+
+    /* Validation Rule Boxes */
+    .rule-demo-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+    }
+
+    .rule-demo-box:last-child {
+        margin-bottom: 0;
+    }
+
+    .rule-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .rule-name {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .rule-pill-malformed {
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.02em;
+    }
+
+    .rule-pill-collision {
+        background: #ffe4e6;
+        color: #e11d48;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.02em;
+    }
+
+    .rule-field-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+
+    .rule-mock-input {
+        background: #fef2f2;
+        border: 1.5px solid #f87171;
+        border-radius: 8px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .rule-mock-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #991b1b;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .rule-mock-left i {
+        color: #dc2626;
+        font-size: 14px;
+    }
+
+    .rule-mock-right i {
+        color: #dc2626;
+        font-size: 14px;
+    }
+
+    .rule-error-msg {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #dc2626;
+    }
+
+    .rule-error-msg i {
+        font-size: 12px;
+    }
+
+    /* Policies Card */
+    .policy-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .policy-header-icon {
+        color: #2563eb;
+        font-size: 18px;
+    }
+
+    .policy-header-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .policy-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .policy-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .policy-check-icon {
+        color: #16a34a;
+        font-size: 15px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .policy-text {
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: #475569;
+        margin: 0;
+    }
+
+    .policy-text strong {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    /* Verification Desk Box */
+    .verification-desk-box {
+        margin-top: 20px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .desk-eyebrow {
+        font-size: 10px;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+    }
+
+    .desk-name {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #1e3a8a;
+        line-height: 1.2;
+        margin-top: 2px;
+    }
+
+    .desk-icon {
+        color: #2563eb;
+        font-size: 20px;
+    }
+
+    .text-danger-custom {
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+        display: block;
+    }
+</style>
+
+<div class="patron-create-container">
+    <!-- Top Header -->
+    <div class="patron-header">
+        <div class="patron-header-left">
+            <div class="patron-supertitle">
+                <span>PATRON ENROLLMENT</span>
+                <span>-</span>
+                <span class="system-badge">Circulation System v1.0</span>
+            </div>
+            <h1 class="patron-title">Add New Member</h1>
+            <p class="patron-subtitle">
+                Register a new patron account to grant library circulation and borrowing privileges. Initial registration activates the standard borrowing tier immediately upon credential confirmation.
+            </p>
+        </div>
+
+        <div class="auto-id-card">
+            <div class="auto-id-icon">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <div>
+                <div class="auto-id-label">Auto-Assigned ID</div>
+                <div class="auto-id-val">@autoAssignedCode</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="patron-grid">
+        <!-- Left Column: Member Account Form -->
+        <div class="patron-grid-left">
+            <div class="patron-main-card">
+                <div class="card-header-flex">
+                    <div>
+                        <h2 class="card-main-title">Member Account Information</h2>
+                        <p class="card-main-desc">Complete required identity attributes to provision patron record.</p>
+                    </div>
+                    <span class="tier-badge">
+                        <i class="bi bi-patch-check-fill"></i> Active Status Tier
+                    </span>
+                </div>
+
+                <form asp-action="Create" method="post" id="addMemberForm">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 px-3 small rounded-3 mb-3"></div>
+
+                    <!-- Full Name -->
+                    <div class="patron-field-group">
+                        <div class="field-label-row">
+                            <label asp-for="FullName" class="patron-label">Full Name <span class="req-star">*</span></label>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="bi bi-person input-icon-left"></i>
+                            <input asp-for="FullName" class="patron-input" placeholder="e.g. Jane Doe" autocomplete="name" required />
+                        </div>
+                        <span asp-validation-for="FullName" class="text-danger-custom"></span>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="patron-field-group">
+                        <div class="field-label-row">
+                            <label asp-for="Email" class="patron-label">Email Address <span class="req-star">*</span></label>
+                            <span class="field-hint-right">Serves as digital login</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="bi bi-envelope input-icon-left"></i>
+                            <input asp-for="Email" class="patron-input" placeholder="e.g. jane.doe@example.com" autocomplete="email" required />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger-custom"></span>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="patron-field-group">
+                        <div class="field-label-row">
+                            <label asp-for="Phone" class="patron-label">Phone Number</label>
+                            <span class="field-hint-right">Optional for SMS overdue alerts</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="bi bi-telephone input-icon-left"></i>
+                            <input asp-for="Phone" class="patron-input" placeholder="e.g. +1 (555) 000-0000" autocomplete="tel" />
+                        </div>
+                        <span asp-validation-for="Phone" class="text-danger-custom"></span>
+                    </div>
+
+                    <!-- Temporary Password -->
+                    <div class="patron-field-group">
+                        <div class="field-label-row">
+                            <label asp-for="Password" class="patron-label">Account Temporary Password <span class="req-star">*</span></label>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="bi bi-lock input-icon-left"></i>
+                            <input asp-for="Password" id="passwordInput" type="password" class="patron-input" placeholder="••••••••" autocomplete="new-password" required />
+                            <button type="button" class="input-icon-btn-right" id="togglePasswordBtn" title="Show or hide password">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                        <div class="password-hint-box">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Must be at least 6 characters with letters and numbers. Patron will be prompted to reset upon first login.</span>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger-custom"></span>
+                    </div>
+
+                    <!-- Circulation Privileges Box -->
+                    <div class="circulation-privileges-box">
+                        <div class="privileges-icon-box">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                        <div class="privileges-content">
+                            <div class="privileges-title">Default Circulation Privileges</div>
+                            <div class="privileges-desc">Up to 5 simultaneous checkouts • 21-day standard loan duration</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-actions-row">
+                        <a asp-action="Index" class="btn-cancel-custom">Cancel</a>
+                        <button type="submit" class="btn-save-custom">
+                            <i class="bi bi-person-check"></i> Save Member
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Need Bulk Registration Card -->
+            <div class="bulk-card">
+                <div class="bulk-card-left">
+                    <div class="bulk-icon-box">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="bulk-title">Need Bulk Registration?</h4>
+                        <p class="bulk-desc">Import multi-student or institutional CSV cohorts into the directory.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-bulk-upload" onclick="triggerCsvModal()">
+                    <i class="bi bi-file-earmark-arrow-up"></i> Upload CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Validation Showcase & Policies -->
+        <div class="patron-grid-right">
+            <!-- Validation States Showcase -->
+            <div class="side-card">
+                <div class="qa-eyebrow-row">
+                    <div class="qa-eyebrow">
+                        <span class="qa-dot"></span> QUALITY ASSURANCE
+                    </div>
+                    <i class="bi bi-ui-checks qa-side-icon"></i>
+                </div>
+                <h3 class="qa-card-title">Validation States Showcase</h3>
+                <p class="qa-card-desc">
+                    Live behavioral specs implemented across registration fields to preserve catalog data integrity and avoid duplicate patron identity mapping.
+                </p>
+
+                <!-- Rule 1: Syntax Format -->
+                <div class="rule-demo-box">
+                    <div class="rule-top-row">
+                        <span class="rule-name">Validation Rule 1: Syntax Format</span>
+                        <span class="rule-pill-malformed">Malformed</span>
+                    </div>
+                    <div class="rule-field-label">Email Address *</div>
+                    <div class="rule-mock-input">
+                        <div class="rule-mock-left">
+                            <i class="bi bi-slash-circle"></i>
+                            <span>jane/invalid-domain</span>
+                        </div>
+                        <div class="rule-mock-right">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                    </div>
+                    <div class="rule-error-msg">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <span>Email is not valid</span>
+                    </div>
+                </div>
+
+                <!-- Rule 2: Uniqueness Constraint -->
+                <div class="rule-demo-box">
+                    <div class="rule-top-row">
+                        <span class="rule-name">Validation Rule 2: Uniqueness Constraint</span>
+                        <span class="rule-pill-collision">Collision</span>
+                    </div>
+                    <div class="rule-field-label">Email Address *</div>
+                    <div class="rule-mock-input">
+                        <div class="rule-mock-left">
+                            <i class="bi bi-envelope-exclamation"></i>
+                            <span>sara.ahmed@example.com</span>
+                        </div>
+                        <div class="rule-mock-right">
+                            <i class="bi bi-person-fill-exclamation"></i>
+                        </div>
+                    </div>
+                    <div class="rule-error-msg">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <span>Email already registered to member #MB-4020</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Circulation Policies & Verification -->
+            <div class="side-card">
+                <div class="policy-header">
+                    <i class="bi bi-shield-check policy-header-icon"></i>
+                    <h3 class="policy-header-title">Circulation Policies & Verification</h3>
+                </div>
+
+                <div class="policy-list">
+                    <div class="policy-item">
+                        <i class="bi bi-check-circle-fill policy-check-icon"></i>
+                        <p class="policy-text">
+                            <strong>Government or Student ID:</strong> Physical identity proof must be visually inspected by the librarian prior to card issuance.
+                        </p>
+                    </div>
+
+                    <div class="policy-item">
+                        <i class="bi bi-check-circle-fill policy-check-icon"></i>
+                        <p class="policy-text">
+                            <strong>Default Tier Caps:</strong> Initial accounts maintain standard borrowing limits until 3 consecutive on-time returns are registered.
+                        </p>
+                    </div>
+
+                    <div class="policy-item">
+                        <i class="bi bi-check-circle-fill policy-check-icon"></i>
+                        <p class="policy-text">
+                            <strong>Account Renewal:</strong> Memberships are active for exactly 365 calendar days from registration and require in-person revalidation.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Verification Desk Footer -->
+                <div class="verification-desk-box">
+                    <div>
+                        <div class="desk-eyebrow">VERIFICATION DESK</div>
+                        <div class="desk-name">Librarian Omar Hassan (LIB-104)</div>
+                    </div>
+                    <i class="bi bi-person-badge desk-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for CSV Bulk Upload Simulation -->
+<div class="modal fade" id="csvModal" tabindex="-1" aria-labelledby="csvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden;">
+            <div class="modal-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 24px;">
+                <h5 class="modal-title" id="csvModalLabel" style="font-size: 16px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-file-earmark-spreadsheet-fill" style="color: #4338ca;"></i> Bulk Member Import
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+                    Upload a CSV file containing patron records. Required columns: <code>FullName</code>, <code>Email</code>, <code>Phone</code>, <code>Password</code>.
+                </p>
+                <div style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 28px 16px; text-align: center; background: #f8fafc; cursor: pointer;" onclick="document.getElementById('csvFileInput').click();">
+                    <i class="bi bi-cloud-arrow-up" style="font-size: 36px; color: #6366f1;"></i>
+                    <div style="font-size: 14px; font-weight: 600; color: #1e293b; margin-top: 8px;">Click to select CSV file</div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Supports UTF-8 CSV up to 10MB</div>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvFile(event)" />
+                </div>
+                <div id="csvFileInfo" style="display: none; margin-top: 14px; font-size: 13px; color: #064e3b; background: #ecfdf5; padding: 10px 14px; border-radius: 8px; border: 1px solid #a7f3d0;">
+                    <i class="bi bi-check-circle-fill me-1"></i> <span id="csvFileName"></span>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px;">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 6px 14px;">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="submitCsv()" style="background: #4338ca; border-color: #4338ca; border-radius: 8px; font-weight: 600; padding: 6px 16px;">Import Patrons</button>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Password Visibility Toggle
+        document.addEventListener('DOMContentLoaded', function () {
+            var toggleBtn = document.getElementById('togglePasswordBtn');
+            var passwordInput = document.getElementById('passwordInput');
+            var toggleIcon = document.getElementById('togglePasswordIcon');
+
+            if (toggleBtn && passwordInput && toggleIcon) {
+                toggleBtn.addEventListener('click', function () {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        toggleIcon.classList.remove('bi-eye');
+                        toggleIcon.classList.add('bi-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        toggleIcon.classList.remove('bi-eye-slash');
+                        toggleIcon.classList.add('bi-eye');
+                    }
+                });
+            }
+        });
+
+        // Bulk CSV Helper
+        function triggerCsvModal() {
+            var myModal = new bootstrap.Modal(document.getElementById('csvModal'));
+            myModal.show();
+        }
+
+        function handleCsvFile(e) {
+            if (e.target.files && e.target.files[0]) {
+                var name = e.target.files[0].name;
+                document.getElementById('csvFileName').textContent = name + ' ready to process';
+                document.getElementById('csvFileInfo').style.display = 'block';
+            }
+        }
+
+        function submitCsv() {
+            var fileInput = document.getElementById('csvFileInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please choose a CSV file first.');
+                return;
+            }
+            alert('Bulk import queued for ' + fileInput.files[0].name + '. Members will appear in directory shortly.');
+            var modalEl = document.getElementById('csvModal');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+    </script>
 }

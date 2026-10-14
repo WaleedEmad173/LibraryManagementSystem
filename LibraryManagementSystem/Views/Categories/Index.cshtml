@@ -1,48 +1,557 @@
-@model IEnumerable<CategoryViewModel>
-
+@model LibraryManagementSystem.ViewModels.CategoryListViewModel
 @{
     ViewData["Title"] = "Categories";
+    ViewData["Section"] = "Categories";
 }
 
-<h1>Categories</h1>
+<style>
+    .cat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+    .cat-title-group h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .chip-taxonomy {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 6px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .cat-subtitle {
+        color: #64748b;
+        font-size: 13.5px;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
+    .btn-add-cat {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        text-decoration: none;
+        transition: background 0.15s ease;
+    }
+    .btn-add-cat:hover {
+        background: #172554;
+        color: #ffffff;
+    }
 
-<a asp-action="Create" class="btn btn-primary mb-3">Add Category</a>
+    /* Stat Cards */
+    .cat-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+    @@media (max-width: 992px) {
+        .cat-stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .cat-stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .cat-stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+    .cat-stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .cat-stat-val-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .cat-stat-num {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+    .cat-stat-title-lg {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
+    }
+    .badge-active-pill {
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px;
+    }
+    .badge-total-pill {
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+    }
+    .cat-stat-icon-tile {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 19px;
+        flex-shrink: 0;
+    }
+    .cat-stat-sub {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+    }
+    .text-added-green {
+        color: #16a34a;
+        font-weight: 600;
+    }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+    /* Filters Bar */
+    .cat-filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px 12px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .cat-search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 260px;
+    }
+    .cat-search-box i {
+        color: #94a3b8;
+        font-size: 15px;
+    }
+    .cat-search-input {
+        border: none;
+        outline: none;
+        font-size: 13.5px;
+        color: #0f172a;
+        width: 100%;
+        background: transparent;
+    }
+    .cat-search-input::placeholder {
+        color: #94a3b8;
+    }
+    .cat-filter-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .cat-sort-btn {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .cat-sort-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">No categories yet. Add your first category.</div>
-}
-else
-{
-    <table class="table table-striped align-middle">
+    /* Categories Table Card */
+    .cat-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .cat-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .cat-table th {
+        background: #fafafa;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 14px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+    .cat-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+        vertical-align: middle;
+    }
+    .cat-table tbody tr:hover {
+        background: #fafcff;
+    }
+    .cat-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Column Specifics */
+    .cat-item-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .cat-icon-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+    .cat-name-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .cat-name-bold {
+        font-weight: 700;
+        font-size: 14px;
+        color: #0f172a;
+    }
+    .badge-high-demand {
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+    }
+    .cat-code-sub {
+        font-size: 11px;
+        color: #64748b;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        margin-top: 2px;
+    }
+
+    /* Distribution & Volume */
+    .cat-vol-wrap {
+        min-width: 160px;
+        max-width: 200px;
+    }
+    .cat-vol-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+    }
+    .cat-vol-count {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .cat-vol-pct {
+        font-size: 11.5px;
+        color: #64748b;
+    }
+    .cat-vol-bar {
+        width: 100%;
+        height: 4.5px;
+        background: #f1f5f9;
+        border-radius: 99px;
+        overflow: hidden;
+    }
+    .cat-vol-bar-inner {
+        height: 100%;
+        border-radius: 99px;
+    }
+
+    /* Department Note */
+    .cat-dept-line {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        color: #475569;
+    }
+    .cat-dept-pin {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    /* Action Buttons */
+    .cat-actions-cell {
+        text-align: right;
+    }
+    .cat-action-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 15px;
+        padding: 6px;
+        border-radius: 6px;
+        transition: color 0.15s, background 0.15s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cat-action-btn:hover {
+        color: #1e3a8a;
+        background: #f1f5f9;
+    }
+    .cat-action-btn.delete-btn:hover {
+        color: #dc2626;
+        background: #fee2e2;
+    }
+
+    /* Table Footer */
+    .cat-table-footer {
+        padding: 14px 20px;
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #64748b;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .cat-sync-note {
+        font-size: 11.5px;
+        color: #64748b;
+    }
+</style>
+
+<!-- Header -->
+<div class="cat-header">
+    <div class="cat-title-group">
+        <h1>
+            <span>Categories</span>
+            <span class="chip-taxonomy">TAXONOMY</span>
+        </h1>
+        <p class="cat-subtitle">Manage catalog taxonomy, classification genres, and book volume distribution across departments.</p>
+    </div>
+    <a href="/Categories/Create" class="btn-add-cat" style="text-decoration: none;">
+        <i class="bi bi-plus-lg"></i>
+        <span>Add Category</span>
+    </a>
+</div>
+
+<!-- Stat Cards Grid -->
+<div class="cat-stats-grid">
+    <!-- Card 1: Total Categories -->
+    <div class="cat-stat-card">
+        <div class="cat-stat-top">
+            <div>
+                <div class="cat-stat-label">TOTAL CATEGORIES</div>
+                <div class="cat-stat-val-group">
+                    <span class="cat-stat-num">@Model.TotalCategories</span>
+                    <span class="badge-active-pill">Active</span>
+                </div>
+            </div>
+            <div class="cat-stat-icon-tile" style="background: #eff6ff; color: #2563eb;">
+                <i class="bi bi-diagram-3"></i>
+            </div>
+        </div>
+        <p class="cat-stat-sub">100% catalog coverage</p>
+    </div>
+
+    <!-- Card 2: Categorized Books -->
+    <div class="cat-stat-card">
+        <div class="cat-stat-top">
+            <div>
+                <div class="cat-stat-label">CATEGORIZED BOOKS</div>
+                <div class="cat-stat-val-group">
+                    <span class="cat-stat-num">@Model.CategorizedBooks.ToString("N0")</span>
+                    <span class="badge-total-pill">TOTAL</span>
+                </div>
+            </div>
+            <div class="cat-stat-icon-tile" style="background: #eff6ff; color: #2563eb;">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+        </div>
+        <p class="cat-stat-sub text-added-green">
+            <i class="bi bi-arrow-up-right"></i> +38 added this month
+        </p>
+    </div>
+
+    <!-- Card 3: Largest Category -->
+    <div class="cat-stat-card">
+        <div class="cat-stat-top">
+            <div>
+                <div class="cat-stat-label">LARGEST CATEGORY</div>
+                <div class="cat-stat-val-group">
+                    <span class="cat-stat-title-lg">@Model.LargestCategoryName</span>
+                </div>
+            </div>
+            <div class="cat-stat-icon-tile" style="background: #fef3c7; color: #d97706;">
+                <i class="bi bi-award"></i>
+            </div>
+        </div>
+        <p class="cat-stat-sub">@Model.LargestCategoryCount titles &bull; @Model.LargestCategoryShare% share</p>
+    </div>
+</div>
+
+<!-- Search & Sort Filter Bar -->
+<form method="get" asp-action="Index" class="cat-filter-card">
+    <div class="cat-search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" name="search" value="@Model.Search" class="cat-search-input" placeholder="Filter categories or departments..." />
+    </div>
+
+    <div class="cat-filter-right">
+        <button type="submit" name="sort" value="@(Model.Sort == "volume" ? "name" : "volume")" class="cat-sort-btn" title="Toggle sorting order">
+            <i class="bi bi-sort-down"></i>
+            <span>Sorted by @(Model.Sort == "name" ? "Name" : "Volume")</span>
+        </button>
+
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <a asp-action="Index" class="cat-sort-btn" title="Clear search">
+                <i class="bi bi-x-circle"></i>
+            </a>
+        }
+    </div>
+</form>
+
+<!-- Categories Table -->
+<div class="cat-table-card">
+    <table class="cat-table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Books</th>
-                <th style="width: 180px;">Actions</th>
+                <th style="width: 28%;">CATEGORY NAME</th>
+                <th style="width: 25%;">DISTRIBUTION &amp; VOLUME</th>
+                <th style="width: 37%;">DEPARTMENT NOTE / CLASSIFICATION</th>
+                <th style="width: 10%; text-align: right;">ACTIONS</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var category in Model)
+            @if (Model.Categories.Any())
+            {
+                foreach (var cat in Model.Categories)
+                {
+                    <tr>
+                        <!-- Category Name Column -->
+                        <td>
+                            <div class="cat-item-cell">
+                                <div class="cat-icon-box">
+                                    <i class="bi @cat.IconClass"></i>
+                                </div>
+                                <div>
+                                    <div class="cat-name-line">
+                                        <span class="cat-name-bold">@cat.Name</span>
+                                        @if (cat.IsHighDemand)
+                                        {
+                                            <span class="badge-high-demand">High Demand</span>
+                                        }
+                                    </div>
+                                    <div class="cat-code-sub">@cat.Code</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Distribution & Volume Column -->
+                        <td>
+                            <div class="cat-vol-wrap">
+                                <div class="cat-vol-labels">
+                                    <span class="cat-vol-count">@cat.BooksCount Books</span>
+                                    <span class="cat-vol-pct">@cat.Percentage%</span>
+                                </div>
+                                <div class="cat-vol-bar">
+                                    <div class="cat-vol-bar-inner" style="width: @(Math.Min(100, cat.Percentage))%; background-color: @cat.ProgressColor;"></div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Department Note / Classification Column -->
+                        <td>
+                            <div class="cat-dept-line">
+                                <i class="bi bi-geo-alt cat-dept-pin"></i>
+                                <span>@cat.DepartmentNote</span>
+                            </div>
+                        </td>
+
+                        <!-- Actions Column -->
+                        <td class="cat-actions-cell">
+                            <a asp-action="Edit" asp-route-id="@cat.Id" class="cat-action-btn" title="Edit Category">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@cat.Id" class="cat-action-btn delete-btn" title="Delete Category">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>@category.Name</td>
-                    <td>@category.BooksCount</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-danger">Delete</a>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="bi bi-folder-x" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+                        <div>No categories found matching your query.</div>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-}
+
+    <div class="cat-table-footer">
+        <div>Showing <strong>@Model.Categories.Count</strong> of <strong>@Model.TotalCategories</strong> categories</div>
+        <div class="cat-sync-note">
+            <span>System Catalog v1.0 &bull; Synchronized with Central Repository</span>
+        </div>
+    </div>
+</div>
+

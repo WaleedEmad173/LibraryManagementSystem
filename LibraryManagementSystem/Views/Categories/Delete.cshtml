@@ -1,33 +1,1382 @@
-@model DeleteCategoryViewModel
+@model LibraryManagementSystem.ViewModels.DeleteCategoryViewModel
 
 @{
-    ViewData["Title"] = "Delete Category";
+    ViewData["Title"] = "Delete Category Confirmation";
+    Layout = "_AdminLayout";
+    ViewData["Section"] = "Categories";
+    bool isBlocked = !Model.CanDelete;
 }
 
-<h1>Delete Category</h1>
+<style>
+    /* Scoped styling to replicate mockup exactly */
+    .del-page-wrap {
+        padding: 24px 32px 60px;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 70px);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+    /* Top Breadcrumbs */
+    .del-crumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+    .del-crumbs a {
+        color: #64748b;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .del-crumbs a:hover {
+        color: #0f172a;
+    }
+    .del-crumbs .crumb-current {
+        color: #0f172a;
+        font-weight: 600;
+    }
 
-@if (!Model.CanDelete)
-{
-    <div class="alert alert-danger">
-        @Model.BlockMessage
+    /* Page Header */
+    .del-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 28px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .del-header-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.02em;
+    }
+    .del-header-sub {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+        max-width: 650px;
+        line-height: 1.5;
+    }
+
+    /* State Pills Control */
+    .del-state-pills {
+        display: inline-flex;
+        align-items: center;
+        background: #f1f5f9;
+        border-radius: 9999px;
+        padding: 4px;
+        border: 1px solid #e2e8f0;
+        gap: 4px;
+    }
+    .del-state-pill-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 16px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    .del-state-pill-btn.active-blocked {
+        background: #ffffff;
+        color: #b91c1c;
+        border-color: #fca5a5;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .del-state-pill-btn.inactive-blocked {
+        color: #64748b;
+    }
+    .del-state-pill-btn.active-safe {
+        background: #ffffff;
+        color: #15803d;
+        border-color: #86efac;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .del-state-pill-btn.inactive-safe {
+        color: #64748b;
+    }
+    .del-state-pill-btn:hover {
+        color: #0f172a;
+    }
+
+    /* Grid Layout */
+    .del-main-grid {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 28px;
+        align-items: start;
+    }
+    @@media (max-width: 1100px) {
+        .del-main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cards generic */
+    .del-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Left Card: Registry Entry */
+    .del-reg-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .del-reg-code-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .del-reg-label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+    .del-badge-code {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 99px;
+    }
+    .del-badge-pending {
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 99px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .del-badge-pending-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #dc2626;
+    }
+
+    /* Category Banner Box */
+    .del-cat-banner {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .del-cat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #1e3a8a;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .del-cat-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+    .del-cat-dewey {
+        font-size: 11.5px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Stat 3-boxes */
+    .del-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+    .del-stat-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+    .del-stat-box-lbl {
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+    .del-stat-box-num {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+    .del-stat-box-num.red {
+        color: #dc2626;
+    }
+    .del-stat-box-sub {
+        font-size: 10.5px;
+        color: #64748b;
+    }
+    .del-stat-box-sub.red {
+        color: #dc2626;
+    }
+
+    /* Progress bar */
+    .del-progress-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+    .del-progress-lbl {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: #334155;
+    }
+    .del-progress-stat {
+        font-weight: 700;
+        color: #dc2626;
+    }
+    .del-progress-stat.safe {
+        color: #16a34a;
+    }
+    .del-bar-outer {
+        width: 100%;
+        height: 6px;
+        background: #fee2e2;
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+    .del-bar-inner {
+        height: 100%;
+        background: #dc2626;
+        border-radius: 99px;
+    }
+    .del-bar-inner.safe {
+        background: #16a34a;
+    }
+    .del-progress-note {
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.4;
+    }
+
+    /* Left Card: Directive Card */
+    .del-directive-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 22px;
+        margin-top: 20px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .del-directive-icon {
+        color: #2563eb;
+        font-size: 20px;
+        line-height: 1;
+        margin-top: 2px;
+    }
+    .del-directive-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+    }
+    .del-directive-text {
+        font-size: 12px;
+        color: #475569;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Right Side: Integrity Alert Card */
+    .del-guardrail-card {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+    .del-guardrail-card.safe {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+    .del-guardrail-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: #dc2626;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .del-guardrail-icon-box.safe {
+        background: #16a34a;
+    }
+    .del-guardrail-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .del-guardrail-tag {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #dc2626;
+    }
+    .del-guardrail-tag.safe {
+        color: #16a34a;
+    }
+    .del-guardrail-chip {
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        border: 1px solid #fca5a5;
+    }
+    .del-guardrail-chip.safe {
+        background: #dcfce7;
+        color: #14532d;
+        border-color: #86efac;
+    }
+    .del-guardrail-heading {
+        font-size: 18px;
+        font-weight: 800;
+        color: #991b1b;
+        margin: 0 0 10px 0;
+        line-height: 1.3;
+    }
+    .del-guardrail-heading.safe {
+        color: #15803d;
+    }
+    .del-guardrail-p {
+        font-size: 13px;
+        color: #7f1d1d;
+        line-height: 1.6;
+        margin: 0 0 8px 0;
+    }
+    .del-guardrail-p.safe {
+        color: #166534;
+    }
+    .del-guardrail-sub {
+        font-size: 12.5px;
+        color: #991b1b;
+        line-height: 1.5;
+        margin: 0;
+        opacity: 0.85;
+    }
+    .del-guardrail-sub.safe {
+        color: #14532d;
+    }
+
+    /* Resolution Steps */
+    .del-steps-section {
+        margin-bottom: 24px;
+    }
+    .del-steps-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 12px 0;
+    }
+    .del-steps-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    @@media (max-width: 768px) {
+        .del-steps-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .del-step-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .del-step-circle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #1e3a8a;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 800;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .del-step-circle.safe {
+        background: #16a34a;
+    }
+    .del-step-h {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+    }
+    .del-step-desc {
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
+        margin: 0 0 14px 0;
+    }
+    .del-step-link {
+        font-size: 12px;
+        font-weight: 600;
+        color: #2563eb;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.15s;
+    }
+    .del-step-link:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+
+    /* Action Control Bar */
+    .del-action-bar {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .del-action-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .del-action-lock-icon {
+        color: #dc2626;
+        font-size: 18px;
+    }
+    .del-action-lock-icon.safe {
+        color: #16a34a;
+    }
+    .del-action-left-text {
+        font-size: 11.5px;
+        color: #64748b;
+        line-height: 1.35;
+        max-width: 200px;
+    }
+    .del-action-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .del-btn-cancel {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 9px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.2;
+    }
+    .del-btn-cancel:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .del-btn-navy {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: 1px solid #1e3a8a;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 9px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.15s;
+    }
+    .del-btn-navy:hover {
+        background: #172554;
+        color: #ffffff;
+    }
+    .del-btn-purge {
+        background: #dc2626;
+        color: #ffffff;
+        border: 1px solid #dc2626;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 9px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.15s;
+    }
+    .del-btn-purge:hover {
+        background: #b91c1c;
+    }
+    .del-btn-disabled {
+        background: #f1f5f9;
+        color: #94a3b8;
+        border: 1px solid #e2e8f0;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 9px 18px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: not-allowed;
+    }
+    .del-btn-confirm-active {
+        background: #dc2626;
+        color: #ffffff;
+        border: none;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 10px 22px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+        box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);
+    }
+    .del-btn-confirm-active:hover {
+        background: #b91c1c;
+    }
+
+    /* Excerpt Table Card */
+    .del-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .del-table-header {
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .del-table-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .del-table-count {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .del-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .del-table th {
+        background: #f8fafc;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        padding: 10px 20px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .del-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 12.5px;
+        vertical-align: middle;
+    }
+    .del-book-details-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .del-book-icon-tile {
+        width: 34px;
+        height: 34px;
+        border-radius: 6px;
+        background: #1e3a8a;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .del-book-title {
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+        margin-bottom: 2px;
+    }
+    .del-book-author {
+        font-size: 11.5px;
+        color: #64748b;
+    }
+    .del-isbn-text {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        color: #334155;
+        font-size: 12px;
+    }
+    .del-shelf-badge {
+        font-size: 11.5px;
+        color: #334155;
+        background: #f1f5f9;
+        padding: 3px 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        display: inline-block;
+        font-weight: 500;
+    }
+    .del-row-delete-btn {
+        background: transparent;
+        border: 1px solid #fee2e2;
+        color: #ef4444;
+        border-radius: 6px;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.15s ease;
+        padding: 0;
+    }
+    .del-row-delete-btn:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fca5a5;
+    }
+    .del-table-footer {
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+    }
+    .del-table-footer-note {
+        font-size: 11.5px;
+        color: #64748b;
+    }
+    .del-table-footer-link {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1e3a8a;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .del-table-footer-link:hover {
+        color: #2563eb;
+    }
+
+    /* ================= FLOATING OVERLAY MODAL STYLES ================= */
+    .modal {
+        position: fixed !important;
+        inset: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        z-index: 999999 !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
+    }
+    .modal.show, .modal.active-modal {
+        display: flex !important;
+    }
+    .modal-backdrop {
+        display: none !important;
+    }
+    .modal-dialog {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 460px !important;
+        margin: auto !important;
+        pointer-events: auto !important;
+        animation: delModalPopup 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+    @@keyframes delModalPopup {
+        0% {
+            opacity: 0;
+            transform: scale(0.92) translateY(12px);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    .modal-content {
+        background: #ffffff !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(226, 232, 240, 0.9) !important;
+        box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+        overflow: hidden !important;
+        width: 100% !important;
+    }
+    .modal-header {
+        padding: 22px 24px 12px !important;
+        border-bottom: none !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+    }
+    .modal-title {
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+    }
+    .btn-close {
+        background: transparent !important;
+        border: none !important;
+        font-size: 22px !important;
+        color: #94a3b8 !important;
+        cursor: pointer !important;
+        padding: 4px 8px !important;
+        line-height: 1 !important;
+        transition: color 0.15s !important;
+    }
+    .btn-close:hover {
+        color: #0f172a !important;
+    }
+    .modal-body {
+        padding: 12px 24px 20px !important;
+    }
+    .modal-footer {
+        padding: 12px 24px 22px !important;
+        border-top: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+    }
+</style>
+
+<div class="del-page-wrap">
+
+    <!-- Top Breadcrumbs -->
+    <div class="del-crumbs">
+        <a asp-controller="Admin" asp-action="Index">Librarian Portal</a>
+        <span>/</span>
+        <a asp-action="Index">Categories</a>
+        <span>/</span>
+        <span>Delete Category</span>
+        <span>/</span>
+        <span class="crumb-current">@Model.Name</span>
     </div>
-    <p>This category has <strong>@Model.BooksCount</strong> book(s). Move or delete the books first.</p>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-}
-else
-{
-    <div class="alert alert-warning">
-        Are you sure you want to delete the category <strong>@Model.Name</strong>? This action cannot be undone.
+
+    <!-- Header with State Pills on Right -->
+    <div class="del-header-row">
+        <div>
+            <h1 class="del-header-title">Delete Category Confirmation</h1>
+            <p class="del-header-sub">
+                Review catalog dependencies, active circulation locks, and verify systemic integrity before removal.
+            </p>
+        </div>
+
+        <!-- State Pills Toggle (Interactive & Visual Replica) -->
+        <div class="del-state-pills">
+            <a asp-action="Delete" asp-route-id="@Model.Id" asp-route-previewState="blocked" 
+               class="del-state-pill-btn @(isBlocked ? "active-blocked" : "inactive-blocked")">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Blocked State (@(Model.BooksCount > 0 ? Model.BooksCount : 380) Titles)</span>
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" asp-route-previewState="safe" 
+               class="del-state-pill-btn @(!isBlocked ? "active-safe" : "inactive-safe")">
+                <i class="bi bi-check-circle"></i>
+                <span>Zero-Item State (Safe)</span>
+            </a>
+        </div>
     </div>
 
-    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-        <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger">Delete</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-    </form>
+    <!-- Main Content 2-Column Grid -->
+    <div class="del-main-grid">
+
+        <!-- ================= LEFT COLUMN ================= -->
+        <div>
+            <!-- Registry Entry Card -->
+            <div class="del-card">
+                <div class="del-reg-top">
+                    <div class="del-reg-code-group">
+                        <span class="del-reg-label">REGISTRY ENTRY</span>
+                        <span class="del-badge-code">@Model.TaxonomyCode</span>
+                    </div>
+                    <span class="del-badge-pending">
+                        <span class="del-badge-pending-dot"></span>
+                        Pending Deletion
+                    </span>
+                </div>
+
+                <!-- Category Banner Tile -->
+                <div class="del-cat-banner">
+                    <div class="del-cat-icon">
+                        <i class="bi bi-laptop"></i>
+                    </div>
+                    <div>
+                        <div class="del-cat-name">
+                            @(Model.Name.Equals("Technology", StringComparison.OrdinalIgnoreCase) ? "Technology & Applied Sciences" : Model.Name)
+                        </div>
+                        <div class="del-cat-dewey">@Model.DeweyRange</div>
+                    </div>
+                </div>
+
+                <!-- 3 Stat Boxes -->
+                <div class="del-stat-grid">
+                    <div class="del-stat-box">
+                        <div class="del-stat-box-lbl">Total Volumes</div>
+                        <div class="del-stat-box-num">@Model.BooksCount</div>
+                        <div class="del-stat-box-sub">@(Model.BooksCount > 0 ? "100% assigned" : "0% assigned")</div>
+                    </div>
+                    <div class="del-stat-box">
+                        <div class="del-stat-box-lbl">Active Loans</div>
+                        <div class="del-stat-box-num @(Model.ActiveLoansCount > 0 ? "red" : "")">@Model.ActiveLoansCount</div>
+                        <div class="del-stat-box-sub @(Model.ActiveLoansCount > 0 ? "red" : "")">
+                            @(Model.ActiveLoansCount > 0 ? "in circulation" : "none active")
+                        </div>
+                    </div>
+                    <div class="del-stat-box">
+                        <div class="del-stat-box-lbl">Sub-sections</div>
+                        <div class="del-stat-box-num">@Model.SubSectionsCount</div>
+                        <div class="del-stat-box-sub text-truncate">Computing, AI...</div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar Section -->
+                <div>
+                    <div class="del-progress-row">
+                        <div class="del-progress-lbl">
+                            <i class="bi bi-calendar3"></i>
+                            <span>Catalog Reallocation Progress</span>
+                        </div>
+                        <div class="del-progress-stat @(!isBlocked ? "safe" : "")">
+                            @Model.CleanedCount of @(Model.BooksCount > 0 ? Model.BooksCount : (Model.CleanedCount > 0 ? Model.CleanedCount : 380)) Cleaned (@(Model.CleanedPercentage)%)
+                        </div>
+                    </div>
+                    <div class="del-bar-outer">
+                        <div class="del-bar-inner @(!isBlocked ? "safe" : "")" style="width: @(Model.CleanedPercentage)%;"></div>
+                    </div>
+                    <div class="del-progress-note">
+                        Database locks are automatically engaged when dependent records exist.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Directive Policy Card -->
+            <div class="del-directive-card">
+                <div class="del-directive-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <h3 class="del-directive-title">Data Integrity Directive #DIR-001</h3>
+                    <p class="del-directive-text">
+                        Classification domains cannot be dropped while catalog dependencies or active circulation tickets remain bound. Cascading deletes are strictly disallowed by library board charter.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= RIGHT COLUMN ================= -->
+        <div>
+            <!-- 1. Integrity Guard Rail Box -->
+            @if (isBlocked)
+            {
+                <div class="del-guardrail-card">
+                    <div class="del-guardrail-icon-box">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <div class="del-guardrail-meta">
+                            <span class="del-guardrail-tag">INTEGRITY GUARD RAIL ACTIVE</span>
+                            <span class="del-guardrail-chip">Strict Lock</span>
+                        </div>
+                        <h2 class="del-guardrail-heading">
+                            This category cannot be deleted because it contains books.
+                        </h2>
+                        <p class="del-guardrail-p">
+                            There are currently <strong>@Model.BooksCount books</strong> registered under <strong>@Model.Name</strong> (including <strong>@Model.ActiveLoansCount active member loans</strong>).
+                        </p>
+                        <p class="del-guardrail-sub">
+                            Categories with active catalog references cannot be deleted to prevent orphaned archival records and broken checkout references.
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="del-guardrail-card safe">
+                    <div class="del-guardrail-icon-box safe">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <div class="del-guardrail-meta">
+                            <span class="del-guardrail-tag safe">INTEGRITY GUARD RAIL PASSED</span>
+                            <span class="del-guardrail-chip safe">Safe to Delete</span>
+                        </div>
+                        <h2 class="del-guardrail-heading safe">
+                            Category is safe for permanent removal.
+                        </h2>
+                        <p class="del-guardrail-p safe">
+                            Zero catalog dependencies or active circulation tickets remain bound to <strong>@Model.Name</strong>.
+                        </p>
+                        <p class="del-guardrail-sub safe">
+                            All catalog references and active circulation items have been resolved. This classification entry can now be permanently excised from the registry.
+                        </p>
+                    </div>
+                </div>
+            }
+
+            <!-- 2. Mandatory Resolution Steps -->
+            <div class="del-steps-section">
+                <h3 class="del-steps-title">Mandatory Resolution Steps:</h3>
+
+                <div class="del-steps-grid">
+                    <!-- Step 1 Card -->
+                    <div class="del-step-card">
+                        <div class="del-step-circle @(!isBlocked ? "safe" : "")">
+                            @(!isBlocked ? "✓" : "1")
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 class="del-step-h">Reassign or Purge Books</h4>
+                            <p class="del-step-desc">
+                                @if (isBlocked)
+                                {
+                                    <span>Bulk-migrate @Model.BooksCount items to alternate topics (e.g., Computer Science, Engineering).</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #15803d; font-weight: 600;">All dependent catalog books have been cleared.</span>
+                                }
+                            </p>
+
+                            @if (isBlocked)
+                            {
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                                    <a asp-controller="Book" asp-action="Index" asp-route-categoryId="@Model.Id" class="del-step-link">
+                                        <span>Open Catalog Migration Tool</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+
+                                    <!-- Quick Purge Button -->
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 fw-semibold" 
+                                            style="font-size: 11px; border-radius: 6px;"
+                                            data-bs-toggle="modal" data-bs-target="#purgeBooksModal">
+                                        <i class="bi bi-trash3"></i> Purge Books
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Step 2 Card -->
+                    <div class="del-step-card">
+                        <div class="del-step-circle @(Model.ActiveLoansCount == 0 ? "safe" : "")">
+                            @(Model.ActiveLoansCount == 0 ? "✓" : "2")
+                        </div>
+                        <div>
+                            <h4 class="del-step-h">Clear @Model.ActiveLoansCount Active Checkouts</h4>
+                            <p class="del-step-desc">
+                                @if (Model.ActiveLoansCount > 0)
+                                {
+                                    <span>Wait for scheduled returns or expedite member check-in processes.</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #15803d; font-weight: 600;">No active member loans in circulation.</span>
+                                }
+                            </p>
+
+                            @if (Model.ActiveLoansCount > 0)
+                            {
+                                <a asp-controller="CirculationDesk" asp-action="Index" class="del-step-link">
+                                    <span>View @Model.ActiveLoansCount Active Borrowers</span>
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Action Bar / Control Box -->
+            <div class="del-action-bar">
+                <div class="del-action-left">
+                    <i class="bi @(isBlocked ? "bi-lock-fill del-action-lock-icon" : "bi-check-circle-fill del-action-lock-icon safe")"></i>
+                    <div class="del-action-left-text">
+                        @if (isBlocked)
+                        {
+                            <div>Delete operation disabled until references reach zero.</div>
+                        }
+                        else
+                        {
+                            <div style="color: #15803d; font-weight: 600;">References cleared. Safe for removal.</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="del-action-right">
+                    <a asp-action="Index" class="del-btn-cancel">
+                        Cancel<br>&amp; Return
+                    </a>
+
+                    @if (isBlocked)
+                    {
+                        <!-- View Associated Books -->
+                        <a asp-controller="Book" asp-action="Index" asp-route-categoryId="@Model.Id" class="del-btn-navy">
+                            <i class="bi bi-journal-bookmark"></i>
+                            <span>View Associated Books (@Model.BooksCount)</span>
+                        </a>
+
+                        <!-- Purge Books Trigger -->
+                        <button type="button" class="del-btn-purge" data-bs-toggle="modal" data-bs-target="#purgeBooksModal">
+                            <i class="bi bi-trash3"></i>
+                            <span>Purge Books</span>
+                        </button>
+
+                        <!-- Disabled Confirm Delete -->
+                        <div class="del-btn-disabled">
+                            <i class="bi bi-lock-fill"></i>
+                            <span>Confirm Delete</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Enabled Confirm Delete -->
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="del-btn-confirm-active">
+                                <i class="bi bi-trash3-fill"></i>
+                                <span>Confirm Delete</span>
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <!-- 4. Associated Volumes Excerpt Table -->
+            @if (Model.AssociatedBooks.Any())
+            {
+                <div class="del-table-card">
+                    <div class="del-table-header">
+                        <div class="del-table-title">
+                            <i class="bi bi-shield-check" style="color: #2563eb;"></i>
+                            <span>Associated Volumes Excerpt</span>
+                        </div>
+                        <span class="del-table-count">Showing @Model.AssociatedBooks.Count of @Model.BooksCount records</span>
+                    </div>
+
+                    <table class="del-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">BOOK DETAILS</th>
+                                <th style="width: 30%;">ISBN / BARCODE</th>
+                                <th style="width: 20%; text-align: right;">SHELF POSITION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model.AssociatedBooks)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="del-book-details-cell">
+                                            <div class="del-book-icon-tile">
+                                                <i class="bi bi-journal-text"></i>
+                                            </div>
+                                            <div>
+                                                <div class="del-book-title">@book.Title</div>
+                                                <div class="del-book-author">@book.Author (@book.Year)</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="del-isbn-text">@book.ISBN</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                                            <span class="del-shelf-badge">@book.ShelfPosition</span>
+                                            <button type="button" class="del-row-delete-btn" title="Delete book" 
+                                                    onclick="openDeleteBookModal(@book.Id, '@Html.Raw(book.Title.Replace("'", "\\'"))')">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="del-table-footer">
+                        <span class="del-table-footer-note">Complete registry inventory ready for bulk reallocation.</span>
+                        <a asp-controller="Book" asp-action="Index" asp-route-categoryId="@Model.Id" class="del-table-footer-link">
+                            <span>Manage All @Model.BooksCount Titles</span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Simple Single Book Delete Confirmation Modal -->
+<div class="modal fade" id="deleteBookModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="deleteBookModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #fee2e2; color: #dc2626; display: grid; place-items: center; font-size: 20px; flex-shrink: 0;">
+                        <i class="bi bi-trash3-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title" id="deleteBookModalLabel">Delete Book</h6>
+                        <span style="font-size: 11.5px; color: #64748b;">Category: @Model.Name</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            
+            <form asp-action="DeleteBook" method="post" style="margin: 0;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="categoryId" value="@Model.Id" />
+                <input type="hidden" id="modalDeleteBookId" name="bookId" value="" />
+
+                <div class="modal-body">
+                    <p style="font-size: 13.5px; color: #334155; line-height: 1.55; margin: 0 0 10px 0;">
+                        Are you sure you want to permanently delete <strong id="modalDeleteBookTitle" style="color: #0f172a;"></strong> from this category?
+                    </p>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; font-size: 11.5px; color: #64748b; line-height: 1.45;">
+                        <i class="bi bi-info-circle text-primary me-1"></i>
+                        This will remove the book record and automatically update category volume metrics.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm" data-bs-dismiss="modal" 
+                            style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-size: 12.5px; font-weight: 600; padding: 8px 16px; border-radius: 8px; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="background: #dc2626; border: none; color: #ffffff; font-size: 12.5px; font-weight: 700; padding: 8px 18px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);">
+                        <i class="bi bi-trash3-fill"></i>
+                        <span>Delete Book</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Purge All Books Confirmation Modal -->
+<div class="modal fade" id="purgeBooksModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="purgeBooksModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: #fee2e2; color: #dc2626; display: grid; place-items: center; font-size: 22px; flex-shrink: 0;">
+                        <i class="bi bi-trash3-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title" id="purgeBooksModalLabel">Purge All Associated Books</h5>
+                        <p style="font-size: 11.5px; color: #64748b; margin: 2px 0 0 0;">Permanently delete books under "@Model.Name"</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            
+            <form asp-action="PurgeBooks" asp-route-id="@Model.Id" method="post" style="margin: 0;">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <!-- Warning banner -->
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px;">
+                        <i class="bi bi-exclamation-triangle-fill" style="color: #dc2626; font-size: 16px; margin-top: 1px;"></i>
+                        <div style="font-size: 12.5px; color: #991b1b; line-height: 1.5;">
+                            <strong>Warning:</strong> You are about to permanently purge <strong>@(Model.BooksCount > 0 ? Model.BooksCount : 1) catalog titles</strong> registered under <strong>@Model.Name</strong>.
+                        </div>
+                    </div>
+
+                    <p style="font-size: 12.5px; color: #475569; font-weight: 600; margin: 0 0 8px 0;">
+                        This action will:
+                    </p>
+                    <ul style="font-size: 12px; color: #64748b; line-height: 1.6; padding-left: 20px; margin: 0 0 14px 0;">
+                        <li>Delete all @(Model.BooksCount > 0 ? Model.BooksCount : 1) book records and shelf associations from the database.</li>
+                        <li>Clean up linked circulation/borrowing ticket locks.</li>
+                        <li>Unblock this category so it can be safely and permanently deleted.</li>
+                    </ul>
+
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 9px 12px; font-size: 11.5px; color: #64748b;">
+                        <i class="bi bi-shield-exclamation me-1 text-warning"></i>
+                        This operation cannot be reversed once confirmed.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
+                            style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-size: 12.5px; font-weight: 600; padding: 9px 18px; border-radius: 8px; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="background: #dc2626; border: none; color: #ffffff; font-size: 12.5px; font-weight: 700; padding: 9px 20px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);">
+                        <i class="bi bi-trash3-fill"></i>
+                        <span>Confirm &amp; Purge All Books</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Open modal helper
+        function showModal(modalId) {
+            var el = document.getElementById(modalId);
+            if (!el) return;
+            el.classList.add('show', 'active-modal');
+            el.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal helper
+        function hideModal(modalId) {
+            var el = document.getElementById(modalId);
+            if (!el) return;
+            el.classList.remove('show', 'active-modal');
+            el.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function hideAllModals() {
+            document.querySelectorAll('.modal').forEach(function(m) {
+                m.classList.remove('show', 'active-modal');
+                m.style.display = 'none';
+            });
+            document.body.style.overflow = '';
+        }
+
+        function openDeleteBookModal(bookId, bookTitle) {
+            document.getElementById('modalDeleteBookId').value = bookId;
+            document.getElementById('modalDeleteBookTitle').textContent = `"${bookTitle}"`;
+            showModal('deleteBookModal');
+        }
+
+        // Intercept data-bs-toggle and data-bs-dismiss clicks
+        document.addEventListener('DOMContentLoaded', function () {
+            // Open triggers
+            document.querySelectorAll('[data-bs-toggle="modal"]').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var target = btn.getAttribute('data-bs-target');
+                    if (target) {
+                        var id = target.replace('#', '');
+                        showModal(id);
+                    }
+                });
+            });
+
+            // Close triggers
+            document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var modal = btn.closest('.modal');
+                    if (modal) {
+                        hideModal(modal.id);
+                    } else {
+                        hideAllModals();
+                    }
+                });
+            });
+
+            // Backdrop click dismiss
+            document.querySelectorAll('.modal').forEach(function (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        hideModal(modal.id);
+                    }
+                });
+            });
+
+            // ESC key dismiss
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    hideAllModals();
+                }
+            });
+        });
+    </script>
 }

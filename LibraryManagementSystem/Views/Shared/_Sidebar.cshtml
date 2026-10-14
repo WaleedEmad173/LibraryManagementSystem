@@ -29,13 +29,19 @@
         <a class="nav-link @(controller == "Members" ? "active" : "")" asp-controller="Members" asp-action="Index">
             <i class="bi bi-people me-2"></i>Members
         </a>
-        <a class="nav-link @(page == "/Borrowings/Borrow" ? "active" : "")" asp-page="/Borrowings/Borrow">
+        @{
+            var currentPath = ViewContext.HttpContext.Request.Path.Value ?? "";
+            var isBorrowActive = currentPath.Contains("/Borrow", StringComparison.OrdinalIgnoreCase) && !currentPath.Contains("/Index", StringComparison.OrdinalIgnoreCase) && !currentPath.Contains("/Return", StringComparison.OrdinalIgnoreCase) && !currentPath.Contains("/History", StringComparison.OrdinalIgnoreCase);
+            var isReturnActive = currentPath.Contains("/Return", StringComparison.OrdinalIgnoreCase);
+            var isHistoryActive = currentPath.Contains("/History", StringComparison.OrdinalIgnoreCase) || (currentPath.Contains("/Borrowings", StringComparison.OrdinalIgnoreCase) && (currentPath.EndsWith("/Index", StringComparison.OrdinalIgnoreCase) || currentPath.EndsWith("/Borrowings", StringComparison.OrdinalIgnoreCase) || currentPath.EndsWith("/Borrowings/", StringComparison.OrdinalIgnoreCase)));
+        }
+        <a class="nav-link @(isBorrowActive ? "active" : "")" href="/Borrowings/Borrow">
             <i class="bi bi-box-arrow-up-right me-2"></i>Borrow
         </a>
-        <a class="nav-link @(page == "/Borrowings/Return" ? "active" : "")" asp-page="/Borrowings/Return">
+        <a class="nav-link @(isReturnActive ? "active" : "")" href="/Borrowings/Return">
             <i class="bi bi-box-arrow-in-down-left me-2"></i>Return
         </a>
-        <a class="nav-link @(page == "/Borrowings/Index" ? "active" : "")" asp-page="/Borrowings/Index">
+        <a class="nav-link @(isHistoryActive ? "active" : "")" href="/Borrowings/Index">
             <i class="bi bi-clock-history me-2"></i>History
         </a>
         @if (isAdmin)
