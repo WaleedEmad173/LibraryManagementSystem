@@ -18,31 +18,24 @@ namespace LibraryManagementSystem.Controllers
             _userManager = userManager;
         }
 
-        // GET: /Borrow or /Borrowings/Borrow
-        [HttpGet("/Borrow")]
-        [HttpGet("/Borrow/{id:int}")]
+        // Fallback redirects for /Borrowings/Borrow, /Borrowings/Return, /Borrowings/Index
+        [HttpGet("/Borrowings/Borrow")]
         public IActionResult BorrowDirect(int? id, int? bookId, int? userId)
         {
             bookId ??= id;
             return RedirectToPage("/Borrowings/Borrow", new { id = bookId, bookId, userId });
         }
 
-        // GET: /Return
-        [HttpGet("/Return")]
+        // GET: /Borrowings/Return
+        [HttpGet("/Borrowings/Return")]
         public IActionResult ReturnDirect()
         {
             return RedirectToPage("/Borrowings/Return");
         }
 
-        // GET: /History
-        [HttpGet("/History")]
-        public IActionResult HistoryDirect(string? status, DateTime? fromDate, DateTime? toDate)
-        {
-            return RedirectToPage("/Borrowings/Index", new { status, fromDate, toDate });
-        }
-
-        // GET: /Borrowings/ or /Borrowings/Index (My Borrowings & Circulation List)
-        [HttpGet]
+        // GET: /Borrowings/ or /Borrowings/Index
+        [HttpGet("/Borrowings")]
+        [HttpGet("/Borrowings/Index")]
         public IActionResult Index(string? status, DateTime? fromDate, DateTime? toDate)
         {
             return RedirectToPage("/Borrowings/Index", new { status, fromDate, toDate });
