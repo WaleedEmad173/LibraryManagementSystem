@@ -1,6 +1,7 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var page = ViewContext.RouteData.Values["page"]?.ToString();
     var isAdmin = User.IsInRole("Admin");
 }
 <aside class="sidebar">

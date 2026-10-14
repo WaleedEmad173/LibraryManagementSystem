@@ -94,7 +94,7 @@ namespace LibraryManagementSystem.Pages.Borrowings
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-            ViewModel.ActiveLoans = loans.Select(b => new ActiveLoanItemViewModel
+            ViewModel.ActiveLoans = loans.Select(b => new CirculationActiveLoanItemViewModel
             {
                 BorrowingId = b.Id,
                 BookId = b.BookId,

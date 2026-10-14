@@ -15,7 +15,7 @@
     var isReturn = currentPath.Contains("/return");
     var isHistory = currentPath.Contains("/history");
     var isStaffAccounts = currentPath.Contains("/staff") || currentPath.Contains("/accounts") || currentPath.Contains("/admin/staff");
-    var isBorrowings = currentPath.Contains("/borrowings");
+    var isBorrowings = currentPath.Contains("/member/borrow");
     var isDashboard = !isBooks && !isCategories && !isMembers && !isBorrow && !isReturn && !isHistory && !isStaffAccounts && !isBorrowings;
 }
 
@@ -83,7 +83,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link-item @(isBorrowings ? "active" : "")" href="/Member/Borrowings">
+                    <a class="nav-link-item @(isBorrowings ? "active" : "")" asp-controller="Member" asp-action="Borrow">
                         <span class="nav-icon">
                             <img src="~/Images/icons/BorrowIcon.png" alt="My Borrowings" width="18" height="18" />
                         </span>
@@ -187,7 +187,7 @@
                 @if (isAdmin)
                 {
                     <!-- ONLY FOR ADMIN -->
-                    <li class="nav-item mt-2">
+                    <li class="nav-item staff-accounts-item">
                         <a class="nav-link-item @(isStaffAccounts ? "active" : "")" href="/Admin/Staff">
                             <span class="nav-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -234,9 +234,13 @@
 
 <style>
     .app-sidebar {
+        position: sticky;
+        top: 0;
+        align-self: start;
         width: 100%;
-        height: 100%;
+        height: 100vh;
         min-height: 100vh;
+        overflow-y: auto;
         background-color: #1a3fa3;
         display: flex;
         flex-direction: column;
@@ -338,6 +342,10 @@
     .nav-item {
         margin: 0;
         padding: 0;
+    }
+
+    .staff-accounts-item {
+        margin-top: 12px;
     }
 
     .nav-link-item {
@@ -452,6 +460,7 @@
             width: 100%;
             min-height: auto;
             height: auto;
+            overflow-y: visible;
         }
     }
 </style>
