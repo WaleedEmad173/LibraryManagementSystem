@@ -87,7 +87,7 @@ small {
 /* ============ Shell ============ */
 .app {
     display: grid;
-    grid-template-columns: 232px minmax(0, 1fr);
+    grid-template-columns: clamp(240px, 16.7vw, 322px) minmax(0, 1fr);
     min-height: 100vh;
 }
 

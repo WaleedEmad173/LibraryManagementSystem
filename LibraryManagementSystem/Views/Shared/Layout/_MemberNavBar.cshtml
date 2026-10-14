@@ -9,13 +9,21 @@
     var memberId = user != null ? $"#MB-{user.Id:D4}" : "#MB-4820";
     var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
     var primaryRole = roles.FirstOrDefault() ?? "Member";
+    var sectionTitle = ViewData["Section"]?.ToString();
 }
 
 <header class="app-top-navbar bg-white">
     <div class="navbar-content d-flex align-items-center justify-content-between">
         <!-- Left Side: Title -->
         <div class="portal-title-wrapper">
-            <h1 class="portal-title mb-0">Member Portal</h1>
+            @if (!string.IsNullOrWhiteSpace(sectionTitle))
+            {
+                <div class="member-portal-crumbs"><span>Books</span><span>/</span><strong>@sectionTitle</strong></div>
+            }
+            else
+            {
+                <h1 class="portal-title mb-0">Member Portal</h1>
+            }
         </div>
 
         <!-- Right Side: User Profile & Actions -->
@@ -72,6 +80,9 @@
         color: #0f172a;
         letter-spacing: -0.2px;
     }
+
+    .member-portal-crumbs { display: flex; align-items: center; gap: 9px; color: #4f5668; font-size: 1rem; }
+    .member-portal-crumbs strong { color: #17223b; font-weight: 700; }
 
     .user-avatar-box {
         width: 36px;

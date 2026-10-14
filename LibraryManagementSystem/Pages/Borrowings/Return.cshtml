@@ -1,11 +1,108 @@
-@page
+@page "/Return"
 @using System.Collections.Generic
 @model LibraryManagementSystem.Pages.Borrowings.ReturnModel
 @{
     ViewData["Title"] = "Return a Book";
+    ViewData["Section"] = "Return";
 }
 
-<div class="circulation-container mt-2">
+<div class="circulation-container mt-2 return-page">
+    <style>
+        .return-page .circ-return-action {
+            border: 1px solid #047857;
+            border-radius: 8px;
+            padding: 8px 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: #fff;
+            background: #047857;
+            font-size: .85rem;
+            font-weight: 650;
+            line-height: 1.2;
+            box-shadow: 0 2px 4px rgba(4, 120, 87, .16);
+            transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+        }
+        .return-page .circ-return-action:hover {
+            color: #fff;
+            background: #065f46;
+            border-color: #065f46;
+            box-shadow: 0 4px 10px rgba(4, 120, 87, .22);
+            transform: translateY(-1px);
+        }
+        .return-page .circ-return-action:focus-visible,
+        .return-confirm-button:focus-visible,
+        .return-cancel-button:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, .35);
+            outline-offset: 2px;
+        }
+        .return-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, .48);
+            backdrop-filter: blur(3px);
+        }
+        .return-confirm-overlay[hidden] { display: none; }
+        .return-confirm-dialog {
+            width: min(100%, 440px);
+            padding: 26px;
+            border: 1px solid #e6eaf2;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+            animation: return-dialog-in .16s ease-out;
+        }
+        .return-confirm-icon {
+            display: grid;
+            width: 48px;
+            height: 48px;
+            place-items: center;
+            margin-bottom: 17px;
+            border-radius: 14px;
+            color: #047857;
+            background: #d1fae5;
+        }
+        .return-confirm-title { margin: 0 0 8px; color: #17223b; font-size: 1.2rem; font-weight: 750; }
+        .return-confirm-copy { margin: 0; color: #64748b; line-height: 1.55; }
+        .return-confirm-book {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border: 1px solid #e8ebf5;
+            border-radius: 10px;
+            background: #f7f8ff;
+            color: #17223b;
+            font-weight: 650;
+        }
+        .return-confirm-member { margin-top: 3px; color: #64748b; font-size: .88rem; }
+        .return-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+        .return-cancel-button, .return-confirm-button {
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 9px;
+            font: inherit;
+            font-size: .9rem;
+            font-weight: 650;
+            cursor: pointer;
+        }
+        .return-cancel-button { border: 1px solid #dbe1ec; color: #334155; background: #fff; }
+        .return-cancel-button:hover { background: #f8fafc; }
+        .return-confirm-button { border: 1px solid #047857; color: #fff; background: #047857; }
+        .return-confirm-button:hover { border-color: #065f46; background: #065f46; }
+        @@keyframes return-dialog-in {
+            from { opacity: 0; transform: translateY(6px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            .return-confirm-dialog { animation: none; }
+            .return-page .circ-return-action { transition: none; }
+        }
+    </style>
+
     <!-- Module Tabs Switcher -->
     <div class="circ-module-tabs">
         <a asp-page="./Borrow" class="circ-tab-btn">
@@ -214,7 +311,7 @@
                                         <input type="hidden" name="id" value="@loan.BorrowingId" />
                                         <input type="hidden" name="SearchQuery" value="@Model.ViewModel.SearchQuery" />
                                         <input type="hidden" name="PageNumber" value="@Model.ViewModel.PageNumber" />
-                                        <button type="submit" class="circ-return-action" onclick="return confirm('Confirm check-in & return for this book?');">
+                                        <button type="button" class="circ-return-action js-open-return-confirm" data-book="@loan.BookTitle" data-member="@loan.BorrowerName">
                                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h7a5 5 0 015 5v4m0 0l-3-3m3 3l3-3M4 10l5 5m-5-5l5-5" />
                                             </svg>
@@ -279,3 +376,63 @@
     </div>
 
 </div>
+
+<div class="return-confirm-overlay" id="returnConfirmDialog" hidden>
+    <section class="return-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="returnConfirmTitle" aria-describedby="returnConfirmCopy">
+        <div class="return-confirm-icon" aria-hidden="true">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h7a5 5 0 015 5v4m0 0l-3-3m3 3l3-3M4 10l5 5m-5-5l5-5" />
+            </svg>
+        </div>
+        <h2 class="return-confirm-title" id="returnConfirmTitle">Confirm book return</h2>
+        <p class="return-confirm-copy" id="returnConfirmCopy">Confirm that this book has been physically checked in. Its available copy count will be updated.</p>
+        <div class="return-confirm-book">
+            <div id="returnConfirmBookTitle"></div>
+            <div class="return-confirm-member" id="returnConfirmMember"></div>
+        </div>
+        <div class="return-confirm-actions">
+            <button type="button" class="return-cancel-button" id="cancelReturnConfirm">Cancel</button>
+            <button type="button" class="return-confirm-button" id="submitReturnConfirm">Confirm return</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    (() => {
+        const dialog = document.getElementById('returnConfirmDialog');
+        const bookTitle = document.getElementById('returnConfirmBookTitle');
+        const memberName = document.getElementById('returnConfirmMember');
+        const cancelButton = document.getElementById('cancelReturnConfirm');
+        const confirmButton = document.getElementById('submitReturnConfirm');
+        let pendingForm = null;
+        let opener = null;
+
+        const closeDialog = () => {
+            dialog.hidden = true;
+            pendingForm = null;
+            if (opener) opener.focus();
+        };
+
+        document.querySelectorAll('.js-open-return-confirm').forEach(button => {
+            button.addEventListener('click', () => {
+                pendingForm = button.closest('form');
+                opener = button;
+                bookTitle.textContent = button.dataset.book || 'Selected book';
+                memberName.textContent = `Borrowed by ${button.dataset.member || 'member'}`;
+                dialog.hidden = false;
+                cancelButton.focus();
+            });
+        });
+
+        cancelButton.addEventListener('click', closeDialog);
+        confirmButton.addEventListener('click', () => {
+            if (pendingForm) pendingForm.requestSubmit();
+        });
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) closeDialog();
+        });
+        document.addEventListener('keydown', event => {
+            if (!dialog.hidden && event.key === 'Escape') closeDialog();
+        });
+    })();
+</script>

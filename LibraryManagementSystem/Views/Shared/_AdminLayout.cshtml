@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="app">
-        <partial name="_Sidebar" />
+        @await Html.PartialAsync("~/Views/Shared/Layout/SideBar.cshtml")
 
         <div class="main">
             <partial name="_Topbar" />

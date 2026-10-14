@@ -1,6 +1,7 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var page = ViewContext.RouteData.Values["page"]?.ToString();
     var isAdmin = User.IsInRole("Admin");
 }
 <aside class="sidebar">
@@ -28,13 +29,13 @@
         <a class="nav-link @(controller == "Members" ? "active" : "")" asp-controller="Members" asp-action="Index">
             <i class="bi bi-people me-2"></i>Members
         </a>
-        <a class="nav-link" href="/Borrow">
+        <a class="nav-link @(page == "/Borrowings/Borrow" ? "active" : "")" asp-page="/Borrowings/Borrow">
             <i class="bi bi-box-arrow-up-right me-2"></i>Borrow
         </a>
-        <a class="nav-link" href="/Return">
+        <a class="nav-link @(page == "/Borrowings/Return" ? "active" : "")" asp-page="/Borrowings/Return">
             <i class="bi bi-box-arrow-in-down-left me-2"></i>Return
         </a>
-        <a class="nav-link" href="/History">
+        <a class="nav-link @(page == "/Borrowings/Index" ? "active" : "")" asp-page="/Borrowings/Index">
             <i class="bi bi-clock-history me-2"></i>History
         </a>
         @if (isAdmin)
