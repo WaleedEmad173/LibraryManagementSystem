@@ -31,8 +31,9 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
         public CirculationBorrowPageViewModel ViewModel { get; set; } = new();
 
-        public async Task<IActionResult> OnGetAsync(int? bookId, int? userId)
+        public async Task<IActionResult> OnGetAsync(int? id, int? bookId, int? userId)
         {
+            bookId ??= id;
             await LoadCirculationDataAsync(bookId, userId);
             return Page();
         }

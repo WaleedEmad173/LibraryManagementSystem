@@ -3,6 +3,7 @@
 @model LibraryManagementSystem.Pages.Borrowings.IndexModel
 @{
     ViewData["Title"] = "Borrowing History";
+    ViewData["Section"] = "History";
     var view = Model.ViewModel;
     var firstRecord = view.MatchingRecordsCount == 0 ? 0 : (view.PageNumber - 1) * 10 + 1;
     var lastRecord = Math.Min(view.PageNumber * 10, view.MatchingRecordsCount);

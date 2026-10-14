@@ -2,6 +2,7 @@
 @model LibraryManagementSystem.Pages.Borrowings.BorrowModel
 @{
     ViewData["Title"] = "Borrow a Book for a Member";
+    ViewData["Section"] = "Borrow";
     var member = Model.ViewModel.SelectedMember;
     var book = Model.ViewModel.SelectedBook;
 }
