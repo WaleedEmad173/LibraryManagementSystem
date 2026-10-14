@@ -6,103 +6,233 @@
     ViewData["Section"] = "Return";
 }
 
-<div class="circulation-container mt-2 return-page">
-    <style>
-        .return-page .circ-return-action {
-            border: 1px solid #047857;
-            border-radius: 8px;
-            padding: 8px 15px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            color: #fff;
-            background: #047857;
-            font-size: .85rem;
-            font-weight: 650;
-            line-height: 1.2;
-            box-shadow: 0 2px 4px rgba(4, 120, 87, .16);
-            transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
-        }
-        .return-page .circ-return-action:hover {
-            color: #fff;
-            background: #065f46;
-            border-color: #065f46;
-            box-shadow: 0 4px 10px rgba(4, 120, 87, .22);
-            transform: translateY(-1px);
-        }
-        .return-page .circ-return-action:focus-visible,
-        .return-confirm-button:focus-visible,
-        .return-cancel-button:focus-visible {
-            outline: 3px solid rgba(37, 99, 235, .35);
-            outline-offset: 2px;
-        }
-        .return-confirm-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1100;
-            display: grid;
-            place-items: center;
-            padding: 20px;
-            background: rgba(15, 23, 42, .48);
-            backdrop-filter: blur(3px);
-        }
-        .return-confirm-overlay[hidden] { display: none; }
-        .return-confirm-dialog {
-            width: min(100%, 440px);
-            padding: 26px;
-            border: 1px solid #e6eaf2;
-            border-radius: 18px;
-            background: #fff;
-            box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
-            animation: return-dialog-in .16s ease-out;
-        }
-        .return-confirm-icon {
-            display: grid;
-            width: 48px;
-            height: 48px;
-            place-items: center;
-            margin-bottom: 17px;
-            border-radius: 14px;
-            color: #047857;
-            background: #d1fae5;
-        }
-        .return-confirm-title { margin: 0 0 8px; color: #17223b; font-size: 1.2rem; font-weight: 750; }
-        .return-confirm-copy { margin: 0; color: #64748b; line-height: 1.55; }
-        .return-confirm-book {
-            margin-top: 16px;
-            padding: 12px 14px;
-            border: 1px solid #e8ebf5;
-            border-radius: 10px;
-            background: #f7f8ff;
-            color: #17223b;
-            font-weight: 650;
-        }
-        .return-confirm-member { margin-top: 3px; color: #64748b; font-size: .88rem; }
-        .return-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
-        .return-cancel-button, .return-confirm-button {
-            min-height: 42px;
-            padding: 0 16px;
-            border-radius: 9px;
-            font: inherit;
-            font-size: .9rem;
-            font-weight: 650;
-            cursor: pointer;
-        }
-        .return-cancel-button { border: 1px solid #dbe1ec; color: #334155; background: #fff; }
-        .return-cancel-button:hover { background: #f8fafc; }
-        .return-confirm-button { border: 1px solid #047857; color: #fff; background: #047857; }
-        .return-confirm-button:hover { border-color: #065f46; background: #065f46; }
-        @@keyframes return-dialog-in {
-            from { opacity: 0; transform: translateY(6px) scale(.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @@media (prefers-reduced-motion: reduce) {
-            .return-confirm-dialog { animation: none; }
-            .return-page .circ-return-action { transition: none; }
-        }
-    </style>
+<style>
+    .circulation-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding-bottom: 2.5rem;
+    }
+    .return-page .circ-return-action {
+        border: 1px solid #047857;
+        border-radius: 8px;
+        padding: 8px 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        color: #fff;
+        background: #047857;
+        font-size: .85rem;
+        font-weight: 650;
+        line-height: 1.2;
+        box-shadow: 0 2px 4px rgba(4, 120, 87, .16);
+        transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    .return-page .circ-return-action:hover {
+        color: #fff;
+        background: #065f46;
+        border-color: #065f46;
+        box-shadow: 0 4px 10px rgba(4, 120, 87, .22);
+        transform: translateY(-1px);
+    }
+    .return-page .circ-return-action:focus-visible,
+    .return-confirm-button:focus-visible,
+    .return-cancel-button:focus-visible {
+        outline: 3px solid rgba(37, 99, 235, .35);
+        outline-offset: 2px;
+    }
 
+    /* Modern Return Search Bar */
+    .return-search-card {
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+    .return-search-form {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+    }
+    .return-search-input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+    .return-search-input-wrapper .search-icon {
+        position: absolute;
+        left: 14px;
+        color: #94a3b8;
+        pointer-events: none;
+        flex-shrink: 0;
+    }
+    .return-search-input {
+        width: 100%;
+        height: 46px;
+        padding: 0 40px 0 44px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 9px;
+        background: #ffffff;
+        font-size: 0.92rem;
+        color: #0f172a;
+        outline: none;
+        transition: all 0.15s ease-in-out;
+    }
+    .return-search-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .return-search-input::placeholder {
+        color: #94a3b8;
+        font-size: 0.88rem;
+    }
+    .search-clear-btn {
+        position: absolute;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        background: #f1f5f9;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .search-clear-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .return-search-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    .btn-search-submit {
+        height: 46px;
+        padding: 0 24px;
+        border-radius: 9px;
+        background: #1e3a8a;
+        color: #ffffff;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        white-space: nowrap;
+    }
+    .btn-search-submit:hover {
+        background: #172554;
+    }
+    .btn-search-reset {
+        height: 46px;
+        padding: 0 16px;
+        border-radius: 9px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 0.88rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .btn-search-reset:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    @@media (max-width: 768px) {
+        .return-search-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .return-search-actions {
+            width: 100%;
+        }
+        .btn-search-submit {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    /* Confirm Return Dialog */
+    .return-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, .48);
+        backdrop-filter: blur(3px);
+    }
+    .return-confirm-overlay[hidden] { display: none; }
+    .return-confirm-dialog {
+        width: min(100%, 440px);
+        padding: 26px;
+        border: 1px solid #e6eaf2;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+        animation: return-dialog-in .16s ease-out;
+    }
+    .return-confirm-icon {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        margin-bottom: 17px;
+        border-radius: 14px;
+        color: #047857;
+        background: #d1fae5;
+    }
+    .return-confirm-title { margin: 0 0 8px; color: #17223b; font-size: 1.2rem; font-weight: 750; }
+    .return-confirm-copy { margin: 0; color: #64748b; line-height: 1.55; }
+    .return-confirm-book {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border: 1px solid #e8ebf5;
+        border-radius: 10px;
+        background: #f7f8ff;
+        color: #17223b;
+        font-weight: 650;
+    }
+    .return-confirm-member { margin-top: 3px; color: #64748b; font-size: .88rem; }
+    .return-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .return-cancel-button, .return-confirm-button {
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 9px;
+        font: inherit;
+        font-size: .9rem;
+        font-weight: 650;
+        cursor: pointer;
+    }
+    .return-cancel-button { border: 1px solid #dbe1ec; color: #334155; background: #fff; }
+    .return-cancel-button:hover { background: #f8fafc; }
+    .return-confirm-button { border: 1px solid #047857; color: #fff; background: #047857; }
+    .return-confirm-button:hover { border-color: #065f46; background: #065f46; }
+    @@keyframes return-dialog-in {
+        from { opacity: 0; transform: translateY(6px) scale(.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @@media (prefers-reduced-motion: reduce) {
+        .return-confirm-dialog { animation: none; }
+        .return-page .circ-return-action { transition: none; }
+    }
+</style>
+
+<div class="circulation-container mt-2 return-page">
     <!-- Module Tabs Switcher -->
     <div class="circ-module-tabs">
         <a asp-page="./Borrow" class="circ-tab-btn">
@@ -160,7 +290,7 @@
         </div>
     </div>
 
-    <!-- Feedback Showcase Banners (Top of Page as in Figma) -->
+    <!-- Feedback Showcase Banners -->
     @if (!string.IsNullOrEmpty(Model.ViewModel.AlertState))
     {
         if (Model.ViewModel.AlertState == "success")
@@ -199,40 +329,70 @@
         }
     }
 
-    <!-- Search & Filter Bar Card -->
+    <!-- Search & Filter Bar Card (Modern Full-Width Design) -->
     <div class="circ-card mb-4 return-search-card">
-        <div class="circ-card-body p-3">
-            <form method="get" class="row g-2 align-items-center">
-                <div class="col-md-6 col-lg-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-muted">
-                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </span>
-                        <input type="text"
-                               name="SearchQuery"
-                               value="@Model.ViewModel.SearchQuery"
-                               class="form-control border-start-0 ps-0"
-                               placeholder="Search by member name, patron ID, book title, or ISBN..." />
-                    </div>
+        <div class="circ-card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold text-slate-900 mb-1 d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#1d4ed8">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Find Active Loan
+                    </h5>
+                    <p class="text-muted small mb-0">Search patron name, member ID, book title, or ISBN to process check-in.</p>
                 </div>
-                <div class="col-md-3 col-lg-3 d-none d-md-block text-center">
-                    <span class="circ-badge circ-badge-amber">
-                        @Model.ViewModel.TotalActiveLoansCount active loans | @Model.ViewModel.DueThisWeekCount due this week
+                <div>
+                    <span class="circ-badge circ-badge-amber py-2 px-3">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="me-1">
+                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                            <polyline points="12 6 12 12 16 14" stroke-width="2"></polyline>
+                        </svg>
+                        @Model.ViewModel.TotalActiveLoansCount Active Loans | @Model.ViewModel.DueThisWeekCount Due This Week
                     </span>
                 </div>
-                <div class="col-md-3 col-lg-3 d-flex gap-2">
-                    <button type="submit" class="circ-btn-search flex-grow-1 justify-content-center">
+            </div>
+
+            <form method="get" class="return-search-form">
+                <div class="return-search-input-wrapper">
+                    <svg class="search-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text"
+                           name="SearchQuery"
+                           value="@Model.ViewModel.SearchQuery"
+                           class="return-search-input"
+                           placeholder="Scan barcode or type member name, patron ID, book title, ISBN..."
+                           autocomplete="off" />
+                    @if (!string.IsNullOrWhiteSpace(Model.ViewModel.SearchQuery))
+                    {
+                        <a asp-page="./Return" class="search-clear-btn" title="Clear search">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    }
+                </div>
+                <div class="return-search-actions">
+                    <button type="submit" class="btn-search-submit">
+                        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="11" cy="11" r="7" stroke-width="2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16l4.5 4.5" />
+                        </svg>
                         Search
                     </button>
-                    <a asp-page="./Return" class="circ-btn-secondary px-3" title="Clear Search">Reset</a>
+                    @if (!string.IsNullOrWhiteSpace(Model.ViewModel.SearchQuery))
+                    {
+                        <a asp-page="./Return" class="btn-search-reset">
+                            Reset
+                        </a>
+                    }
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Currently Borrowed Inventory Table Card -->
+    <!-- Currently Borrowed Inventory Table Card (Full Width) -->
     <div class="circ-card">
         <div class="circ-card-header">
             <div>
@@ -249,14 +409,14 @@
         </div>
 
         <div class="circ-table-container">
-            <table class="circ-table return-table">
+            <table class="circ-table return-table w-100">
                 <thead>
                     <tr>
-                        <th>MEMBER / PATRON</th>
-                        <th>BOOK TITLE &amp; AUTHOR</th>
-                        <th>BORROW DATE</th>
-                        <th>LOAN STATUS</th>
-                        <th class="text-end pe-4">ACTIONS</th>
+                        <th style="width: 25%;">MEMBER / PATRON</th>
+                        <th style="width: 32%;">BOOK TITLE &amp; AUTHOR</th>
+                        <th style="width: 15%;">BORROW DATE</th>
+                        <th style="width: 15%;">LOAN STATUS</th>
+                        <th style="width: 13%;" class="text-end pe-4">ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -374,7 +534,6 @@
             }
         </div>
     </div>
-
 </div>
 
 <div class="return-confirm-overlay" id="returnConfirmDialog" hidden>

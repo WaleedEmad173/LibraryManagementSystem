@@ -1,25 +1,34 @@
-﻿@model BookIndexViewModel
+@model BookIndexViewModel
 
-<section class="card filters">
-    <form method="get" asp-action="Index" class="filter-form">
-        <div class="input-icon">
-            <i class="bi bi-search"></i>
-            <input type="text" name="search" value="@Model.Search" placeholder="Search by title, author, or ISBN..." />
+<div class="books-filters-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <form method="get" asp-action="Index" class="books-filter-form d-flex align-items-center gap-2 flex-wrap">
+        <div class="books-search-wrapper">
+            <i class="bi bi-search search-lens-icon"></i>
+            <input type="text" name="search" value="@Model.Search" placeholder="Search by title, author, or ISBN..." class="books-search-input" />
         </div>
 
-        <select name="categoryId" asp-items="Model.Categories" class="select">
+        <select name="categoryId" asp-items="Model.Categories" class="books-category-select">
             <option value="">All Categories</option>
         </select>
 
         <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
 
-        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
-        <a class="btn btn-soft" asp-action="Index"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+        <button type="submit" class="btn-books-search">
+            <i class="bi bi-search"></i> Search
+        </button>
+        <a class="btn-books-reset" asp-action="Index">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </a>
     </form>
 
-    <div class="filter-stats">
-        <span><i class="dot dot-navy"></i> Total Books: <strong>@Model.TotalTitles.ToString("N0")</strong></span>
-        <span class="divider"></span>
-        <span><i class="dot dot-amber"></i> In Circulation: <strong>@Model.CopiesOnLoan.ToString("N0")</strong></span>
+    <div class="books-filter-stats d-flex align-items-center gap-3">
+        <span class="d-flex align-items-center gap-2">
+            <span class="dot-indicator dot-books-navy"></span>
+            Total Books: <strong>@Model.TotalTitles.ToString("N0")</strong>
+        </span>
+        <span class="d-flex align-items-center gap-2">
+            <span class="dot-indicator dot-books-amber"></span>
+            In Circulation: <strong>@Model.CopiesOnLoan.ToString("N0")</strong>
+        </span>
     </div>
-</section>
+</div>

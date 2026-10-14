@@ -1,4 +1,4 @@
-﻿@model BookIndexViewModel
+@model BookIndexViewModel
 @{
     var p = Model.Books;
     var totalPages = Math.Max(1, p.TotalPages);
@@ -21,34 +21,42 @@
     }
 }
 
-<div class="table-footer">
-    <div class="muted">
+<div class="books-table-footer d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="footer-counts-text text-muted">
         Showing <strong>@(first)-@(last)</strong> of <strong>@p.TotalCount</strong> books
-        <span class="sep-dot"></span> Page @p.PageIndex of @totalPages
+        <span class="mx-1">•</span> Page @p.PageIndex of @totalPages
     </div>
 
-    <nav class="pager">
+    <nav class="books-pager-nav d-flex align-items-center gap-1">
         @if (p.HasPreviousPage)
         {
-            <a class="pager-link" asp-action="Index" asp-all-route-data="Route(p.PageIndex - 1)"><i class="bi bi-chevron-left"></i> Previous</a>
+            <a class="pager-nav-link" asp-action="Index" asp-all-route-data="Route(p.PageIndex - 1)">
+                <i class="bi bi-chevron-left me-1"></i> Previous
+            </a>
         }
         else
         {
-            <span class="pager-link disabled"><i class="bi bi-chevron-left"></i> Previous</span>
+            <span class="pager-nav-link disabled">
+                <i class="bi bi-chevron-left me-1"></i> Previous
+            </span>
         }
 
         @for (var i = start; i <= end; i++)
         {
-            <a class="pager-link @(i == p.PageIndex ? "active" : "")" asp-action="Index" asp-all-route-data="Route(i)">@i</a>
+            <a class="pager-nav-number @(i == p.PageIndex ? "active" : "")" asp-action="Index" asp-all-route-data="Route(i)">@i</a>
         }
 
         @if (p.HasNextPage)
         {
-            <a class="pager-link" asp-action="Index" asp-all-route-data="Route(p.PageIndex + 1)">Next <i class="bi bi-chevron-right"></i></a>
+            <a class="pager-nav-link" asp-action="Index" asp-all-route-data="Route(p.PageIndex + 1)">
+                Next <i class="bi bi-chevron-right ms-1"></i>
+            </a>
         }
         else
         {
-            <span class="pager-link disabled">Next <i class="bi bi-chevron-right"></i></span>
+            <span class="pager-nav-link disabled">
+                Next <i class="bi bi-chevron-right ms-1"></i>
+            </span>
         }
     </nav>
 </div>

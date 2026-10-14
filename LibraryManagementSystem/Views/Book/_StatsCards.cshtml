@@ -1,39 +1,39 @@
 @model BookIndexViewModel
 
-<section class="stats">
-    <div class="card stat">
-        <div>
-            <div class="stat-label">TOTAL CATALOG</div>
-            <div class="stat-value">@Model.TotalTitles.ToString("N0")</div>
-            <div class="stat-note note-green"><i class="bi bi-arrow-up-short"></i> +12 more this month</div>
+<div class="books-stats-grid">
+    <div class="books-stat-card">
+        <div class="stat-info">
+            <div class="stat-meta-label">TOTAL CATALOG</div>
+            <div class="stat-main-number">@Model.TotalTitles.ToString("N0")</div>
+            <div class="stat-note-badge note-green"><i class="bi bi-arrow-up-right"></i> +12 new this month</div>
         </div>
-        <div class="stat-icon tile-blue"><i class="bi bi-book"></i></div>
+        <div class="stat-icon-tile tile-blue"><i class="bi bi-book"></i></div>
     </div>
 
-    <div class="card stat">
-        <div>
-            <div class="stat-label">IN CIRCULATION</div>
-            <div class="stat-value">@Model.CopiesOnLoan.ToString("N0")</div>
-            <div class="stat-note note-amber"><i class="bi bi-arrow-left-right"></i> Active member loans</div>
+    <div class="books-stat-card">
+        <div class="stat-info">
+            <div class="stat-meta-label">IN CIRCULATION</div>
+            <div class="stat-main-number">@Model.CopiesOnLoan.ToString("N0")</div>
+            <div class="stat-note-badge note-amber"><i class="bi bi-check2"></i> Active member loans</div>
         </div>
-        <div class="stat-icon tile-amber"><i class="bi bi-arrow-left-right"></i></div>
+        <div class="stat-icon-tile tile-amber"><i class="bi bi-arrow-left-right"></i></div>
     </div>
 
-    <div class="card stat">
-        <div>
-            <div class="stat-label">AVAILABLE COPIES</div>
-            <div class="stat-value">@Model.AvailableCopies.ToString("N0")</div>
-            <div class="stat-note note-green"><i class="bi bi-pie-chart"></i> @(Model.ShelfReadinessPercent > 0 ? Model.ShelfReadinessPercent : 93)% shelf readiness</div>
+    <div class="books-stat-card">
+        <div class="stat-info">
+            <div class="stat-meta-label">AVAILABLE COPIES</div>
+            <div class="stat-main-number">@Model.AvailableCopies.ToString("N0")</div>
+            <div class="stat-note-badge note-green"><i class="bi bi-pie-chart"></i> @(Model.ShelfReadinessPercent > 0 ? Model.ShelfReadinessPercent : 93)% shelf readiness</div>
         </div>
-        <div class="stat-icon tile-blue"><i class="bi bi-bookshelf"></i></div>
+        <div class="stat-icon-tile tile-blue"><i class="bi bi-bookshelf"></i></div>
     </div>
 
-    <div class="card stat">
-        <div>
-            <div class="stat-label">ZERO AVAILABLE</div>
-            <div class="stat-value text-red">@Model.ZeroAvailable.ToString("N0")</div>
-            <div class="stat-note note-red"><i class="bi bi-exclamation-triangle"></i> High reservation queue</div>
+    <div class="books-stat-card">
+        <div class="stat-info">
+            <div class="stat-meta-label">ZERO AVAILABLE</div>
+            <div class="stat-main-number text-red">@Model.ZeroAvailable.ToString("N0")</div>
+            <div class="stat-note-badge note-red"><i class="bi bi-exclamation-triangle"></i> High reservation queue</div>
         </div>
-        <div class="stat-icon tile-red"><i class="bi bi-archive"></i></div>
+        <div class="stat-icon-tile tile-red"><i class="bi bi-trash3"></i></div>
     </div>
-</section>
+</div>
