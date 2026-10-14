@@ -52,7 +52,7 @@ namespace LibraryManagementSystem.ViewModels
         public DateTime? AlertDueDate { get; set; }
     }
 
-    public class ActiveLoanItemViewModel
+    public class CirculationActiveLoanItemViewModel
     {
         public int BorrowingId { get; set; }
         public int BookId { get; set; }
@@ -82,7 +82,7 @@ namespace LibraryManagementSystem.ViewModels
         public int PageNumber { get; set; } = 1;
         public int TotalPages { get; set; } = 1;
 
-        public List<ActiveLoanItemViewModel> ActiveLoans { get; set; } = new();
+        public List<CirculationActiveLoanItemViewModel> ActiveLoans { get; set; } = new();
 
         // Return feedback banner
         public string? AlertState { get; set; } // "success", "error"
