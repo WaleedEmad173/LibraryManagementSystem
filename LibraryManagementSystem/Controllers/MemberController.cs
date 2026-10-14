@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Controllers
 {
-    [Authorize(Roles = "Member")]
+    [Authorize(Roles = "Member,Admin,Librarian")]
     public class MemberController : Controller
     {
         private readonly AppDbContext _context;
@@ -23,6 +23,11 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Borrow(string? status, DateTime? fromDate, DateTime? toDate, int pageNumber = 1)
         {
+            if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+            {
+                return Redirect("/Borrow");
+            }
+
             var member = await _userManager.GetUserAsync(User);
             if (member == null)
                 return Challenge();
@@ -99,6 +104,42 @@ namespace LibraryManagementSystem.Controllers
             ViewData["Title"] = "My Borrowings";
             ViewData["Section"] = "Confirm Borrowing";
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Return(int id)
+        {
+            var member = await _userManager.GetUserAsync(User);
+            if (member == null)
+                return Challenge();
+
+            var borrowing = await _context.Borrowings
+                .Include(b => b.Book)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == member.Id);
+
+            if (borrowing == null)
+            {
+                TempData["Error"] = "Borrowing record not found.";
+                return RedirectToAction(nameof(Borrow));
+            }
+
+            if (borrowing.ReturnDate != null)
+            {
+                TempData["Warning"] = "This book has already been returned.";
+                return RedirectToAction(nameof(Borrow));
+            }
+
+            borrowing.ReturnDate = DateTime.Now;
+            if (borrowing.Book != null)
+            {
+                borrowing.Book.AvailableCopies = Math.Min(borrowing.Book.TotalCopies, borrowing.Book.AvailableCopies + 1);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"Successfully returned '{borrowing.Book?.Title ?? "book"}'.";
+
+            return RedirectToAction(nameof(Borrow));
         }
     }
 }

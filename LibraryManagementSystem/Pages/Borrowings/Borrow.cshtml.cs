@@ -33,6 +33,11 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
         public async Task<IActionResult> OnGetAsync(int? id, int? bookId, int? userId)
         {
+            if (User.IsInRole("Member") && !User.IsInRole("Admin") && !User.IsInRole("Librarian"))
+            {
+                return RedirectToAction("Borrow", "Member");
+            }
+
             bookId ??= id;
             await LoadCirculationDataAsync(bookId, userId);
             return Page();
@@ -40,6 +45,11 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
         public async Task<IActionResult> OnPostBorrowAsync()
         {
+            if (User.IsInRole("Member") && !User.IsInRole("Admin") && !User.IsInRole("Librarian"))
+            {
+                return RedirectToAction("Borrow", "Member");
+            }
+
             await LoadCirculationDataAsync(SelectedBookId, SelectedUserId);
 
             var book = await _context.Books.FirstOrDefaultAsync(b => b.Id == SelectedBookId);
