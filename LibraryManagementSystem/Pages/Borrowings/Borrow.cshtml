@@ -54,6 +54,16 @@
     .circulation-container .book-cover-fallback-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 5; color: #fff; font-size: .75rem; font-weight: 750; line-height: 1.2; overflow-wrap: anywhere; }
     .circulation-container .book-cover-fallback-rule { width: 22px; height: 2px; flex: 0 0 auto; background: #91b5ff; }
     .circulation-container .book-cover-fallback-author { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: #d3e0ff; font-size: .59rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .circulation-container .date-field-label {
+        position: relative;
+        display: block;
+        min-height: 24px;
+    }
+    .circulation-container .date-field-period {
+        position: absolute;
+        top: -3px;
+        right: 0;
+    }
 </style>
 
 <div class="circulation-container mt-2">
@@ -241,14 +251,16 @@
                         <!-- Date Grid (Auto-filled & Calculated Due Date) -->
                         <div class="row g-3 mb-4">
                             <div class="col-sm-6">
-                                <label class="circ-label">Borrow Date (Auto-filled) <span class="text-danger">*</span></label>
+                                <label class="circ-label date-field-label">
+                                    <span>Borrow Date (Auto-filled) <span class="text-danger">*</span></span>
+                                </label>
                                 <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.ToString("MMM dd, yyyy")" readonly />
                                 <div class="circ-hint">Not editable during standard circulation checkout.</div>
                             </div>
                             <div class="col-sm-6">
-                                <label class="circ-label">
+                                <label class="circ-label date-field-label">
                                     <span>Calculated Due Date <span class="text-danger">*</span></span>
-                                    <span class="circ-badge circ-badge-emerald">+14 Days</span>
+                                    <span class="circ-badge circ-badge-emerald date-field-period">+14 Days</span>
                                 </label>
                                 <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.AddDays(14).ToString("MMM dd, yyyy")" readonly />
                                 <div class="circ-hint">Standard 14 days - auto-policy applied.</div>
