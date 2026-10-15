@@ -3,27 +3,24 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>@ViewData["Title"] - LibraryManagementSystem</title>
+	<title>@ViewData["Title"] - Library System</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 	<link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
-	<link rel="stylesheet" href="~/LibraryManagementSystem.styles.css" asp-append-version="true" />
 	@await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-	<script>
-		// Prevent layout jump if previously collapsed
-		if (localStorage.getItem('sidebar_collapsed') === 'true') {
-			document.write('<style id="pre-collapse-style">.app-sidebar-wrapper{width:74px!important;}</style>');
-		}
-	</script>
-	<div class="app-wrapper" id="mainAppWrapper">
-		<div class="app-sidebar-wrapper">
-			@await Html.PartialAsync("~/Views/Shared/Layout/SideBar.cshtml")
-		</div>
-		<div class="app-main-wrapper">
-			@await Html.PartialAsync("~/Views/Shared/Layout/_MemberNavBar.cshtml")
-			<main role="main" class="flex-grow-1 p-4">
+	<div class="app">
+		@await Html.PartialAsync("~/Views/Shared/Layout/SideBar.cshtml")
+
+		<div class="main">
+			<partial name="_Topbar" />
+
+			<main class="content">
+				<partial name="_Alerts" />
 				@RenderBody()
 			</main>
 		</div>
@@ -32,12 +29,6 @@
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
-	<script>
-		(() => {
-			const preStyle = document.getElementById('pre-collapse-style');
-			if (preStyle) preStyle.remove();
-		})();
-	</script>
 	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
