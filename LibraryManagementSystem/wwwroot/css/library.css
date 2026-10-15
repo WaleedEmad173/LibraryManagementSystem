@@ -1,4 +1,4 @@
-﻿/* ============ Tokens ============ */
+/* ============ Tokens ============ */
 :root {
     --navy: #1e3a8a;
     --navy-dark: #0b1f55;
@@ -89,6 +89,12 @@ small {
     display: grid;
     grid-template-columns: clamp(240px, 16.7vw, 322px) minmax(0, 1fr);
     min-height: 100vh;
+    transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app.sidebar-collapsed,
+body.sidebar-collapsed .app {
+    grid-template-columns: 74px minmax(0, 1fr) !important;
 }
 
 .sidebar {
@@ -570,23 +576,6 @@ small {
     align-items: center;
 }
 
-.input-icon {
-    position: relative;
-}
-
-    .input-icon i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--muted);
-    }
-
-    .input-icon input {
-        padding-left: 38px;
-        min-width: 260px;
-    }
-
 .filter-form input[type=text], .select {
     padding: 10px 14px;
     border: 1px solid transparent;
@@ -598,6 +587,30 @@ small {
     .filter-form input[type=text]:focus, .select:focus {
         outline: 2px solid var(--navy);
         background: #fff;
+    }
+
+.input-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+    .input-icon i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        pointer-events: none;
+        font-size: 14px;
+        line-height: 1;
+        z-index: 2;
+    }
+
+    .input-icon input,
+    .filter-form .input-icon input[type=text] {
+        padding-left: 38px !important;
+        min-width: 260px;
     }
 
 .filter-stats {

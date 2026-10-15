@@ -1,27 +1,49 @@
+@using Microsoft.AspNetCore.Identity
+@using LibraryManagementSystem.Models
+@inject UserManager<ApplicationUser> UserManager
+
 @{
+    var user = await UserManager.GetUserAsync(User);
     var isAdmin = User.IsInRole("Admin");
-    var sectionTitle = ViewData["Section"]?.ToString() ?? (isAdmin ? "Overview" : "Books");
-    var portalName = isAdmin ? "Admin Portal" : "Librarian Portal";
-    var userName = User.Identity?.Name ?? (isAdmin ? "Mona Ali" : "Omar Hassan");
+    var isLibrarian = User.IsInRole("Librarian");
+    var isMember = !isAdmin && !isLibrarian;
+
+    var portalName = isAdmin ? "Admin Portal" : (isLibrarian ? "Librarian Portal" : "Member Portal");
+    var roleName = isAdmin ? "Admin" : (isLibrarian ? "Librarian" : "Member");
+    var idPrefix = isAdmin ? "#ADM-" : (isLibrarian ? "#LIB-" : "#MB-");
+
+    var userName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? (isAdmin ? "Admin User" : isLibrarian ? "Librarian" : "Member"));
+    var userIdText = user != null ? $"{idPrefix}{user.Id:D4}" : (isAdmin ? "#ADM-001" : isLibrarian ? "LIB-104" : "#MB-001");
+
+    var sectionTitle = ViewData["Section"]?.ToString() ?? ViewData["Title"]?.ToString() ?? (isMember ? "Books" : "Overview");
     
     // Extract 2 initials from username/email
     var parts = userName.Split(new[] { ' ', '.', '@', '_' }, StringSplitOptions.RemoveEmptyEntries);
     var initials = parts.Length >= 2
         ? $"{parts[0][0]}{parts[1][0]}".ToUpper()
-        : (parts.Length == 1 && parts[0].Length >= 2 ? parts[0][..2].ToUpper() : (isAdmin ? "MA" : "OH"));
+        : (parts.Length == 1 && parts[0].Length >= 2 ? parts[0][..2].ToUpper() : (isAdmin ? "AD" : isLibrarian ? "LB" : "MB"));
 }
 <header class="topbar">
-    <div class="crumbs" style="display: flex; align-items: center; gap: 4px;">
-        @if (isAdmin)
-        {
-            <i class="bi bi-shield-lock me-1" style="color: var(--muted); font-size: 14px;"></i>
-        }
-        <span>@portalName</span> <span style="margin: 0 4px;">/</span> <strong>@sectionTitle</strong>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn-topbar-sidebar-toggle" id="globalSidebarToggle" title="Toggle Sidebar" style="background: none; border: 1px solid #e2e8f0; border-radius: 6px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #475569; transition: all 0.15s ease;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div class="crumbs" style="display: flex; align-items: center; gap: 4px;">
+            @if (isAdmin)
+            {
+                <i class="bi bi-shield-lock me-1" style="color: var(--muted); font-size: 14px;"></i>
+            }
+            <span>@portalName</span> <span style="margin: 0 4px;">/</span> <strong>@sectionTitle</strong>
+        </div>
     </div>
 
     <div class="topbar-right">
         <div class="user">
-            <div class="avatar" style="font-weight: 700; font-size: 13px; letter-spacing: 0.5px;">
+            <div class="avatar" style="font-weight: 700; font-size: 13px; letter-spacing: 0.5px; @(isAdmin ? "background: #fee2e2; color: #dc2626;" : isLibrarian ? "background: #fef3c7; color: #b45309;" : "background: #dcfce7; color: #15803d;")">
                 @initials
             </div>
             <div class="user-meta" style="display: flex; flex-direction: column; line-height: 1.2;">
@@ -31,12 +53,16 @@
                     {
                         <span class="chip" style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #fee2e2; color: #dc2626; font-weight: 600;">Admin</span>
                     }
+                    else if (isLibrarian)
+                    {
+                        <span class="chip chip-soft" style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #fef3c7; color: #b45309; font-weight: 600;">Librarian</span>
+                    }
                     else
                     {
-                        <span class="chip chip-soft" style="font-size: 11px; padding: 2px 8px; border-radius: 99px;">Librarian</span>
+                        <span class="chip" style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #dcfce7; color: #15803d; font-weight: 600;">Member</span>
                     }
                 </div>
-                <span class="user-sub" style="font-size: 11px; color: var(--muted); font-weight: 500;">@(isAdmin ? "#ADM-001" : "LIB-104")</span>
+                <span class="user-sub" style="font-size: 11px; color: var(--muted); font-weight: 500;">@userIdText</span>
             </div>
         </div>
 

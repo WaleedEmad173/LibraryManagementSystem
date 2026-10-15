@@ -1,4 +1,4 @@
-@page "/Borrow"
+@page "/Borrow/{id:int?}"
 @model LibraryManagementSystem.Pages.Borrowings.BorrowModel
 @{
     ViewData["Title"] = "Borrow a Book for a Member";
@@ -22,6 +22,12 @@
 }
 
 <style>
+    .circulation-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding-bottom: 2.5rem;
+    }
     .circulation-container .book-cover-frame {
         width: 100px;
         height: 140px;
@@ -56,18 +62,18 @@
     .circulation-container .book-cover-fallback-author { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: #d3e0ff; font-size: .59rem; line-height: 1.25; overflow-wrap: anywhere; }
     .circulation-container .date-field-label {
         position: relative;
-        display: block;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         min-height: 24px;
     }
     .circulation-container .date-field-period {
-        position: absolute;
-        top: -3px;
-        right: 0;
+        font-size: 0.72rem;
     }
 </style>
 
 <div class="circulation-container mt-2">
-    <!-- Module Tabs Switcher (No global navbar inside view, pure circulation module tabs) -->
+    <!-- Module Tabs Switcher -->
     <div class="circ-module-tabs">
         <a asp-page="./Borrow" class="circ-tab-btn active">
             <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +135,7 @@
     {
         if (Model.ViewModel.AlertState == "success")
         {
-            <div class="circ-alert-card circ-alert-success">
+            <div class="circ-alert-card circ-alert-success mb-4">
                 <div class="circ-alert-icon">
                     <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
@@ -150,7 +156,7 @@
         }
         else
         {
-            <div class="circ-alert-card circ-alert-danger">
+            <div class="circ-alert-card circ-alert-danger mb-4">
                 <div class="circ-alert-icon">
                     <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -167,121 +173,122 @@
         }
     }
 
-    <!-- Main Circulation Split Grid (60% Form, 40% Live Preview Sidebar) -->
-    <div class="row g-4 circ-grid-split">
-        <!-- Left: Circulation Form -->
-        <div class="col-lg-7">
-            <div class="circ-card h-100">
-                <div class="circ-card-header">
-                    <div>
-                        <h3 class="circ-card-title">
-                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#1d4ed8">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Issue New Loan / Circulation Desk
-                        </h3>
-                        <p class="text-muted small mb-0 mt-1">Complete all fields below confirming physical item handover.</p>
+    <!-- Main Circulation Form (Full Width to Fill the Entire Space) -->
+    <div class="circ-card mb-4">
+        <div class="circ-card-header">
+            <div>
+                <h3 class="circ-card-title">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#1d4ed8">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Issue New Loan / Circulation Desk
+                </h3>
+                <p class="text-muted small mb-0 mt-1">Complete all fields below confirming physical item handover.</p>
+            </div>
+            <span class="circ-badge circ-badge-blue">DESK FLOW</span>
+        </div>
+
+        <div class="circ-card-body">
+            <form id="loanForm" method="post" asp-page-handler="Borrow">
+                <div class="row g-4">
+                    <!-- Member Field (Column 1) -->
+                    <div class="col-md-6">
+                        <label class="circ-label" for="memberSelect">
+                            <span>Member <span class="text-danger">*</span></span>
+                            <span class="circ-hint">Required • ID, email or NFC scan</span>
+                        </label>
+                        <select id="memberSelect" name="SelectedUserId" class="circ-select" onchange="onMemberChanged(this)" disabled="@(Model.ViewModel.Members.Count == 0)">
+                            @foreach (var m in Model.ViewModel.Members)
+                            {
+                                <option value="@m.Id"
+                                        selected="@(m.Id == Model.SelectedUserId)"
+                                        data-name="@m.FullName"
+                                        data-email="@m.Email"
+                                        data-memberid="@m.MemberId"
+                                        data-initials="@m.Initials"
+                                        data-activeloans="@m.ActiveLoansCount"
+                                        data-maxquota="@m.MaxQuota"
+                                        data-overdue="@m.OverdueCount"
+                                        data-standing="@m.Standing">
+                                    @m.FullName - @m.MemberId (@m.Email)
+                                </option>
+                            }
+                        </select>
+                        @if (Model.ViewModel.Members.Count == 0) { <div class="circ-hint">No members are recorded in the database.</div> }
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <span class="circ-badge circ-badge-emerald" id="patronBadgeLabel">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Patron Card Validated <span id="patronBadgeId">@member?.MemberId</span>
+                            </span>
+                        </div>
                     </div>
-                    <span class="circ-badge circ-badge-blue">DESK FLOW</span>
-                </div>
 
-                <div class="circ-card-body">
-                    <form id="loanForm" method="post" asp-page-handler="Borrow">
-                        <!-- Member Field -->
-                        <div class="mb-3">
-                            <label class="circ-label" for="memberSelect">
-                                <span>Member <span class="text-danger">*</span></span>
-                                <span class="circ-hint">Required • ID, email or NFC scan</span>
-                            </label>
-                            <select id="memberSelect" name="SelectedUserId" class="circ-select" onchange="onMemberChanged(this)" disabled="@(Model.ViewModel.Members.Count == 0)">
-                                @foreach (var m in Model.ViewModel.Members)
-                                {
-                                    <option value="@m.Id"
-                                            selected="@(m.Id == Model.SelectedUserId)"
-                                            data-name="@m.FullName"
-                                            data-email="@m.Email"
-                                            data-memberid="@m.MemberId"
-                                            data-initials="@m.Initials"
-                                            data-activeloans="@m.ActiveLoansCount"
-                                            data-maxquota="@m.MaxQuota"
-                                            data-overdue="@m.OverdueCount"
-                                            data-standing="@m.Standing">
-                                        @m.FullName - @m.MemberId (@m.Email)
-                                    </option>
-                                }
-                            </select>
-                            @if (Model.ViewModel.Members.Count == 0) { <div class="circ-hint">No members are recorded in the database.</div> }
-                            <div class="d-flex align-items-center justify-content-between mt-2">
-                                <span class="circ-badge circ-badge-emerald" id="patronBadgeLabel">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Patron Card Validated <span id="patronBadgeId">@member?.MemberId</span>
-                                </span>
-                            </div>
-                        </div>
+                    <!-- Book Field (Column 2) -->
+                    <div class="col-md-6">
+                        <label class="circ-label" for="bookSelect">
+                            <span>Book <span class="text-danger">*</span></span>
+                            <span class="circ-hint">Only titles with stock available</span>
+                        </label>
+                        <select id="bookSelect" name="SelectedBookId" class="circ-select" onchange="onBookChanged(this)" disabled="@(Model.ViewModel.Books.Count == 0)">
+                            @foreach (var b in Model.ViewModel.Books)
+                            {
+                                <option value="@b.Id"
+                                        selected="@(b.Id == Model.SelectedBookId)"
+                                        data-title="@b.Title"
+                                        data-author="@b.Author"
+                                        data-isbn="@b.ISBN"
+                                        data-category="@b.CategoryName"
+                                        data-image-url="@(ResolveBookImageUrl(b.ImageUrl) ?? string.Empty)"
+                                        data-total="@b.TotalCopies"
+                                        data-available="@b.AvailableCopies"
+                                        data-instock="@(b.InStock ? "true" : "false")">
+                                    @b.Title (@b.AvailableCopies available of @b.TotalCopies)
+                                </option>
+                            }
+                        </select>
+                        @if (Model.ViewModel.Books.Count == 0) { <div class="circ-hint">No books are recorded in the database.</div> }
+                        <div class="circ-hint mt-2" id="fieldBookIsbn">ISBN: @book?.ISBN</div>
+                    </div>
 
-                        <!-- Book Field -->
-                        <div class="mb-3">
-                            <label class="circ-label" for="bookSelect">
-                                <span>Book <span class="text-danger">*</span></span>
-                                <span class="circ-hint">Only titles with stock available</span>
-                            </label>
-                            <select id="bookSelect" name="SelectedBookId" class="circ-select" onchange="onBookChanged(this)" disabled="@(Model.ViewModel.Books.Count == 0)">
-                                @foreach (var b in Model.ViewModel.Books)
-                                {
-                                    <option value="@b.Id"
-                                            selected="@(b.Id == Model.SelectedBookId)"
-                                            data-title="@b.Title"
-                                            data-author="@b.Author"
-                                            data-isbn="@b.ISBN"
-                                            data-category="@b.CategoryName"
-                                            data-image-url="@(ResolveBookImageUrl(b.ImageUrl) ?? string.Empty)"
-                                            data-total="@b.TotalCopies"
-                                            data-available="@b.AvailableCopies"
-                                            data-instock="@(b.InStock ? "true" : "false")">
-                                        @b.Title (@b.AvailableCopies available of @b.TotalCopies)
-                                    </option>
-                                }
-                            </select>
-                            @if (Model.ViewModel.Books.Count == 0) { <div class="circ-hint">No books are recorded in the database.</div> }
-                            <div class="circ-hint">ISBN: @book?.ISBN</div>
-                        </div>
+                    <!-- Borrow Date (Auto-filled) (Column 1) -->
+                    <div class="col-md-6">
+                        <label class="circ-label date-field-label">
+                            <span>Borrow Date (Auto-filled) <span class="text-danger">*</span></span>
+                        </label>
+                        <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.ToString("MMM dd, yyyy")" readonly />
+                        <div class="circ-hint mt-1">Not editable during standard circulation checkout.</div>
+                    </div>
 
-                        <!-- Date Grid (Auto-filled & Calculated Due Date) -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-sm-6">
-                                <label class="circ-label date-field-label">
-                                    <span>Borrow Date (Auto-filled) <span class="text-danger">*</span></span>
-                                </label>
-                                <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.ToString("MMM dd, yyyy")" readonly />
-                                <div class="circ-hint">Not editable during standard circulation checkout.</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="circ-label date-field-label">
-                                    <span>Calculated Due Date <span class="text-danger">*</span></span>
-                                    <span class="circ-badge circ-badge-emerald date-field-period">+14 Days</span>
-                                </label>
-                                <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.AddDays(14).ToString("MMM dd, yyyy")" readonly />
-                                <div class="circ-hint">Standard 14 days - auto-policy applied.</div>
-                            </div>
-                        </div>
+                    <!-- Calculated Due Date (Column 2) -->
+                    <div class="col-md-6">
+                        <label class="circ-label date-field-label">
+                            <span>Calculated Due Date <span class="text-danger">*</span></span>
+                            <span class="circ-badge circ-badge-emerald date-field-period">+14 Days</span>
+                        </label>
+                        <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.AddDays(14).ToString("MMM dd, yyyy")" readonly />
+                        <div class="circ-hint mt-1">Standard 14 days - auto-policy applied.</div>
+                    </div>
 
-                        <!-- Terms Notice Box -->
-                        <div class="circ-notice-box mb-4">
+                    <!-- Terms Notice Box (Full Width) -->
+                    <div class="col-12">
+                        <div class="circ-notice-box">
                             <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2563eb" class="flex-shrink-0 mt-1">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             <div>
                                 <div class="circ-notice-title">Patron circulation notification terms</div>
-                                <p class="circ-notice-desc">
+                                <p class="circ-notice-desc mb-0">
                                     The due date is calculated as <strong>@DateTime.Today.AddDays(14).ToString("MMM dd, yyyy")</strong> using the standard loan duration.
                                 </p>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Action Buttons -->
-                        <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                    <!-- Action Buttons -->
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
                             <a asp-page="./Index" class="circ-btn-secondary">
                                 Cancel
                             </a>
@@ -292,120 +299,123 @@
                                 Confirm Borrow
                             </button>
                         </div>
-                    </form>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Patron & Book Preview Cards (2-Column Grid Filling Full Width Below) -->
+    <div class="row g-4">
+        <!-- Left: Patron Circulation Status Card -->
+        <div class="col-lg-6">
+            <div class="circ-card h-100">
+                <div class="circ-card-header py-3">
+                    <span class="circ-card-title fs-6">PATRON CIRCULATION STATUS</span>
+                    <span class="circ-badge circ-badge-blue" id="previewPatronStatusBadge">@(member == null ? string.Empty : "Member")</span>
+                </div>
+                <div class="circ-card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="circ-patron-avatar" id="previewAvatar">
+                            @member?.Initials
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-slate-900" id="previewPatronName">@member?.FullName</h5>
+                            <div class="text-muted small" id="previewPatronEmail">@member?.Email</div>
+                            <div class="text-secondary small mt-1">
+                                <span id="previewPatronId">ID: @member?.MemberId</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quota Progress -->
+                    <div class="mb-3 pt-2 border-top">
+                        <div class="d-flex justify-content-between small fw-semibold text-slate-700">
+                            <span>Active Loans Quota:</span>
+                            <span id="previewQuotaText">@(member?.ActiveLoansCount ?? 0) of @(member?.MaxQuota ?? 3) books checked out</span>
+                        </div>
+                        <div class="circ-quota-bar">
+                            @{
+                                var activeCount = member?.ActiveLoansCount ?? 0;
+                                var maxQuota = member?.MaxQuota ?? 3;
+                                var pct = Math.Min(100, (int)((activeCount / (double)maxQuota) * 100));
+                            }
+                            <div class="circ-quota-fill" id="previewQuotaFill" style="width: @(pct)%;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted mt-1">
+                            <span id="previewSlotsRemaining">@(Math.Max(0, maxQuota - activeCount)) slot remaining</span>
+                            <span class="text-primary">Quota limit: 3</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <div>
+                            <span class="text-muted small">Overdue Items:</span>
+                            <strong class="ms-1 small" id="previewOverdue">@(member?.OverdueCount ?? 0) Items</strong>
+                        </div>
+                        <span class="circ-badge circ-badge-blue" id="previewStanding">
+                            @member?.Standing
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Live Patron & Book Preview Cards -->
-        <div class="col-lg-5">
-            <div class="d-flex flex-column gap-3">
-                <!-- Patron Circulation Status Card -->
-                <div class="circ-card">
-                    <div class="circ-card-header py-3">
-                        <span class="circ-card-title fs-6">PATRON CIRCULATION STATUS</span>
-                        <span class="circ-badge circ-badge-blue" id="previewPatronStatusBadge">@(member == null ? string.Empty : "Member")</span>
-                    </div>
-                    <div class="circ-card-body">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <div class="circ-patron-avatar" id="previewAvatar">
-                                @member?.Initials
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-0 text-slate-900" id="previewPatronName">@member?.FullName</h5>
-                                <div class="text-muted small" id="previewPatronEmail">@member?.Email</div>
-                                <div class="text-secondary small mt-1">
-                                    <span id="previewPatronId">ID: @member?.MemberId</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quota Progress -->
-                        <div class="mb-3 pt-2 border-top">
-                            <div class="d-flex justify-content-between small fw-semibold text-slate-700">
-                                <span>Active Loans Quota:</span>
-                                <span id="previewQuotaText">@(member?.ActiveLoansCount ?? 0) of @(member?.MaxQuota ?? 3) books checked out</span>
-                            </div>
-                            <div class="circ-quota-bar">
-                                @{
-                                    var activeCount = member?.ActiveLoansCount ?? 0;
-                                    var maxQuota = member?.MaxQuota ?? 3;
-                                    var pct = Math.Min(100, (int)((activeCount / (double)maxQuota) * 100));
-                                }
-                                <div class="circ-quota-fill" id="previewQuotaFill" style="width: @(pct)%;"></div>
-                            </div>
-                            <div class="d-flex justify-content-between small text-muted mt-1">
-                                <span id="previewSlotsRemaining">@(Math.Max(0, maxQuota - activeCount)) slot remaining</span>
-                                <span class="text-primary">Quota limit: 3</span>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                            <div>
-                                <span class="text-muted small">Overdue Items:</span>
-                                <strong class="ms-1 small" id="previewOverdue">@(member?.OverdueCount ?? 0) Items</strong>
-                            </div>
-                            <span class="circ-badge circ-badge-blue" id="previewStanding">
-                                @member?.Standing
-                            </span>
-                        </div>
-                    </div>
+        <!-- Right: Selected Book Inventory Card -->
+        <div class="col-lg-6">
+            <div class="circ-card h-100">
+                <div class="circ-card-header py-3">
+                    <span class="circ-card-title fs-6">SELECTED BOOK INVENTORY</span>
+                    <span class="circ-badge @(book == null ? "circ-badge-blue" : book.InStock ? "circ-badge-emerald" : "circ-badge-rose")" id="previewBookStockBadge">
+                        @(book == null ? string.Empty : book.InStock ? "• In Stock" : "• Out of Stock")
+                    </span>
                 </div>
-
-                <!-- Selected Book Inventory Card -->
-                <div class="circ-card">
-                    <div class="circ-card-header py-3">
-                        <span class="circ-card-title fs-6">SELECTED BOOK INVENTORY</span>
-                        <span class="circ-badge @(book == null ? "circ-badge-blue" : book.InStock ? "circ-badge-emerald" : "circ-badge-rose")" id="previewBookStockBadge">
-                            @(book == null ? string.Empty : book.InStock ? "• In Stock" : "• Out of Stock")
-                        </span>
-                    </div>
-                    <div class="circ-card-body">
-                        <div class="d-flex gap-3 align-items-start">
-                            <div class="book-cover-frame flex-shrink-0">
-                                @if (!string.IsNullOrWhiteSpace(book?.ImageUrl))
-                                {
-                                    <img id="previewBookCover" src="@ResolveBookImageUrl(book.ImageUrl)" alt="@book.Title" onerror="showBookCoverFallback()" />
-                                }
-                                else
-                                {
-                                    <img id="previewBookCover" class="d-none" alt="" />
-                                }
-                                <div id="previewBookCoverEmpty" class="book-cover-fallback @(string.IsNullOrWhiteSpace(book?.ImageUrl) ? string.Empty : "d-none")">
-                                    <span class="book-cover-fallback-mark">LIBRARY</span>
-                                    <span id="previewBookCoverFallbackTitle" class="book-cover-fallback-title">@(book?.Title ?? "Select a book")</span>
-                                    <span class="book-cover-fallback-rule"></span>
-                                    <span id="previewBookCoverFallbackAuthor" class="book-cover-fallback-author">@(book?.Author ?? string.Empty)</span>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="badge bg-light text-primary border mb-1" id="previewCategory">@book?.CategoryName</span>
-                                <h6 class="fw-bold mb-1 text-slate-900" id="previewBookTitle">@book?.Title</h6>
-                                <div class="text-muted small" id="previewBookAuthor">@book?.Author</div>
-                                <div class="text-secondary small mt-1" id="previewBookIsbn">@book?.ISBN</div>
+                <div class="circ-card-body">
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="book-cover-frame flex-shrink-0">
+                            @if (!string.IsNullOrWhiteSpace(book?.ImageUrl))
+                            {
+                                <img id="previewBookCover" src="@ResolveBookImageUrl(book.ImageUrl)" alt="@book.Title" onerror="showBookCoverFallback()" />
+                            }
+                            else
+                            {
+                                <img id="previewBookCover" class="d-none" alt="" />
+                            }
+                            <div id="previewBookCoverEmpty" class="book-cover-fallback @(string.IsNullOrWhiteSpace(book?.ImageUrl) ? string.Empty : "d-none")">
+                                <span class="book-cover-fallback-mark">LIBRARY</span>
+                                <span id="previewBookCoverFallbackTitle" class="book-cover-fallback-title">@(book?.Title ?? "Select a book")</span>
+                                <span class="book-cover-fallback-rule"></span>
+                                <span id="previewBookCoverFallbackAuthor" class="book-cover-fallback-author">@(book?.Author ?? string.Empty)</span>
                             </div>
                         </div>
+                        <div>
+                            <span class="badge bg-light text-primary border mb-1" id="previewCategory">@book?.CategoryName</span>
+                            <h6 class="fw-bold mb-1 text-slate-900" id="previewBookTitle">@book?.Title</h6>
+                            <div class="text-muted small" id="previewBookAuthor">@book?.Author</div>
+                            <div class="text-secondary small mt-1" id="previewBookIsbn">@book?.ISBN</div>
+                        </div>
+                    </div>
 
-                        <!-- 3-Metrics Grid -->
-                        <div class="circ-book-metrics-grid">
-                            <div>
-                                <div class="circ-book-metric-val" id="metricTotal">@(book?.TotalCopies ?? 0)</div>
-                                <div class="circ-book-metric-label">Total Catalog</div>
-                            </div>
-                            <div>
-                                <div class="circ-book-metric-val text-success" id="metricAvailable">@(book?.AvailableCopies ?? 0)</div>
-                                <div class="circ-book-metric-label">Available Shelf</div>
-                            </div>
-                            <div>
-                                <div class="circ-book-metric-val text-primary" id="metricActiveLoan">@(book?.ActiveLoans ?? 0)</div>
-                                <div class="circ-book-metric-label">In Active Loan</div>
-                            </div>
+                    <!-- 3-Metrics Grid -->
+                    <div class="circ-book-metrics-grid">
+                        <div>
+                            <div class="circ-book-metric-val" id="metricTotal">@(book?.TotalCopies ?? 0)</div>
+                            <div class="circ-book-metric-label">Total Catalog</div>
+                        </div>
+                        <div>
+                            <div class="circ-book-metric-val text-success" id="metricAvailable">@(book?.AvailableCopies ?? 0)</div>
+                            <div class="circ-book-metric-label">Available Shelf</div>
+                        </div>
+                        <div>
+                            <div class="circ-book-metric-val text-primary" id="metricActiveLoan">@(book?.ActiveLoans ?? 0)</div>
+                            <div class="circ-book-metric-label">In Active Loan</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 @section Scripts {
     <script>
@@ -452,6 +462,8 @@
             document.getElementById('previewBookTitle').innerText = title;
             document.getElementById('previewBookAuthor').innerText = author;
             document.getElementById('previewBookIsbn').innerText = isbn;
+            const fieldIsbn = document.getElementById('fieldBookIsbn');
+            if (fieldIsbn) fieldIsbn.innerText = 'ISBN: ' + isbn;
             document.getElementById('previewCategory').innerText = category;
             document.getElementById('previewBookCoverFallbackTitle').innerText = title;
             document.getElementById('previewBookCoverFallbackAuthor').innerText = author;

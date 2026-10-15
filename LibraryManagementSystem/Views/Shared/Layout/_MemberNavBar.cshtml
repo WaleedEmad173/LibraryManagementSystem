@@ -5,25 +5,48 @@
 
 @{
     var user = await UserManager.GetUserAsync(User);
-    var fullName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? "Sara Ahmed");
-    var memberId = user != null ? $"#MB-{user.Id:D4}" : "#MB-4820";
-    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
-    var primaryRole = roles.FirstOrDefault() ?? "Member";
+    var isAdmin = User.IsInRole("Admin");
+    var isLibrarian = User.IsInRole("Librarian");
+    var isStaff = isAdmin || isLibrarian;
+
+    var fullName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? (isAdmin ? "Admin User" : isLibrarian ? "Librarian" : "Member"));
+    var idPrefix = isAdmin ? "#ADM-" : (isLibrarian ? "#LIB-" : "#MB-");
+    var memberId = user != null ? $"{idPrefix}{user.Id:D4}" : (isAdmin ? "#ADM-0001" : isLibrarian ? "#LIB-0104" : "#MB-4820");
+
+    var primaryRole = isAdmin ? "Admin" : (isLibrarian ? "Librarian" : "Member");
+    var portalName = isAdmin ? "Admin Portal" : (isLibrarian ? "Librarian Portal" : "Member Portal");
+
     var sectionTitle = ViewData["Section"]?.ToString();
+    var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+    if (string.IsNullOrWhiteSpace(sectionTitle))
+    {
+        if (currentPath.Contains("/book")) sectionTitle = "Books";
+        else if (currentPath.Contains("/categories")) sectionTitle = "Categories";
+        else if (currentPath.Contains("/members")) sectionTitle = "Members";
+        else if (currentPath.Contains("/borrow")) sectionTitle = isStaff ? "Borrow" : "My Borrowings";
+        else if (currentPath.Contains("/return")) sectionTitle = "Return";
+        else if (currentPath.Contains("/history")) sectionTitle = "Circulation History";
+        else if (currentPath.Contains("/staff")) sectionTitle = "Staff Accounts";
+        else sectionTitle = isStaff ? "Dashboard" : "Home";
+    }
 }
 
 <header class="app-top-navbar bg-white">
     <div class="navbar-content d-flex align-items-center justify-content-between">
-        <!-- Left Side: Title -->
-        <div class="portal-title-wrapper">
-            @if (!string.IsNullOrWhiteSpace(sectionTitle))
-            {
-                <div class="member-portal-crumbs"><span>Books</span><span>/</span><strong>@sectionTitle</strong></div>
-            }
-            else
-            {
-                <h1 class="portal-title mb-0">Member Portal</h1>
-            }
+        <!-- Left Side: Portal & Breadcrumbs -->
+        <div class="portal-title-wrapper d-flex align-items-center">
+            <button type="button" class="btn-topbar-sidebar-toggle me-3" id="globalSidebarToggle" title="Toggle Sidebar">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="member-portal-crumbs">
+                <span>@portalName</span>
+                <span>/</span>
+                <strong>@sectionTitle</strong>
+            </div>
         </div>
 
         <!-- Right Side: User Profile & Actions -->
@@ -31,7 +54,7 @@
             <!-- User Info Card -->
             <div class="user-profile-badge d-flex align-items-center me-3">
                 <!-- Avatar Icon -->
-                <div class="user-avatar-box me-2">
+                <div class="user-avatar-box me-2 @(isAdmin ? "avatar-admin" : isLibrarian ? "avatar-librarian" : "")">
                     <img src="~/Images/icons/person.png" alt="User Avatar" width="16" height="16" class="avatar-icon" />
                 </div>
 
@@ -42,7 +65,7 @@
                 </div>
 
                 <!-- Role Pill -->
-                <span class="role-badge">@primaryRole</span>
+                <span class="role-badge @(isAdmin ? "role-admin" : isLibrarian ? "role-librarian" : "role-member")">@primaryRole</span>
             </div>
 
             <!-- Divider -->
@@ -63,116 +86,3 @@
         </div>
     </div>
 </header>
-
-<style>
-    .app-top-navbar {
-        border-bottom: 1px solid #edf2f7;
-        padding: 14px 28px;
-        background-color: #ffffff;
-        position: sticky;
-        top: 0;
-        z-index: 1010;
-    }
-
-    .portal-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #0f172a;
-        letter-spacing: -0.2px;
-    }
-
-    .member-portal-crumbs { display: flex; align-items: center; gap: 9px; color: #4f5668; font-size: 1rem; }
-    .member-portal-crumbs strong { color: #17223b; font-weight: 700; }
-
-    .user-avatar-box {
-        width: 36px;
-        height: 36px;
-        background: #0f2756;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .avatar-icon {
-        filter: brightness(0) invert(1);
-        display: block;
-    }
-
-    .user-text-info {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.25;
-    }
-
-    .user-fullname {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #0f172a;
-    }
-
-    .user-id {
-        font-size: 0.72rem;
-        color: #64748b;
-        font-weight: 500;
-        margin-top: 1px;
-    }
-
-    .role-badge {
-        background-color: #dcfce7;
-        color: #15803d;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 3px 10px;
-        border-radius: 20px;
-        letter-spacing: 0.2px;
-    }
-
-    .nav-divider {
-        width: 1px;
-        height: 24px;
-        background-color: #e2e8f0;
-        margin: 0 14px;
-    }
-
-    .btn-logout {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        color: #475569;
-        font-size: 0.82rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.15s ease-in-out;
-        text-decoration: none;
-    }
-
-    .btn-logout:hover {
-        background-color: #f1f5f9;
-        color: #0f172a;
-        border-color: #cbd5e1;
-    }
-
-    .logout-icon {
-        stroke: currentColor;
-    }
-
-    @@media (max-width: 768px) {
-        .app-top-navbar {
-            padding: 12px 16px;
-        }
-
-        .portal-title {
-            font-size: 1rem;
-        }
-
-        .user-id {
-            display: none;
-        }
-    }
-</style>
