@@ -14,8 +14,5 @@ namespace LibraryManagementSystem.Models
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
         public ICollection<Borrowing> Borrowings { get; set; } = new List<Borrowing>();
-
-        // صورة غلاف الكتاب - اسم الملف المرفوع على السيرفر
-        public string? ImageUrl { get; set; }
     }
 }
