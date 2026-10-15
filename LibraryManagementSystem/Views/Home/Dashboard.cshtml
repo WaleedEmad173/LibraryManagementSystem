@@ -58,11 +58,7 @@
                         <div class="dash-stat-label">TOTAL CATALOG</div>
                         <div class="dash-stat-value">@Model.TotalCatalogTitles.ToString("N0")</div>
                     </div>
-                    <div class="dash-stat-icon bg-blue-subtle text-primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-                        </svg>
-                    </div>
+                    <div class="dash-stat-icon icon-books"><i class="bi bi-book" aria-hidden="true"></i></div>
                 </div>
                 <div class="dash-stat-note text-muted mt-2">
                     <span>@Model.TotalCopies.ToString("N0") physical copies recorded</span>
@@ -77,14 +73,7 @@
                         <div class="dash-stat-label">IN CIRCULATION</div>
                         <div class="dash-stat-value text-amber-600">@Model.CopiesOnLoan.ToString("N0")</div>
                     </div>
-                    <div class="dash-stat-icon bg-amber-subtle text-amber-600">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="17 1 21 5 17 9"></polyline>
-                            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                            <polyline points="7 23 3 19 7 15"></polyline>
-                            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-                        </svg>
-                    </div>
+                    <div class="dash-stat-icon icon-circulation"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></div>
                 </div>
                 <div class="dash-stat-note text-amber-600 mt-2">
                     <span>@Model.ActiveLoansCount active borrower loans</span>
@@ -99,12 +88,7 @@
                         <div class="dash-stat-label">AVAILABLE COPIES</div>
                         <div class="dash-stat-value text-emerald-600">@Model.AvailableCopies.ToString("N0")</div>
                     </div>
-                    <div class="dash-stat-icon bg-emerald-subtle text-emerald-600">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                    </div>
+                    <div class="dash-stat-icon icon-available"><i class="bi bi-check-circle" aria-hidden="true"></i></div>
                 </div>
                 <div class="dash-stat-note text-emerald-600 mt-2">
                     <span>@Model.ShelfReadinessPercent% shelf availability rate</span>
@@ -121,14 +105,7 @@
                             @(Model.IsStaff ? Model.TotalMembers.ToString("N0") : Model.MyActiveBorrowingsCount.ToString("N0"))
                         </div>
                     </div>
-                    <div class="dash-stat-icon @(Model.IsStaff ? "bg-purple-subtle text-indigo" : "bg-slate-subtle text-slate-700")">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </div>
+                    <div class="dash-stat-icon icon-members"><i class="bi bi-people" aria-hidden="true"></i></div>
                 </div>
                 <div class="dash-stat-note mt-2 @(Model.OverdueLoansCount > 0 ? "text-danger" : "text-muted")">
                     @if (Model.IsStaff)

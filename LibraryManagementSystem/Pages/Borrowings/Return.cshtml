@@ -266,22 +266,14 @@
         </div>
         <div class="d-flex gap-2 mt-3 mt-lg-0">
             <div class="circ-stat-chip">
-                <div class="circ-stat-chip-icon" style="color: #059669;">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+                <div class="circ-stat-chip-icon icon-circulation"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></div>
                 <div>
                     <div class="circ-stat-chip-label">ACTIVE LOANS</div>
                     <div class="circ-stat-chip-val">@Model.ViewModel.TotalActiveLoansCount</div>
                 </div>
             </div>
             <div class="circ-stat-chip">
-                <div class="circ-stat-chip-icon" style="color: #e11d48;">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
+                <div class="circ-stat-chip-icon icon-due"><i class="bi bi-clock-history" aria-hidden="true"></i></div>
                 <div>
                     <div class="circ-stat-chip-label">DUE THIS WEEK</div>
                     <div class="circ-stat-chip-val">@Model.ViewModel.DueThisWeekCount</div>

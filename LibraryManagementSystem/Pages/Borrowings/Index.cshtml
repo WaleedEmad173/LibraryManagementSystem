@@ -30,15 +30,15 @@
 
     <section class="history-stats" aria-label="Circulation summary">
         <article class="history-stat-card">
-            <span class="history-stat-icon history-stat-blue"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10v18H5V5a2 2 0 0 1 2-2Zm1 5h6M8 12h8m-8 4h8" /></svg></span>
+            <span class="history-stat-icon icon-records"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
             <div><div class="history-stat-label">TOTAL RECORDS</div><div class="history-stat-value">@view.TotalBorrowedCount <small>All Time</small></div></div>
         </article>
         <article class="history-stat-card">
-            <span class="history-stat-icon history-stat-amber"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+            <span class="history-stat-icon icon-circulation"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span>
             <div><div class="history-stat-label">ACTIVE LOANS</div><div class="history-stat-value">@view.CurrentlyBorrowedCount <small>Requires Return</small></div></div>
         </article>
         <article class="history-stat-card">
-            <span class="history-stat-icon history-stat-green"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+            <span class="history-stat-icon icon-available"><i class="bi bi-check-circle" aria-hidden="true"></i></span>
             <div><div class="history-stat-label">COMPLETED RETURNS</div><div class="history-stat-value">@view.CompletedReturnsCount <small>Restocked</small></div></div>
         </article>
     </section>
