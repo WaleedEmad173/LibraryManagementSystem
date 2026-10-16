@@ -64,6 +64,14 @@ namespace LibraryManagementSystem.Controllers
                 );
 
             int realActiveLoans = await _context.Borrowings.CountAsync(b => b.ReturnDate == null);
+            int membersWithOverdueLoans = await _context.Borrowings
+                .Where(b => b.ReturnDate == null && b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) < DateTime.Today)
+                .Select(b => b.UserId)
+                .Distinct()
+                .CountAsync();
+            double goodStandingPercentage = totalItems == 0
+                ? 0
+                : Math.Round(Math.Max(0, totalItems - membersWithOverdueLoans) * 100.0 / totalItems, 1);
 
             var memberList = users.Select(u =>
             {
@@ -79,36 +87,14 @@ namespace LibraryManagementSystem.Controllers
                     Id = u.Id,
                     FullName = u.FullName,
                     Email = u.Email ?? "",
-                    Phone = u.PhoneNumber ?? "+1 (555) 000-0000",
+                    Phone = u.PhoneNumber,
                     JoinDate = u.JoinDate,
                     ActiveBorrowings = activeCounts.TryGetValue(u.Id, out var c) ? c : 0,
-                    MemberCode = $"#MEM-{4090 + u.Id}",
+                    MemberCode = LibraryIdentifiers.Member(u.Id),
                     Initials = initials,
                     Role = roleName
                 };
             }).ToList();
-
-            // High-fidelity fallback items matching the mockup when DB is fresh/empty
-            if (!memberList.Any() && string.IsNullOrWhiteSpace(search))
-            {
-                var demoAll = new List<MemberRowViewModel>
-                {
-                    new() { Id = 1, FullName = "Sara Ahmed", Initials = "SA", MemberCode = "#MEM-4091", Role = "Member", Email = "sara.ahmed@example.com", Phone = "+1 (555) 234-8901", JoinDate = new DateTime(2023, 10, 12), ActiveBorrowings = 2 },
-                    new() { Id = 2, FullName = "Daniel Kahneman", Initials = "DK", MemberCode = "#MEM-4092", Role = "Member", Email = "d.kahneman@example.com", Phone = "+1 (555) 345-6789", JoinDate = new DateTime(2023, 11, 4), ActiveBorrowings = 1 },
-                    new() { Id = 3, FullName = "Maya Lin", Initials = "ML", MemberCode = "#MEM-4093", Role = "Member", Email = "maya.lin@example.com", Phone = "+1 (555) 456-7890", JoinDate = new DateTime(2024, 1, 15), ActiveBorrowings = 1 },
-                    new() { Id = 4, FullName = "Alex Xu", Initials = "AX", MemberCode = "#MEM-4094", Role = "Member", Email = "alex.xu@bytebyte.com", Phone = "+1 (555) 567-8901", JoinDate = new DateTime(2024, 2, 20), ActiveBorrowings = 0 },
-                    new() { Id = 5, FullName = "Elena Rostova", Initials = "ER", MemberCode = "#MEM-4095", Role = "Member", Email = "e.rostova@university.edu", Phone = "+1 (555) 678-9012", JoinDate = new DateTime(2024, 3, 8), ActiveBorrowings = 0 },
-                    new() { Id = 6, FullName = "Marcus Vance", Initials = "MV", MemberCode = "#MEM-4096", Role = "Member", Email = "marcus.vance@techmail.org", Phone = "+1 (555) 789-0123", JoinDate = new DateTime(2024, 4, 19), ActiveBorrowings = 0 },
-                    new() { Id = 7, FullName = "Sophia Chen", Initials = "SC", MemberCode = "#MEM-4097", Role = "Member", Email = "sophia.chen@example.edu", Phone = "+1 (555) 890-1234", JoinDate = new DateTime(2024, 5, 22), ActiveBorrowings = 3 },
-                    new() { Id = 8, FullName = "James Wilson", Initials = "JW", MemberCode = "#MEM-4098", Role = "Member", Email = "j.wilson@civiclibrary.net", Phone = "+1 (555) 901-2345", JoinDate = new DateTime(2024, 6, 11), ActiveBorrowings = 1 },
-                    new() { Id = 9, FullName = "Omar Hassan", Initials = "OH", MemberCode = "#MEM-4099", Role = "Librarian", Email = "omar.hassan@library.com", Phone = "+1 (555) 800-1122", JoinDate = new DateTime(2023, 8, 1), ActiveBorrowings = 0 },
-                    new() { Id = 10, FullName = "Mona Ali", Initials = "MA", MemberCode = "#ADM-0001", Role = "Admin", Email = "admin@library.com", Phone = "+1 (555) 999-0011", JoinDate = new DateTime(2023, 1, 10), ActiveBorrowings = 0 }
-                };
-
-                totalItems = demoAll.Count;
-                totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
-                memberList = demoAll.Skip((page - 1) * PageSize).Take(PageSize).ToList();
-            }
 
             var model = new MemberListViewModel
             {
@@ -116,8 +102,8 @@ namespace LibraryManagementSystem.Controllers
                 Page = page,
                 TotalPages = Math.Max(totalPages, 1),
                 TotalMembers = totalItems,
-                ActiveLoansTotal = realActiveLoans > 0 ? realActiveLoans : 87,
-                GoodStandingPercentage = 98.2,
+                ActiveLoansTotal = realActiveLoans,
+                GoodStandingPercentage = goodStandingPercentage,
                 Members = memberList
             };
 
@@ -132,22 +118,8 @@ namespace LibraryManagementSystem.Controllers
 
             var user = await _userManager.FindByIdAsync(id.ToString());
 
-            // Demo fallback if user id is 1 (Sara Ahmed) and user not seeded
-            if (user == null && id == 1)
-            {
-                user = new ApplicationUser
-                {
-                    Id = 1,
-                    FullName = "Sara Ahmed",
-                    Email = "sara.ahmed@example.com",
-                    PhoneNumber = "+1 (555) 234-8901",
-                    JoinDate = new DateTime(2023, 10, 12)
-                };
-            }
-            else if (user == null)
-            {
+            if (user == null)
                 return NotFound();
-            }
 
             var query = _context.Borrowings
                 .Include(b => b.Book)
@@ -156,90 +128,30 @@ namespace LibraryManagementSystem.Controllers
                 .Select(b => new BorrowingRowViewModel
                 {
                     Id = b.Id,
-                    BookTitle = b.Book.Title,
-                    Author = b.Book.Author,
-                    ISBN = b.Book.ISBN,
+                    BookTitle = b.Book != null ? b.Book.Title : string.Empty,
+                    Author = b.Book != null ? b.Book.Author : string.Empty,
+                    ISBN = b.Book != null ? b.Book.ISBN : string.Empty,
                     BorrowDate = b.BorrowDate,
                     ReturnDate = b.ReturnDate,
-                    DueDate = b.BorrowDate.AddDays(14)
+                    DueDate = b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays)
                 });
 
             var borrowings = await query.ToListAsync();
 
-            if (!borrowings.Any() && (id == 1 || user.FullName.Contains("Sara", StringComparison.OrdinalIgnoreCase)))
-            {
-                // Exact 6 high-fidelity records matching the mockup
-                borrowings = new List<BorrowingRowViewModel>
-                {
-                    new()
-                    {
-                        Id = 101,
-                        BookTitle = "Clean Code: A Handbook of Agile Software Craftsmanship",
-                        Author = "Robert C. Martin",
-                        ISBN = "978-0132350884",
-                        BorrowDate = new DateTime(2024, 10, 24),
-                        ReturnDate = null,
-                        DueDate = new DateTime(2024, 11, 7)
-                    },
-                    new()
-                    {
-                        Id = 102,
-                        BookTitle = "System Design Interview – An Insider's Guide",
-                        Author = "Alex Xu",
-                        ISBN = "978-1736453403",
-                        BorrowDate = new DateTime(2024, 10, 14),
-                        ReturnDate = null,
-                        DueDate = new DateTime(2024, 10, 28)
-                    },
-                    new()
-                    {
-                        Id = 103,
-                        BookTitle = "Klara and the Sun",
-                        Author = "Kazuo Ishiguro",
-                        ISBN = "978-0593318171",
-                        BorrowDate = new DateTime(2024, 9, 15),
-                        ReturnDate = new DateTime(2024, 9, 28)
-                    },
-                    new()
-                    {
-                        Id = 104,
-                        BookTitle = "Atomic Habits",
-                        Author = "James Clear",
-                        ISBN = "978-0735211292",
-                        BorrowDate = new DateTime(2024, 8, 26),
-                        ReturnDate = new DateTime(2024, 9, 10)
-                    },
-                    new()
-                    {
-                        Id = 105,
-                        BookTitle = "Designing Data-Intensive Applications",
-                        Author = "Martin Kleppmann",
-                        ISBN = "978-1449373320",
-                        BorrowDate = new DateTime(2024, 8, 2),
-                        ReturnDate = new DateTime(2024, 8, 15)
-                    },
-                    new()
-                    {
-                        Id = 106,
-                        BookTitle = "A Brief History of Time",
-                        Author = "Stephen Hawking",
-                        ISBN = "978-0553380163",
-                        BorrowDate = new DateTime(2024, 7, 11),
-                        ReturnDate = new DateTime(2024, 7, 24)
-                    }
-                };
-            }
-
             int activeCount = borrowings.Count(b => b.ReturnDate == null);
-            int totalLoans = Math.Max(borrowings.Count, activeCount > 0 ? 9 : borrowings.Count);
-            double returnRate = 100.0;
+            int overdueCount = borrowings.Count(b => b.ReturnDate == null && b.DueDate < DateTime.Today);
+            int returnedCount = borrowings.Count(b => b.ReturnDate != null);
+            int totalLoans = borrowings.Count;
+            double returnRate = totalLoans == 0
+                ? 0
+                : Math.Round((totalLoans - overdueCount) * 100.0 / totalLoans, 1);
 
             var names = user.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string initials = names.Length >= 2
                 ? $"{names[0][0]}{names[1][0]}".ToUpper()
-                : (user.FullName.Length >= 2 ? user.FullName[..2].ToUpper() : "SA");
+                : (user.FullName.Length >= 2 ? user.FullName[..2].ToUpper() : string.Empty);
 
-            string memberCode = id == 1 ? "#MB-4018" : $"#MB-{4017 + user.Id}";
+            string memberCode = LibraryIdentifiers.Member(user.Id);
 
             ViewData["CurrentFilter"] = filter ?? "all";
             var filteredBorrowings = filter switch
@@ -254,16 +166,16 @@ namespace LibraryManagementSystem.Controllers
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email ?? "",
-                Phone = user.PhoneNumber ?? "+1 (555) 234-8901",
+                Phone = user.PhoneNumber,
                 JoinDate = user.JoinDate,
                 MemberCode = memberCode,
                 Initials = initials,
                 ActiveLoansCount = activeCount,
-                MaxLoansQuota = 5,
+                MaxLoansQuota = CirculationPolicy.MaxActiveLoans,
                 TotalLoansCount = totalLoans,
+                ReturnedLoansCount = returnedCount,
                 ReturnRate = returnRate,
-                StatusStanding = "In Good Standing",
-                OutstandingFines = "No Outstanding Fines",
+                StatusStanding = overdueCount == 0 ? "No Overdue Loans" : $"{overdueCount} Overdue Loan(s)",
                 Borrowings = filteredBorrowings
             };
 
@@ -276,11 +188,6 @@ namespace LibraryManagementSystem.Controllers
             ViewData["Title"] = "Add New Member";
             ViewData["Section"] = "Members";
 
-            var maxId = await _context.Users.AnyAsync() 
-                ? await _context.Users.MaxAsync(u => u.Id) 
-                : 0;
-            ViewBag.AutoAssignedCode = maxId >= 1 ? $"#MB-{4900 + maxId + 1}" : "#MB-4902";
-
             return View(new MemberFormViewModel());
         }
 
@@ -292,18 +199,13 @@ namespace LibraryManagementSystem.Controllers
             ViewData["Title"] = "Add New Member";
             ViewData["Section"] = "Members";
 
-            var maxId = await _context.Users.AnyAsync() 
-                ? await _context.Users.MaxAsync(u => u.Id) 
-                : 0;
-            ViewBag.AutoAssignedCode = maxId >= 1 ? $"#MB-{4900 + maxId + 1}" : "#MB-4902";
-
             if (!ModelState.IsValid)
                 return View(model);
 
             var existing = await _userManager.FindByEmailAsync(model.Email);
             if (existing != null)
             {
-                ModelState.AddModelError("Email", $"Email already registered to member #MB-{4020 + existing.Id}");
+                ModelState.AddModelError("Email", $"Email already registered to member {LibraryIdentifiers.Member(existing.Id)}");
                 return View(model);
             }
 
@@ -344,9 +246,9 @@ namespace LibraryManagementSystem.Controllers
             var names = user.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string initials = names.Length >= 2
                 ? $"{names[0][0]}{names[1][0]}".ToUpper()
-                : (user.FullName.Length >= 2 ? user.FullName[..2].ToUpper() : "SA");
+                : (user.FullName.Length >= 2 ? user.FullName[..2].ToUpper() : string.Empty);
 
-            string memberCode = id == 1 ? "#MB-4020" : $"#MB-{4019 + user.Id}";
+            string memberCode = LibraryIdentifiers.Member(user.Id);
 
             // Fetch active loans for user
             var realLoans = await _context.Borrowings
@@ -355,67 +257,41 @@ namespace LibraryManagementSystem.Controllers
                 .ToListAsync();
 
             var activeLoanItems = new List<EditMemberLoanItem>();
-            if (realLoans.Any())
+            foreach (var loan in realLoans)
             {
-                foreach (var loan in realLoans)
-                {
-                    var dueDate = loan.BorrowDate.AddDays(14);
-                    int daysLeft = Math.Max(0, (dueDate - DateTime.UtcNow).Days);
-                    activeLoanItems.Add(new EditMemberLoanItem
-                    {
-                        Title = loan.Book?.Title ?? "Book Title",
-                        Dewey = "005." + (100 + loan.BookId),
-                        Barcode = $"#BOK-{3000 + loan.BookId:D4}",
-                        DueText = $"Due in {daysLeft} days ({dueDate:MMM dd, yyyy})"
-                    });
-                }
-            }
-            else
-            {
+                var dueDate = loan.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays);
+                int daysLeft = (dueDate.Date - DateTime.Today).Days;
                 activeLoanItems.Add(new EditMemberLoanItem
                 {
-                    Title = "Principles of Distributed Database...",
-                    Dewey = "005.759",
-                    Barcode = "#BOK-0402",
-                    DueText = "Due in 14 days (Nov 15, 2024)"
-                });
-                activeLoanItems.Add(new EditMemberLoanItem
-                {
-                    Title = "Clean Architecture: A Craftsman...",
-                    Dewey = "005.1",
-                    Barcode = "#BOK-3108",
-                    DueText = "Due in 6 days (Nov 7, 2024)"
+                    Title = loan.Book?.Title ?? string.Empty,
+                    Author = loan.Book?.Author ?? string.Empty,
+                    ISBN = loan.Book?.ISBN ?? string.Empty,
+                    DueText = daysLeft < 0
+                        ? $"Overdue by {-daysLeft} days ({dueDate:MMM dd, yyyy})"
+                        : $"Due in {daysLeft} days ({dueDate:MMM dd, yyyy})"
                 });
             }
 
-            var auditLogs = new List<MemberAuditLogItem>
-            {
-                new() { Title = "Portal Sign-in Success", Timestamp = "Oct 24, 2024 at 10:45 AM", Detail = "Terminal: Campus WiFi (192.168.4.12)", IsPrimary = true },
-                new() { Title = "Item Loan Registered", Timestamp = "Oct 20, 2024 at 03:18 PM", Detail = "By Librarian: Omar Hassan (LIB-104)", IsPrimary = false },
-                new() { Title = "Email Verification", Timestamp = $"{user.JoinDate:MMM dd, yyyy} at 09:12 AM", Detail = "Self-service digital onboarding", IsPrimary = false }
-            };
+            int overdueItems = realLoans.Count(loan => loan.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) < DateTime.Today);
+            int lifetimeLoans = await _context.Borrowings.CountAsync(loan => loan.UserId == id);
 
             var model = new MemberFormViewModel
             {
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email ?? "",
-                Phone = user.PhoneNumber ?? "+1 (555) 234-8901",
-                MembershipTier = "Standard Member (5 loans max)",
+                Phone = user.PhoneNumber,
                 MemberCode = memberCode,
                 Initials = initials,
-                CardStatus = "Verified",
+                CardStatus = user.EmailConfirmed ? "Verified" : "Unverified",
                 JoinDate = user.JoinDate,
-                CurrentlyBorrowed = activeLoanItems.Count,
-                BorrowAllowance = 5,
-                OverdueItems = 0,
-                StandingStatus = "Good",
-                StandingDesc = "Clean ledger & zero holds lost",
-                OutstandingFines = "$0.00 USD",
-                CardRenewalDue = $"{user.JoinDate.AddYears(2):MMM dd, yyyy}",
-                LifetimeCheckouts = "43 Volumes",
-                ActiveLoans = activeLoanItems,
-                AuditLogs = auditLogs
+                CurrentlyBorrowed = realLoans.Count,
+                BorrowAllowance = CirculationPolicy.MaxActiveLoans,
+                OverdueItems = overdueItems,
+                StandingStatus = overdueItems == 0 ? "Good" : "Overdue",
+                StandingDesc = overdueItems == 0 ? "No overdue loans" : "Overdue loans require attention",
+                LifetimeCheckouts = $"{lifetimeLoans} Volumes",
+                ActiveLoans = activeLoanItems
             };
 
             return View(model);
@@ -434,7 +310,7 @@ namespace LibraryManagementSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                PopulateEditContext(model);
+                await PopulateEditContextAsync(model);
                 return View(model);
             }
 
@@ -445,8 +321,8 @@ namespace LibraryManagementSystem.Controllers
             var emailOwner = await _userManager.FindByEmailAsync(model.Email);
             if (emailOwner != null && emailOwner.Id != id)
             {
-                ModelState.AddModelError("Email", $"Email already registered to member #MB-{4020 + emailOwner.Id}");
-                PopulateEditContext(model);
+                ModelState.AddModelError("Email", $"Email already registered to member {LibraryIdentifiers.Member(emailOwner.Id)}");
+                await PopulateEditContextAsync(model);
                 return View(model);
             }
 
@@ -460,7 +336,7 @@ namespace LibraryManagementSystem.Controllers
             {
                 foreach (var error in result.Errors)
                     ModelState.AddModelError("", error.Description);
-                PopulateEditContext(model);
+                await PopulateEditContextAsync(model);
                 return View(model);
             }
 
@@ -473,7 +349,7 @@ namespace LibraryManagementSystem.Controllers
                 {
                     foreach (var error in passResult.Errors)
                         ModelState.AddModelError("", error.Description);
-                    PopulateEditContext(model);
+                    await PopulateEditContextAsync(model);
                     return View(model);
                 }
             }
@@ -482,32 +358,47 @@ namespace LibraryManagementSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private void PopulateEditContext(MemberFormViewModel model)
+        private async Task PopulateEditContextAsync(MemberFormViewModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.MemberCode))
-                model.MemberCode = model.Id == 1 ? "#MB-4020" : $"#MB-{4019 + (model.Id ?? 1)}";
-            if (string.IsNullOrWhiteSpace(model.Initials) && !string.IsNullOrWhiteSpace(model.FullName))
+            if (!model.Id.HasValue)
+                return;
+
+            var user = await _userManager.FindByIdAsync(model.Id.Value.ToString());
+            if (user == null)
+                return;
+
+            var names = model.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            model.MemberCode = LibraryIdentifiers.Member(user.Id);
+            model.Initials = names.Length >= 2
+                ? $"{names[0][0]}{names[1][0]}".ToUpperInvariant()
+                : (model.FullName.Length >= 2 ? model.FullName[..2].ToUpperInvariant() : string.Empty);
+            model.CardStatus = user.EmailConfirmed ? "Verified" : "Unverified";
+            model.JoinDate = user.JoinDate;
+
+            var loans = await _context.Borrowings
+                .Include(b => b.Book)
+                .Where(b => b.UserId == user.Id && b.ReturnDate == null)
+                .ToListAsync();
+            model.CurrentlyBorrowed = loans.Count;
+            model.OverdueItems = loans.Count(b => b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) < DateTime.Today);
+            model.StandingStatus = model.OverdueItems == 0 ? "Good" : "Overdue";
+            model.StandingDesc = model.OverdueItems == 0 ? "No overdue loans" : "Overdue loans require attention";
+            model.LifetimeCheckouts = $"{await _context.Borrowings.CountAsync(b => b.UserId == user.Id)} Volumes";
+            model.BorrowAllowance = CirculationPolicy.MaxActiveLoans;
+            model.ActiveLoans = loans.Select(loan =>
             {
-                var parts = model.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                model.Initials = parts.Length >= 2 ? $"{parts[0][0]}{parts[1][0]}".ToUpper() : "SA";
-            }
-            if (!model.ActiveLoans.Any())
-            {
-                model.ActiveLoans = new List<EditMemberLoanItem>
+                var dueDate = loan.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays);
+                int daysLeft = (dueDate.Date - DateTime.Today).Days;
+                return new EditMemberLoanItem
                 {
-                    new() { Title = "Principles of Distributed Database...", Dewey = "005.759", Barcode = "#BOK-0402", DueText = "Due in 14 days (Nov 15, 2024)" },
-                    new() { Title = "Clean Architecture: A Craftsman...", Dewey = "005.1", Barcode = "#BOK-3108", DueText = "Due in 6 days (Nov 7, 2024)" }
+                    Title = loan.Book?.Title ?? string.Empty,
+                    Author = loan.Book?.Author ?? string.Empty,
+                    ISBN = loan.Book?.ISBN ?? string.Empty,
+                    DueText = daysLeft < 0
+                        ? $"Overdue by {-daysLeft} days ({dueDate:MMM dd, yyyy})"
+                        : $"Due in {daysLeft} days ({dueDate:MMM dd, yyyy})"
                 };
-            }
-            if (!model.AuditLogs.Any())
-            {
-                model.AuditLogs = new List<MemberAuditLogItem>
-                {
-                    new() { Title = "Portal Sign-in Success", Timestamp = "Oct 24, 2024 at 10:45 AM", Detail = "Terminal: Campus WiFi (192.168.4.12)", IsPrimary = true },
-                    new() { Title = "Item Loan Registered", Timestamp = "Oct 20, 2024 at 03:18 PM", Detail = "By Librarian: Omar Hassan (LIB-104)", IsPrimary = false },
-                    new() { Title = "Email Verification", Timestamp = "Oct 12, 2023 at 09:12 AM", Detail = "Self-service digital onboarding", IsPrimary = false }
-                };
-            }
+            }).ToList();
         }
 
         // GET: /Members/Delete/{id}  -- Admin only
@@ -521,7 +412,7 @@ namespace LibraryManagementSystem.Controllers
             var parts = user.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var initials = parts.Length >= 2
                 ? $"{parts[0][0]}{parts[1][0]}".ToUpper()
-                : (parts.Length == 1 && parts[0].Length >= 2 ? parts[0][..2].ToUpper() : "MB");
+                : (parts.Length == 1 && parts[0].Length >= 2 ? parts[0][..2].ToUpper() : string.Empty);
 
             var completedLoans = await _context.Borrowings.CountAsync(b => b.UserId == id && b.ReturnDate != null);
             var activeBorrowings = await _context.Borrowings
@@ -534,11 +425,11 @@ namespace LibraryManagementSystem.Controllers
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email ?? "",
-                Phone = !string.IsNullOrWhiteSpace(user.PhoneNumber) ? user.PhoneNumber : "+1 (555) 234-8901",
-                MemberCode = $"#MB-{user.Id:D4}",
+                Phone = user.PhoneNumber,
+                MemberCode = LibraryIdentifiers.Member(user.Id),
                 Initials = initials,
                 JoinDate = user.JoinDate,
-                CompletedLoansCount = completedLoans > 0 ? completedLoans : 38
+                CompletedLoansCount = completedLoans
             };
 
             if (activeBorrowings.Any())
@@ -549,8 +440,7 @@ namespace LibraryManagementSystem.Controllers
                 {
                     Id = b.Id,
                     BookTitle = b.Book?.Title ?? "Book",
-                    Barcode = $"BC-{Math.Abs((b.Id * 48192) % 90000) + 10000}",
-                    DueDate = b.BorrowDate.AddDays(14)
+                    DueDate = b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays)
                 }).ToList();
             }
 

@@ -4,9 +4,9 @@
     ViewData["Title"] = "Borrowing Record Details";
     var b = Model.Borrowing;
     var isReturned = b?.ReturnDate.HasValue == true;
-    var isOverdue = !isReturned && b != null && DateTime.Today > b.BorrowDate.AddDays(14);
+    var isOverdue = !isReturned && b != null && DateTime.Today > b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays);
     var loanRef = b == null ? string.Empty : $"#LN-{b.Id:D4}";
-    var memberId = b == null ? string.Empty : $"#MB-{b.UserId:D4}";
+    var memberId = b == null ? string.Empty : LibraryIdentifiers.Member(b.UserId);
     var initials = string.Empty;
     if (!string.IsNullOrWhiteSpace(b?.User?.FullName))
     {
@@ -136,7 +136,7 @@
                                 </div>
                                 <div>
                                     <div class="text-muted small">Standard Loan Period</div>
-                                    <div class="fw-semibold text-slate-900">14 Days</div>
+                                    <div class="fw-semibold text-slate-900">@CirculationPolicy.LoanPeriodDays Days</div>
                                 </div>
                             </div>
 
@@ -211,10 +211,10 @@
                                 <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span class="text-muted small fw-semibold">Scheduled Due Date</span>
-                                        <span class="circ-badge circ-badge-emerald">+14 Days</span>
+                                        <span class="circ-badge circ-badge-emerald">+@CirculationPolicy.LoanPeriodDays Days</span>
                                     </div>
                                     <div class="fw-bold text-slate-900 fs-6">
-                                        @b.BorrowDate.AddDays(14).ToString("MMMM dd, yyyy")
+                                        @b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays).ToString("MMMM dd, yyyy")
                                     </div>
                                     <div class="text-muted small">Standard auto-policy applied</div>
                                 </div>
@@ -235,11 +235,11 @@
                                         }
                                         else if (isOverdue)
                                         {
-                                            <span class="text-danger">Overdue by @((DateTime.Today - b.BorrowDate.AddDays(14)).Days) days</span>
+                                            <span class="text-danger">Overdue by @((DateTime.Today - b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays)).Days) days</span>
                                         }
                                         else
                                         {
-                                            <span>Currently Active Loan (Due in @((b.BorrowDate.AddDays(14) - DateTime.Today).Days) days)</span>
+                                            <span>Currently Active Loan (Due in @((b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) - DateTime.Today).Days) days)</span>
                                         }
                                     </div>
                                 </div>

@@ -107,14 +107,14 @@ namespace LibraryManagementSystem.Pages.Borrowings
                 UserId = b.UserId,
                 BorrowerName = b.User?.FullName ?? string.Empty,
                 BorrowerEmail = b.User?.Email ?? string.Empty,
-                MemberId = $"#MB-{b.UserId:D4}",
+                MemberId = LibraryIdentifiers.Member(b.UserId),
                 BorrowerInitials = GetInitials(b.User?.FullName),
                 BorrowDate = b.BorrowDate
             }).ToList();
 
             ViewModel.ReturnsTodayCount = await _context.Borrowings.CountAsync(b => b.ReturnDate.HasValue && b.ReturnDate.Value.Date == DateTime.Today);
-            ViewModel.OverdueItemsCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(14) < DateTime.Today);
-            ViewModel.DueThisWeekCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(14) >= DateTime.Today && b.BorrowDate.AddDays(14) <= DateTime.Today.AddDays(7));
+            ViewModel.OverdueItemsCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) < DateTime.Today);
+            ViewModel.DueThisWeekCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) >= DateTime.Today && b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) <= DateTime.Today.AddDays(7));
             ViewModel.TotalActiveLoansCount = await _context.Borrowings.CountAsync(b => b.ReturnDate == null);
             ViewModel.MatchingActiveLoansCount = matchingCount;
             ViewModel.PageNumber = pageNumber;

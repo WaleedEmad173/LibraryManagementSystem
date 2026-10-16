@@ -94,11 +94,11 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
             // Check member quota
             var activeLoans = await _context.Borrowings.CountAsync(b => b.UserId == member.Id && b.ReturnDate == null);
-            if (activeLoans >= 3)
+            if (activeLoans >= CirculationPolicy.MaxActiveLoans)
             {
                 ViewModel.AlertState = "duplicate";
                 ViewModel.AlertTitle = "Borrowing Quota Limit Reached";
-                ViewModel.AlertMessage = $"Patron {member.FullName} currently has {activeLoans} active books checked out. Maximum quota is 3 books.";
+                ViewModel.AlertMessage = $"Patron {member.FullName} currently has {activeLoans} active books checked out. Maximum quota is {CirculationPolicy.MaxActiveLoans} books.";
                 return Page();
             }
 
@@ -121,7 +121,7 @@ namespace LibraryManagementSystem.Pages.Borrowings
             ViewModel.AlertState = "success";
             ViewModel.AlertTitle = "Book borrowed successfully";
             ViewModel.AlertReference = $"#LN-{borrowing.Id:D4}";
-            ViewModel.AlertDueDate = DateTime.Today.AddDays(14);
+            ViewModel.AlertDueDate = DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays);
             ViewModel.AlertMessage = $"Inventory status updated instantly. Transaction permitted with reference {ViewModel.AlertReference}. Assigned to member {member.FullName}.";
 
             return Page();
@@ -154,16 +154,16 @@ namespace LibraryManagementSystem.Pages.Borrowings
                 ViewModel.Members = dbUsers.Select(u =>
                 {
                     var activeLoans = u.Borrowings.Count(b => b.ReturnDate == null);
-                    var overdue = u.Borrowings.Count(b => b.ReturnDate == null && DateTime.Today > b.BorrowDate.AddDays(14));
+                    var overdue = u.Borrowings.Count(b => b.ReturnDate == null && DateTime.Today > b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays));
                     return new PatronOptionViewModel
                     {
                         Id = u.Id,
                         FullName = u.FullName,
                         Email = u.Email ?? string.Empty,
-                        MemberId = $"#MB-{u.Id:D4}",
+                        MemberId = LibraryIdentifiers.Member(u.Id),
                         Initials = GetInitials(u.FullName),
                         ActiveLoansCount = activeLoans,
-                        MaxQuota = 3,
+                        MaxQuota = CirculationPolicy.MaxActiveLoans,
                         OverdueCount = overdue,
                         Standing = overdue > 0 ? "Under Review" : "Good Standing"
                     };

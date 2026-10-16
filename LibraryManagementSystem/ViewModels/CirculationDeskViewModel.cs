@@ -1,3 +1,4 @@
+using LibraryManagementSystem.Models;
 using System;
 using System.Collections.Generic;
 
@@ -11,9 +12,9 @@ namespace LibraryManagementSystem.ViewModels
         public string MemberId { get; set; } = string.Empty;
         public string Initials { get; set; } = string.Empty;
         public int ActiveLoansCount { get; set; }
-        public int MaxQuota { get; set; } = 3;
+        public int MaxQuota { get; set; }
         public int OverdueCount { get; set; }
-        public string Standing { get; set; } = "Good Standing";
+        public string Standing { get; set; } = string.Empty;
     }
 
     public class BookOptionViewModel
@@ -35,7 +36,7 @@ namespace LibraryManagementSystem.ViewModels
         public int SelectedUserId { get; set; }
         public int SelectedBookId { get; set; }
         public DateTime BorrowDate { get; set; } = DateTime.Today;
-        public DateTime DueDate { get; set; } = DateTime.Today.AddDays(14);
+        public DateTime DueDate { get; set; } = DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays);
         public int TransactedCount { get; set; }
 
         public List<PatronOptionViewModel> Members { get; set; } = new();
@@ -65,7 +66,7 @@ namespace LibraryManagementSystem.ViewModels
         public string MemberId { get; set; } = string.Empty;
         public string BorrowerInitials { get; set; } = string.Empty;
         public DateTime BorrowDate { get; set; }
-        public DateTime DueDate => BorrowDate.AddDays(14);
+        public DateTime DueDate => BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays);
         public bool IsOverdue => DateTime.Today > DueDate;
         public int DaysOverdue => Math.Max(0, (DateTime.Today - DueDate).Days);
         public int DaysRemaining => Math.Max(0, (DueDate - DateTime.Today).Days);

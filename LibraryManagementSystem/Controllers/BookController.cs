@@ -288,7 +288,7 @@ namespace LibraryManagementSystem.Controllers
                         BookAuthor = book.Author,
                         BookISBN = book.ISBN,
                         BorrowerName = b.User?.FullName ?? "Unknown member",
-                        MemberId = $"#MB-{b.UserId:D4}",
+                        MemberId = LibraryIdentifiers.Member(b.UserId),
                         BorrowDate = b.BorrowDate,
                         ReturnDate = b.ReturnDate
                     })

@@ -7,14 +7,11 @@
     // out = none left, full = nothing borrowed, low = a third or less left, ok = everything else
     var state = available == 0 ? "out" : available == total ? "full" : pct <= 34 ? "low" : "ok";
 
-    var categoryName = Model.Category?.Name ?? "General";
+    var categoryName = Model.Category?.Name ?? "Uncategorized";
     // "Psychology & Self-Help" -> "psychology-self-help"
     var categorySlug = System.Text.RegularExpressions.Regex
         .Replace(categoryName.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
 
-    var shelfInfo = !string.IsNullOrWhiteSpace(Model.Description) && Model.Description.Contains("Shelf")
-        ? Model.Description
-        : $"Shelf {Model.CategoryId}B • Section {(Model.Category != null && Model.Category.Name.Length >= 3 ? (Model.Category.Name.Length > 4 ? Model.Category.Name[..4].ToUpper() : Model.Category.Name.ToUpper()) : "GEN")}";
 }
 
 <tr class="books-table-row @(state == "out" ? "row-out" : "")">
@@ -33,12 +30,7 @@
             <div class="book-details-box">
                 <div class="book-primary-title d-flex align-items-center gap-2 flex-wrap">
                     <a asp-action="Details" asp-route-id="@Model.Id" class="book-title-link">@Model.Title</a>
-                    @if (state == "out")
-                    {
-                        <span class="badge-waitlist">WAITLIST (@(total > 0 ? total : 3))</span>
-                    }
                 </div>
-                <div class="book-meta-shelf">@shelfInfo</div>
             </div>
         </div>
     </td>
@@ -84,4 +76,4 @@
             }
         </div>
     </td>
-</tr>
+</tr>

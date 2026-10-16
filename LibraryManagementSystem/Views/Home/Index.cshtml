@@ -205,8 +205,7 @@
                                 <div class="book-info-author text-truncate">@book.Author</div>
 
                                 <div class="rating-row mt-2">
-                                    <span class="stars">★ @book.Rating.ToString("F1")</span>
-                                    <span class="reviews-count">(@book.ReviewCount loans &amp; reviews)</span>
+                                    <span class="reviews-count">@book.LoanCount loan record(s)</span>
                                 </div>
 
                                 <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" class="btn btn-outline-custom w-100 mt-3">

@@ -2746,6 +2746,29 @@ a.pager-link:hover {
 
 /* History audit screen */
 .library-content .history-page { max-width: 1240px; padding-bottom: 1rem; }
+.circulation-workflow-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+.circulation-workflow-page .circ-module-tabs {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: top;
+    max-width: 100%;
+    margin: .5rem 0 1.5rem;
+    padding: 4px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.circulation-workflow-page .circ-tab-btn {
+    min-height: 34px;
+    padding: 8px 18px;
+    gap: 8px;
+    font-size: .9rem;
+    line-height: 18px;
+    white-space: nowrap;
+}
 .history-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 28px; }
 .history-heading .circ-title { margin: 4px 0 2px; }
 .history-heading-actions { display: flex; align-items: center; gap: 10px; }

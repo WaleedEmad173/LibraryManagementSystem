@@ -5,7 +5,7 @@
         <div class="stat-info">
             <div class="stat-meta-label">TOTAL CATALOG</div>
             <div class="stat-main-number">@Model.TotalTitles.ToString("N0")</div>
-            <div class="stat-note-badge note-green"><i class="bi bi-arrow-up-right"></i> +12 new this month</div>
+            <div class="stat-note-badge note-green"><i class="bi bi-book"></i> Titles in the database</div>
         </div>
         <div class="stat-icon-tile icon-books"><i class="bi bi-book"></i></div>
     </div>
@@ -14,7 +14,7 @@
         <div class="stat-info">
             <div class="stat-meta-label">IN CIRCULATION</div>
             <div class="stat-main-number">@Model.CopiesOnLoan.ToString("N0")</div>
-            <div class="stat-note-badge note-amber"><i class="bi bi-check2"></i> Active member loans</div>
+            <div class="stat-note-badge note-amber"><i class="bi bi-check2"></i> Active loan records</div>
         </div>
         <div class="stat-icon-tile icon-circulation"><i class="bi bi-arrow-left-right"></i></div>
     </div>
@@ -23,7 +23,7 @@
         <div class="stat-info">
             <div class="stat-meta-label">AVAILABLE COPIES</div>
             <div class="stat-main-number">@Model.AvailableCopies.ToString("N0")</div>
-            <div class="stat-note-badge note-green"><i class="bi bi-pie-chart"></i> @(Model.ShelfReadinessPercent > 0 ? Model.ShelfReadinessPercent : 93)% shelf readiness</div>
+            <div class="stat-note-badge note-green"><i class="bi bi-pie-chart"></i> @Model.ShelfReadinessPercent% of copies available</div>
         </div>
         <div class="stat-icon-tile icon-available"><i class="bi bi-check-circle"></i></div>
     </div>
@@ -32,7 +32,7 @@
         <div class="stat-info">
             <div class="stat-meta-label">ZERO AVAILABLE</div>
             <div class="stat-main-number text-red">@Model.ZeroAvailable.ToString("N0")</div>
-            <div class="stat-note-badge note-red"><i class="bi bi-exclamation-triangle"></i> High reservation queue</div>
+            <div class="stat-note-badge note-red"><i class="bi bi-exclamation-triangle"></i> Titles with no available copies</div>
         </div>
         <div class="stat-icon-tile icon-alert"><i class="bi bi-exclamation-triangle"></i></div>
     </div>

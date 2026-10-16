@@ -132,7 +132,7 @@ namespace LibraryManagementSystem.Controllers
             input.AvailableCopies = book.AvailableCopies;
             input.ActiveFeedbackState = "success";
             input.FeedbackBadge = "HTTP 200 OK";
-            TempData["Success"] = $"Loan #{borrowing.Id:D4} recorded. Due date: {borrowing.BorrowDate.AddDays(14):MMM dd, yyyy}.";
+            TempData["Success"] = $"Loan #{borrowing.Id:D4} recorded. Due date: {borrowing.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays):MMM dd, yyyy}.";
             return RedirectToPage("/Borrowings/Borrow", new { bookId = book.Id, userId });
         }
 

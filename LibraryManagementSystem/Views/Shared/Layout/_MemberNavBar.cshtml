@@ -10,8 +10,7 @@
     var isStaff = isAdmin || isLibrarian;
 
     var fullName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? (isAdmin ? "Admin User" : isLibrarian ? "Librarian" : "Member"));
-    var idPrefix = isAdmin ? "#ADM-" : (isLibrarian ? "#LIB-" : "#MB-");
-    var memberId = user != null ? $"{idPrefix}{user.Id:D4}" : (isAdmin ? "#ADM-0001" : isLibrarian ? "#LIB-0104" : "#MB-4820");
+    var memberId = user == null ? string.Empty : isAdmin ? $"#ADM-{user.Id:D4}" : isLibrarian ? $"#LIB-{user.Id:D4}" : LibraryIdentifiers.Member(user.Id);
 
     var primaryRole = isAdmin ? "Admin" : (isLibrarian ? "Librarian" : "Member");
     var portalName = isAdmin ? "Admin Portal" : (isLibrarian ? "Librarian Portal" : "Member Portal");

@@ -103,23 +103,19 @@ namespace LibraryManagementSystem.Controllers
 
             var gradients = new[]
             {
-                ("linear-gradient(135deg, #1e3a8a 0%, #172554 100%)", "#3b82f6"),
-                ("linear-gradient(135deg, #b45309 0%, #78350f 100%)", "#f59e0b"),
-                ("linear-gradient(135deg, #065f46 0%, #064e3b 100%)", "#10b981"),
-                ("linear-gradient(135deg, #4c1d95 0%, #2e1065 100%)", "#8b5cf6"),
-                ("linear-gradient(135deg, #831843 0%, #500724 100%)", "#ec4899"),
-                ("linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", "#64748b"),
-                ("linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%)", "#0284c7"),
-                ("linear-gradient(135deg, #c2410c 0%, #7c2d12 100%)", "#ea580c")
+                "linear-gradient(135deg, #1e3a8a 0%, #172554 100%)",
+                "linear-gradient(135deg, #b45309 0%, #78350f 100%)",
+                "linear-gradient(135deg, #065f46 0%, #064e3b 100%)",
+                "linear-gradient(135deg, #4c1d95 0%, #2e1065 100%)",
+                "linear-gradient(135deg, #831843 0%, #500724 100%)",
+                "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+                "linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%)",
+                "linear-gradient(135deg, #c2410c 0%, #7c2d12 100%)"
             };
 
             var featuredBooks = realBooks.Select((b, index) =>
             {
-                var (gradient, accent) = gradients[index % gradients.Length];
-                var reviewCount = Math.Max(b.Borrowings.Count * 4 + (b.Id % 15) + 3, 5);
-                var rating = Math.Round(4.4 + ((b.Id % 6) * 0.1), 1);
-                if (rating > 5.0) rating = 4.9;
-
+                var gradient = gradients[index % gradients.Length];
                 return new FeaturedBookItem
                 {
                     Id = b.Id,
@@ -127,14 +123,12 @@ namespace LibraryManagementSystem.Controllers
                     Author = b.Author,
                     CategoryName = b.Category?.Name?.ToUpperInvariant() ?? "GENERAL",
                     PublisherYear = !string.IsNullOrWhiteSpace(b.ISBN) ? $"ISBN: {b.ISBN}" : "CATALOG",
-                    Rating = rating,
-                    ReviewCount = reviewCount,
+                    LoanCount = b.Borrowings.Count,
                     IsAvailable = b.TotalCopies > b.Borrowings.Count(loan => loan.ReturnDate == null),
                     AvailableCopies = Math.Max(0, b.TotalCopies - b.Borrowings.Count(loan => loan.ReturnDate == null)),
                     TotalCopies = b.TotalCopies,
                     ImageUrl = b.ImageUrl,
-                    BgGradient = gradient,
-                    AccentColor = accent
+                    BgGradient = gradient
                 };
             }).ToList();
 
@@ -146,7 +140,6 @@ namespace LibraryManagementSystem.Controllers
                 TotalMembers = totalMembers,
                 TotalCategories = totalCategories,
                 TotalBorrowings = totalBorrowings,
-                TotalStudyRooms = 8,
                 Categories = categories,
                 FeaturedBooks = featuredBooks
             };
@@ -166,7 +159,7 @@ namespace LibraryManagementSystem.Controllers
             var totalMembers = await _userManager.Users.CountAsync();
 
             var overdueCount = await _context.Borrowings
-                .CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(14) < DateTime.Now);
+                .CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) < DateTime.Now);
 
             var vm = new DashboardViewModel
             {

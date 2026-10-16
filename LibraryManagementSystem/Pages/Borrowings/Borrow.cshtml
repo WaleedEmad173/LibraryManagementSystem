@@ -24,9 +24,13 @@
 <style>
     .circulation-container {
         width: 100%;
-        max-width: 100%;
+        max-width: none;
         margin: 0;
         padding-bottom: 2.5rem;
+    }
+    .library-content .circulation-container {
+        max-width: none;
+        margin-inline: 0;
     }
     .circulation-container .book-cover-frame {
         width: 100px;
@@ -70,30 +74,273 @@
     .circulation-container .date-field-period {
         font-size: 0.72rem;
     }
+    .circulation-container .borrow-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(320px, .85fr);
+        align-items: stretch;
+        gap: 16px;
+        width: 100%;
+        margin-inline: 0;
+    }
+    .circulation-container .borrow-main-column {
+        display: flex;
+        min-width: 0;
+    }
+    .circulation-container .borrow-main-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0 !important;
+    }
+    .circulation-container .borrow-main-card > .circ-card-body {
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: .8rem 1rem;
+    }
+    .library-content .circulation-container .borrow-main-card .circ-card-header {
+        padding: .9rem 1.2rem;
+    }
+    .circulation-container .borrow-main-card form {
+        display: flex;
+        flex: 1 1 auto;
+    }
+    .circulation-container .borrow-main-card form > .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto auto auto auto 68px;
+        gap: .2rem .9rem;
+        margin: 0;
+        flex: 1 1 auto;
+        align-content: start;
+        width: 100%;
+    }
+    .circulation-container .borrow-main-card form > .row > .col-12 {
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    .circulation-container .borrow-main-card form > .row > .col-md-6 {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    .circulation-container .borrow-main-card .circ-label:not(.date-field-label) {
+        margin-bottom: .2rem;
+    }
+    .circulation-container .borrow-main-card .mt-2 {
+        margin-top: .2rem !important;
+    }
+    .circulation-container .borrow-main-card .mt-1 {
+        margin-top: .15rem !important;
+    }
+    .circulation-container .loan-date-column .date-field-label {
+        height: 28px;
+        min-height: 28px;
+        margin-bottom: .15rem;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        gap: 8px;
+    }
+    .circulation-container .loan-date-column .date-field-label > span:first-child {
+        min-width: 0;
+    }
+    .circulation-container .loan-date-column .circ-hint {
+        min-height: 2.2em;
+    }
+    .circulation-container .borrow-actions-row {
+        height: 100%;
+        min-height: 68px;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 !important;
+        transform: translateY(-1.5rem);
+    }
+    .circulation-container .borrow-actions-row .circ-btn-primary,
+    .circulation-container .borrow-actions-row .circ-btn-secondary {
+        min-height: 50px;
+        padding: 13px 24px;
+        font-size: .96rem;
+    }
+    .circulation-container .borrow-side-column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+    }
+    .circulation-container .borrow-side-column .circ-card {
+        margin: 0;
+        height: auto !important;
+    }
+    .library-content .circulation-container .borrow-side-column .circ-card-header {
+        padding: .8rem 1rem !important;
+    }
+    .library-content .circulation-container .borrow-side-column .circ-card-body {
+        padding: 1rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-card-body > .d-flex:first-child {
+        margin-bottom: .65rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-card-body > .mb-3.pt-2 {
+        margin-top: .45rem !important;
+        margin-bottom: .55rem !important;
+        padding-top: .55rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-card-body > .d-flex.justify-content-between.align-items-center.pt-2 {
+        padding-top: .55rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-book-metrics-grid {
+        margin-top: 8px;
+        padding: 7px;
+    }
+    .library-content .circulation-container .book-cover-frame {
+        width: 82px;
+        height: 112px;
+        flex-basis: 82px;
+    }
+    @@media (max-width: 992px) {
+        .circulation-container .borrow-workspace {
+            grid-template-columns: minmax(0, 1fr);
+            align-items: start;
+        }
+        .circulation-container .borrow-main-column {
+            display: block;
+        }
+        .circulation-container .borrow-main-card {
+            display: block;
+            height: auto;
+        }
+        .circulation-container .borrow-main-card > .circ-card-body {
+            display: block;
+            flex: initial;
+            padding: 1rem 1.1rem;
+        }
+        .circulation-container .borrow-main-card form {
+            display: block;
+        }
+        .circulation-container .borrow-main-card form > .row {
+            display: flex;
+            gap: .2rem .9rem;
+            margin-right: calc(var(--bs-gutter-x, 1.5rem) * -.5);
+            margin-left: calc(var(--bs-gutter-x, 1.5rem) * -.5);
+            flex: initial;
+            align-content: start;
+            width: auto;
+            --bs-gutter-y: .55rem;
+        }
+        .circulation-container .borrow-main-card form > .row > .col-12,
+        .circulation-container .borrow-main-card form > .row > .col-md-6 {
+            width: 100%;
+            max-width: 100%;
+            padding-right: calc(var(--bs-gutter-x, 1.5rem) * .5);
+            padding-left: calc(var(--bs-gutter-x, 1.5rem) * .5);
+        }
+    }
+    @@media (min-width: 993px) and (max-height: 900px) {
+        .library-content .circulation-container {
+            margin-top: 0 !important;
+            padding-bottom: .5rem;
+        }
+        .library-content .circulation-container .circ-title {
+            font-size: clamp(1.55rem, 3.2vh, 2rem);
+            margin-bottom: .15rem;
+        }
+        .library-content .circulation-container .circ-subtitle {
+            font-size: .8rem;
+            line-height: 1.3;
+        }
+        .circulation-container .mb-4 {
+            margin-bottom: .55rem !important;
+        }
+        .circulation-container .circ-stat-chip {
+            padding: 6px 9px;
+            gap: 7px;
+        }
+        .circulation-container .circ-stat-chip-icon {
+            width: 27px;
+            height: 27px;
+        }
+        .circulation-container .circ-card-header {
+            padding: .65rem .9rem !important;
+        }
+        .circulation-container .borrow-main-card > .circ-card-body {
+            display: flex;
+            padding: .8rem 1rem !important;
+        }
+        .circulation-container .borrow-main-card form > .row {
+            display: grid;
+            grid-template-rows: auto auto auto auto 68px;
+            gap: .15rem .9rem;
+            margin: 0;
+            flex: 1 1 auto;
+            align-content: start;
+            width: 100%;
+        }
+        .circulation-container .circ-label {
+            margin-bottom: .2rem;
+            font-size: .74rem;
+        }
+        .circulation-container .circ-select,
+        .circulation-container .circ-input {
+            padding: 7px 10px;
+            font-size: .82rem;
+        }
+        .circulation-container .circ-hint {
+            font-size: .62rem;
+            line-height: 1.25;
+        }
+        .circulation-container .circ-notice-box {
+            padding: 8px 11px;
+        }
+        .circulation-container .circ-notice-title,
+        .circulation-container .circ-notice-desc {
+            font-size: .68rem;
+            line-height: 1.3;
+        }
+        .circulation-container .borrow-actions-row .circ-btn-primary,
+        .circulation-container .borrow-actions-row .circ-btn-secondary {
+            min-height: 46px;
+            padding: 10px 18px;
+            font-size: .88rem;
+        }
+        .circulation-container .borrow-side-column {
+            gap: 8px;
+        }
+        .library-content .circulation-container .borrow-side-column .circ-card-header {
+            padding: .55rem .8rem !important;
+        }
+        .library-content .circulation-container .borrow-side-column .circ-card-body {
+            padding: .7rem .8rem !important;
+        }
+        .circulation-container .circ-patron-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: .9rem;
+        }
+        .library-content .circulation-container .book-cover-frame {
+            width: 68px;
+            height: 96px;
+        }
+        .circulation-container .circ-book-metrics-grid {
+            margin-top: 6px;
+            padding: 6px;
+        }
+        .circulation-container .circ-book-metric-val {
+            font-size: .9rem;
+        }
+        .circulation-container .circ-book-metric-label {
+            font-size: .56rem;
+        }
+        .library-content .circulation-container .circ-alert-card {
+            padding: 7px 10px;
+        }
+    }
 </style>
 
-<div class="circulation-container mt-2">
-    <!-- Module Tabs Switcher -->
-    <div class="circ-module-tabs">
-        <a asp-page="./Borrow" class="circ-tab-btn active">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            Borrow a Book
-        </a>
-        <a asp-page="./Return" class="circ-tab-btn">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-            </svg>
-            Return a Book
-        </a>
-        <a asp-page="./Index" class="circ-tab-btn">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            Circulation History
-        </a>
-    </div>
+<div class="circulation-container circulation-workflow-page">
+    @await Html.PartialAsync("_CirculationModuleTabs")
 
     <!-- Header Section -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
@@ -165,8 +412,10 @@
         }
     }
 
-    <!-- Main Circulation Form (Full Width to Fill the Entire Space) -->
-    <div class="circ-card mb-4">
+    <div class="borrow-workspace">
+      <section class="borrow-main-column">
+    <!-- Main Circulation Form -->
+    <div class="circ-card mb-4 borrow-main-card">
         <div class="circ-card-header">
             <div>
                 <h3 class="circ-card-title">
@@ -184,7 +433,7 @@
             <form id="loanForm" method="post" asp-page-handler="Borrow">
                 <div class="row g-4">
                     <!-- Member Field (Column 1) -->
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <label class="circ-label" for="memberSelect">
                             <span>Member <span class="text-danger">*</span></span>
                             <span class="circ-hint">Required • ID, email or NFC scan</span>
@@ -218,7 +467,7 @@
                     </div>
 
                     <!-- Book Field (Column 2) -->
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <label class="circ-label" for="bookSelect">
                             <span>Book <span class="text-danger">*</span></span>
                             <span class="circ-hint">Only titles with stock available</span>
@@ -245,7 +494,7 @@
                     </div>
 
                     <!-- Borrow Date (Auto-filled) (Column 1) -->
-                    <div class="col-md-6">
+                    <div class="col-md-6 loan-date-column">
                         <label class="circ-label date-field-label">
                             <span>Borrow Date (Auto-filled) <span class="text-danger">*</span></span>
                         </label>
@@ -254,13 +503,13 @@
                     </div>
 
                     <!-- Calculated Due Date (Column 2) -->
-                    <div class="col-md-6">
+                    <div class="col-md-6 loan-date-column">
                         <label class="circ-label date-field-label">
                             <span>Calculated Due Date <span class="text-danger">*</span></span>
-                            <span class="circ-badge circ-badge-emerald date-field-period">+14 Days</span>
+                            <span class="circ-badge circ-badge-emerald date-field-period">+@CirculationPolicy.LoanPeriodDays Days</span>
                         </label>
-                        <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.AddDays(14).ToString("MMM dd, yyyy")" readonly />
-                        <div class="circ-hint mt-1">Standard 14 days - auto-policy applied.</div>
+                        <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays).ToString("MMM dd, yyyy")" readonly />
+                        <div class="circ-hint mt-1">Standard @CirculationPolicy.LoanPeriodDays days - auto-policy applied.</div>
                     </div>
 
                     <!-- Terms Notice Box (Full Width) -->
@@ -272,7 +521,7 @@
                             <div>
                                 <div class="circ-notice-title">Patron circulation notification terms</div>
                                 <p class="circ-notice-desc mb-0">
-                                    The due date is calculated as <strong>@DateTime.Today.AddDays(14).ToString("MMM dd, yyyy")</strong> using the standard loan duration.
+                                    The due date is calculated as <strong>@DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays).ToString("MMM dd, yyyy")</strong> using the standard loan duration.
                                 </p>
                             </div>
                         </div>
@@ -280,7 +529,7 @@
 
                     <!-- Action Buttons -->
                     <div class="col-12">
-                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <div class="d-flex justify-content-end gap-2 pt-4 borrow-actions-row">
                             <a asp-page="./Index" class="circ-btn-secondary">
                                 Cancel
                             </a>
@@ -296,11 +545,11 @@
             </form>
         </div>
     </div>
+      </section>
 
-    <!-- Live Patron & Book Preview Cards (2-Column Grid Filling Full Width Below) -->
-    <div class="row g-4">
-        <!-- Left: Patron Circulation Status Card -->
-        <div class="col-lg-6">
+      <aside class="borrow-side-column">
+        <!-- Patron Circulation Status Card -->
+        <div class="borrow-preview-item">
             <div class="circ-card h-100">
                 <div class="circ-card-header py-3">
                     <span class="circ-card-title fs-6">PATRON CIRCULATION STATUS</span>
@@ -324,12 +573,12 @@
                     <div class="mb-3 pt-2 border-top">
                         <div class="d-flex justify-content-between small fw-semibold text-slate-700">
                             <span>Active Loans Quota:</span>
-                            <span id="previewQuotaText">@(member?.ActiveLoansCount ?? 0) of @(member?.MaxQuota ?? 3) books checked out</span>
+                            <span id="previewQuotaText">@(member?.ActiveLoansCount ?? 0) of @(member?.MaxQuota ?? CirculationPolicy.MaxActiveLoans) books checked out</span>
                         </div>
                         <div class="circ-quota-bar">
                             @{
                                 var activeCount = member?.ActiveLoansCount ?? 0;
-                                var maxQuota = member?.MaxQuota ?? 3;
+                                var maxQuota = member?.MaxQuota ?? CirculationPolicy.MaxActiveLoans;
                                 var pct = Math.Min(100, (int)((activeCount / (double)maxQuota) * 100));
                             }
                             <div class="circ-quota-fill" id="previewQuotaFill" style="width: @(pct)%;"></div>
@@ -353,8 +602,8 @@
             </div>
         </div>
 
-        <!-- Right: Selected Book Inventory Card -->
-        <div class="col-lg-6">
+        <!-- Selected Book Inventory Card -->
+        <div class="borrow-preview-item">
             <div class="circ-card h-100">
                 <div class="circ-card-header py-3">
                     <span class="circ-card-title fs-6">SELECTED BOOK INVENTORY</span>
@@ -406,6 +655,7 @@
                 </div>
             </div>
         </div>
+      </aside>
     </div>
 </div>
 
@@ -490,6 +740,32 @@
             const fallback = document.getElementById('previewBookCoverEmpty');
             if (cover) cover.classList.add('d-none');
             if (fallback) fallback.classList.remove('d-none');
+        }
+
+        function syncBorrowCardHeight() {
+            const mainCard = document.querySelector('.borrow-main-card');
+            const sideColumn = document.querySelector('.borrow-side-column');
+            if (!mainCard || !sideColumn) return;
+
+            if (window.innerWidth <= 992) {
+                mainCard.style.height = '';
+                return;
+            }
+
+            const previewCards = Array.from(sideColumn.children);
+            const cardHeights = previewCards.reduce((height, card) => height + card.getBoundingClientRect().height, 0);
+            const gap = parseFloat(getComputedStyle(sideColumn).rowGap) || 0;
+            const targetHeight = cardHeights + gap * Math.max(0, previewCards.length - 1);
+            if (Math.abs(mainCard.getBoundingClientRect().height - targetHeight) > 1) {
+                mainCard.style.height = `${targetHeight}px`;
+            }
+        }
+
+        syncBorrowCardHeight();
+        window.addEventListener('resize', syncBorrowCardHeight);
+        if ('ResizeObserver' in window) {
+            const sideColumn = document.querySelector('.borrow-side-column');
+            if (sideColumn) new ResizeObserver(syncBorrowCardHeight).observe(sideColumn);
         }
     </script>
 }

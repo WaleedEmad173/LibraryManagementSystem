@@ -11,7 +11,7 @@ namespace LibraryManagementSystem.ViewModels
         public string UserName { get; set; } = string.Empty;
         public DateTime BorrowDate { get; set; }
         public DateTime? ReturnDate { get; set; }
-        public DateTime DueDate => BorrowDate.AddDays(14);
+        public DateTime DueDate => BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays);
         public bool IsReturned => ReturnDate.HasValue;
         public bool IsOverdue => !ReturnDate.HasValue && DateTime.Now > DueDate;
     }

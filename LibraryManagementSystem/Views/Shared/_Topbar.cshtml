@@ -10,10 +10,8 @@
 
     var portalName = isAdmin ? "Admin Portal" : (isLibrarian ? "Librarian Portal" : "Member Portal");
     var roleName = isAdmin ? "Admin" : (isLibrarian ? "Librarian" : "Member");
-    var idPrefix = isAdmin ? "#ADM-" : (isLibrarian ? "#LIB-" : "#MB-");
-
     var userName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? (isAdmin ? "Admin User" : isLibrarian ? "Librarian" : "Member"));
-    var userIdText = user != null ? $"{idPrefix}{user.Id:D4}" : (isAdmin ? "#ADM-001" : isLibrarian ? "LIB-104" : "#MB-001");
+    var userIdText = user == null ? string.Empty : isAdmin ? $"#ADM-{user.Id:D4}" : isLibrarian ? $"#LIB-{user.Id:D4}" : LibraryIdentifiers.Member(user.Id);
 
     var sectionTitle = ViewData["Section"]?.ToString() ?? ViewData["Title"]?.ToString() ?? (isMember ? "Books" : "Overview");
     
@@ -21,7 +19,7 @@
     var parts = userName.Split(new[] { ' ', '.', '@', '_' }, StringSplitOptions.RemoveEmptyEntries);
     var initials = parts.Length >= 2
         ? $"{parts[0][0]}{parts[1][0]}".ToUpper()
-        : (parts.Length == 1 && parts[0].Length >= 2 ? parts[0][..2].ToUpper() : (isAdmin ? "AD" : isLibrarian ? "LB" : "MB"));
+        : (parts.Length == 1 && parts[0].Length >= 2 ? parts[0][..2].ToUpper() : string.Empty);
 }
 <header class="topbar">
     <div style="display: flex; align-items: center; gap: 10px;">

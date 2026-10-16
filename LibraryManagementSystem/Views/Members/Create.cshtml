@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Add New Member";
     ViewData["Section"] = "Members";
-    var autoAssignedCode = ViewBag.AutoAssignedCode as string ?? "#MB-4902";
 }
 
 <style>
@@ -696,7 +695,7 @@
             </div>
             <div>
                 <div class="auto-id-label">Auto-Assigned ID</div>
-                <div class="auto-id-val">@autoAssignedCode</div>
+                <div class="auto-id-val">Assigned after saving</div>
             </div>
         </div>
     </div>
@@ -785,7 +784,7 @@
                         </div>
                         <div class="privileges-content">
                             <div class="privileges-title">Default Circulation Privileges</div>
-                            <div class="privileges-desc">Up to 5 simultaneous checkouts • 21-day standard loan duration</div>
+                            <div class="privileges-desc">Up to @CirculationPolicy.MaxActiveLoans simultaneous checkouts • @CirculationPolicy.LoanPeriodDays-day standard loan duration</div>
                         </div>
                     </div>
 
@@ -818,64 +817,6 @@
 
         <!-- Right Column: Validation Showcase & Policies -->
         <div class="patron-grid-right">
-            <!-- Validation States Showcase -->
-            <div class="side-card">
-                <div class="qa-eyebrow-row">
-                    <div class="qa-eyebrow">
-                        <span class="qa-dot"></span> QUALITY ASSURANCE
-                    </div>
-                    <i class="bi bi-ui-checks qa-side-icon"></i>
-                </div>
-                <h3 class="qa-card-title">Validation States Showcase</h3>
-                <p class="qa-card-desc">
-                    Live behavioral specs implemented across registration fields to preserve catalog data integrity and avoid duplicate patron identity mapping.
-                </p>
-
-                <!-- Rule 1: Syntax Format -->
-                <div class="rule-demo-box">
-                    <div class="rule-top-row">
-                        <span class="rule-name">Validation Rule 1: Syntax Format</span>
-                        <span class="rule-pill-malformed">Malformed</span>
-                    </div>
-                    <div class="rule-field-label">Email Address *</div>
-                    <div class="rule-mock-input">
-                        <div class="rule-mock-left">
-                            <i class="bi bi-slash-circle"></i>
-                            <span>jane/invalid-domain</span>
-                        </div>
-                        <div class="rule-mock-right">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                        </div>
-                    </div>
-                    <div class="rule-error-msg">
-                        <i class="bi bi-x-circle-fill"></i>
-                        <span>Email is not valid</span>
-                    </div>
-                </div>
-
-                <!-- Rule 2: Uniqueness Constraint -->
-                <div class="rule-demo-box">
-                    <div class="rule-top-row">
-                        <span class="rule-name">Validation Rule 2: Uniqueness Constraint</span>
-                        <span class="rule-pill-collision">Collision</span>
-                    </div>
-                    <div class="rule-field-label">Email Address *</div>
-                    <div class="rule-mock-input">
-                        <div class="rule-mock-left">
-                            <i class="bi bi-envelope-exclamation"></i>
-                            <span>sara.ahmed@example.com</span>
-                        </div>
-                        <div class="rule-mock-right">
-                            <i class="bi bi-person-fill-exclamation"></i>
-                        </div>
-                    </div>
-                    <div class="rule-error-msg">
-                        <i class="bi bi-shield-exclamation"></i>
-                        <span>Email already registered to member #MB-4020</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Circulation Policies & Verification -->
             <div class="side-card">
                 <div class="policy-header">
@@ -894,14 +835,14 @@
                     <div class="policy-item">
                         <i class="bi bi-check-circle-fill policy-check-icon"></i>
                         <p class="policy-text">
-                            <strong>Default Tier Caps:</strong> Initial accounts maintain standard borrowing limits until 3 consecutive on-time returns are registered.
+                            <strong>Borrowing Limit:</strong> Members may have up to @CirculationPolicy.MaxActiveLoans active loans, with a standard loan period of @CirculationPolicy.LoanPeriodDays days.
                         </p>
                     </div>
 
                     <div class="policy-item">
                         <i class="bi bi-check-circle-fill policy-check-icon"></i>
                         <p class="policy-text">
-                            <strong>Account Renewal:</strong> Memberships are active for exactly 365 calendar days from registration and require in-person revalidation.
+                            <strong>Duplicate Loans:</strong> A member cannot borrow another copy of a book they already have on loan.
                         </p>
                     </div>
                 </div>
@@ -910,7 +851,7 @@
                 <div class="verification-desk-box">
                     <div>
                         <div class="desk-eyebrow">VERIFICATION DESK</div>
-                        <div class="desk-name">Librarian Omar Hassan (LIB-104)</div>
+                        <div class="desk-name">Librarian verification required</div>
                     </div>
                     <i class="bi bi-person-badge desk-icon"></i>
                 </div>

@@ -1,3 +1,4 @@
+using LibraryManagementSystem.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagementSystem.ViewModels
@@ -27,7 +28,7 @@ namespace LibraryManagementSystem.ViewModels
 
         // Loan Timing
         public DateTime CheckoutDate { get; set; } = DateTime.Today;
-        public DateTime ScheduledDueDate { get; set; } = DateTime.Today.AddDays(14);
+        public DateTime ScheduledDueDate { get; set; } = DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays);
         public string PickupDesk { get; set; } = string.Empty;
 
         // Feedback / Result States
@@ -51,7 +52,7 @@ namespace LibraryManagementSystem.ViewModels
         public string BorrowerInitials { get; set; } = string.Empty;
         public DateTime BorrowDate { get; set; }
         public DateTime? ReturnDate { get; set; }
-        public DateTime DueDate => BorrowDate.AddDays(14);
+        public DateTime DueDate => BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays);
         public bool IsReturned => ReturnDate.HasValue;
         public bool IsOverdue => !IsReturned && DateTime.Today > DueDate;
         public int DaysRemaining => IsReturned ? 0 : Math.Max(0, (DueDate - DateTime.Today).Days);

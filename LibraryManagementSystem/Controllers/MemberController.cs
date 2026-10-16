@@ -39,10 +39,10 @@ namespace LibraryManagementSystem.Controllers
             var totalBorrowedCount = await memberLoans.CountAsync();
             var activeLoans = memberLoans.Where(b => b.ReturnDate == null);
             var activeCount = await activeLoans.CountAsync();
-            var overdueCount = await activeLoans.CountAsync(b => b.BorrowDate.AddDays(14) < DateTime.Today);
+            var overdueCount = await activeLoans.CountAsync(b => b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays) < DateTime.Today);
             var nextDueDate = activeCount == 0
                 ? null
-                : await activeLoans.Select(b => (DateTime?)b.BorrowDate.AddDays(14)).MinAsync();
+                : await activeLoans.Select(b => (DateTime?)b.BorrowDate.AddDays(CirculationPolicy.LoanPeriodDays)).MinAsync();
             var firstBorrowDate = await memberLoans.Select(b => (DateTime?)b.BorrowDate).MinAsync();
             var lastBorrowDate = await memberLoans.Select(b => (DateTime?)b.BorrowDate).MaxAsync();
 
@@ -86,7 +86,7 @@ namespace LibraryManagementSystem.Controllers
                     BookISBN = b.Book != null ? b.Book.ISBN : string.Empty,
                     CategoryName = b.Book != null && b.Book.Category != null ? b.Book.Category.Name : string.Empty,
                     BorrowerName = member.FullName,
-                    MemberId = $"#MB-{member.Id:D4}",
+                    MemberId = LibraryIdentifiers.Member(member.Id),
                     BorrowDate = b.BorrowDate,
                     ReturnDate = b.ReturnDate
                 })

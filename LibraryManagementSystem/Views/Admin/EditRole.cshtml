@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Edit Staff Role";
     ViewData["Section"] = "Edit Role";
+    var canUseCirculation = Model.SelectedRole == "Admin" || Model.SelectedRole == "Librarian";
+    var isAdminRole = Model.SelectedRole == "Admin";
 }
 
 <style>
@@ -53,8 +55,8 @@
     }
     .er-grid {
         display: grid;
-        grid-template-columns: 1.55fr 1fr;
-        gap: 24px;
+        grid-template-columns: minmax(0, 1.6fr) minmax(320px, .9fr);
+        gap: 20px;
         align-items: start;
     }
     @@media (max-width: 992px) {
@@ -177,7 +179,7 @@
     }
     .role-cards-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
         gap: 12px;
         margin: 14px 0 20px;
     }
@@ -252,18 +254,10 @@
     }
     .er-form-actions {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
         border-top: 1px solid #f1f5f9;
         padding-top: 16px;
-    }
-    .er-audit-left {
-        font-size: 12px;
-        color: #059669;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }
     .btn-update-role {
         background: #1e3a8a;
@@ -320,7 +314,7 @@
     }
     .eff-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 12px;
     }
     .eff-tile {
@@ -328,6 +322,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         padding: 12px 14px;
+        min-height: 92px;
     }
     .eff-tile-head {
         font-size: 13px;
@@ -345,155 +340,6 @@
         line-height: 1.35;
     }
 
-    /* Right Column: Audit Log & Governance */
-    .audit-log-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 4px;
-    }
-    .audit-log-title {
-        font-size: 15px;
-        font-weight: 800;
-        color: #0f172a;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .chip-iso {
-        background: #f1f5f9;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 700;
-        padding: 2px 7px;
-        border-radius: 4px;
-    }
-    .audit-log-sub {
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 16px;
-    }
-    .audit-timeline {
-        position: relative;
-        padding-left: 20px;
-        margin-bottom: 18px;
-    }
-    .audit-timeline::before {
-        content: "";
-        position: absolute;
-        left: 6px;
-        top: 6px;
-        bottom: 6px;
-        width: 2px;
-        background: #e2e8f0;
-    }
-    .tl-item {
-        position: relative;
-        margin-bottom: 16px;
-    }
-    .tl-item:last-child {
-        margin-bottom: 0;
-    }
-    .tl-dot {
-        position: absolute;
-        left: -18px;
-        top: 4px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #1e3a8a;
-        border: 2px solid #ffffff;
-    }
-    .tl-item:nth-child(2) .tl-dot {
-        background: #64748b;
-    }
-    .tl-item:nth-child(3) .tl-dot {
-        background: #cbd5e1;
-    }
-    .tl-head {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        font-weight: 700;
-        color: #0f172a;
-    }
-    .tl-date {
-        font-size: 11px;
-        color: #64748b;
-        font-weight: 500;
-    }
-    .tl-desc {
-        font-size: 11.5px;
-        color: #64748b;
-        margin: 2px 0 4px;
-        line-height: 1.35;
-    }
-    .tl-tag {
-        font-size: 10px;
-        background: #f1f5f9;
-        color: #475569;
-        padding: 2px 6px;
-        border-radius: 4px;
-        display: inline-block;
-        font-family: ui-monospace, monospace;
-    }
-    .btn-export-trail {
-        background: #eff6ff;
-        color: #1e3a8a;
-        border: 1px solid #dbeafe;
-        border-radius: 8px;
-        padding: 9px;
-        font-size: 12.5px;
-        font-weight: 600;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 6px;
-    }
-    .gov-sum-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 12.5px;
-        padding: 9px 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    .gov-sum-row:last-child {
-        border-bottom: none;
-    }
-    .gov-sum-label {
-        color: #64748b;
-    }
-    .gov-sum-val {
-        font-weight: 600;
-        color: #0f172a;
-    }
-    .help-card {
-        background: #1e3a8a;
-        color: #ffffff;
-        border-radius: 12px;
-        padding: 18px 20px;
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-    }
-    .help-icon {
-        font-size: 24px;
-        color: #93c5fd;
-        flex-shrink: 0;
-    }
-    .help-title {
-        font-size: 13.5px;
-        font-weight: 700;
-        margin: 0 0 2px;
-    }
-    .help-text {
-        font-size: 12px;
-        color: #bfdbfe;
-        margin: 0;
-        line-height: 1.35;
-    }
 </style>
 
 <!-- Breadcrumb -->
@@ -511,10 +357,10 @@
 <div class="er-header">
     <div class="er-title-group">
         <h1>Edit Staff Role</h1>
-        <p class="er-subtitle">Modify portal authorization and security clearance level.</p>
+        <p class="er-subtitle">Choose the account role and review the access it provides.</p>
     </div>
     <span class="badge-clearance">
-        <i class="bi bi-shield-check"></i> Clearance Level ID: SEC-AUTH-443
+        <i class="bi bi-shield-check"></i> Current role: @Model.CurrentRole
     </span>
 </div>
 
@@ -531,10 +377,10 @@
                     </div>
                     <div>
                         <h2 class="er-card-title">User Role & Permissions Assignment</h2>
-                        <p class="er-card-subtitle">Configure system scope and elevated database capabilities</p>
+                        <p class="er-card-subtitle">Select the role assigned to this account.</p>
                     </div>
                 </div>
-                <span class="chip-live-mode">LIVE MODE</span>
+                <span class="chip-live-mode">ROLE MANAGEMENT</span>
             </div>
 
             <!-- User Profile Banner -->
@@ -552,10 +398,6 @@
                 </div>
                 <div class="up-right">
                     <div>Joined @Model.JoinDate.ToString("MMM dd, yyyy")</div>
-                    <div>
-                        <span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; margin-right: 3px;"></span>
-                        Last active: Today, 10:45 AM
-                    </div>
                 </div>
             </div>
 
@@ -571,17 +413,17 @@
                 </label>
                 <select id="roleDropdown" class="form-select" style="border-radius: 8px; font-size: 13.5px; padding: 10px 14px;" onchange="syncRoleFromDropdown(this.value)">
                     <option value="Librarian" selected="@(Model.SelectedRole == "Librarian" ? "selected" : null)">
-                        Librarian (Currently Selected) — Desk circulation, catalog management, member checkouts
+                        Librarian — Desk circulation, catalog management, member checkouts
                     </option>
                     <option value="Admin" selected="@(Model.SelectedRole == "Admin" ? "selected" : null)">
-                        Admin — Global override, credentials assignment, and ledger purging
+                        Admin — Library administration and staff management
                     </option>
                     <option value="Member" selected="@(Model.SelectedRole == "Member" ? "selected" : null)">
                         Member — Restricted patron layer with no system dashboard access
                     </option>
                 </select>
                 <div style="font-size: 12px; color: #64748b; margin-top: 5px;">
-                    Selected scope dictates active read, write, and database deletion tokens immediately.
+                        The selected role takes effect after you save the changes.
                 </div>
 
                 <!-- 3 Role Selection Cards -->
@@ -601,7 +443,7 @@
                             <span class="role-card-name">Librarian</span>
                             <i class="bi bi-journal-bookmark role-card-icon"></i>
                         </div>
-                        <p class="role-card-desc">Catalog edit, book returns, and member checkout permissions.</p>
+                        <p class="role-card-desc">Catalog and circulation management.</p>
                     </div>
 
                     <!-- Admin Card -->
@@ -610,7 +452,7 @@
                             <span class="role-card-name">Admin</span>
                             <i class="bi bi-shield-check role-card-icon"></i>
                         </div>
-                        <p class="role-card-desc">Global override, credentials assignment, and ledger purging.</p>
+                        <p class="role-card-desc">Library administration and staff management.</p>
                     </div>
                 </div>
 
@@ -620,17 +462,13 @@
                     <div>
                         <div class="auth-notice-title">Important Authorization Notice</div>
                         <p class="auth-notice-text">
-                            Changing the role changes what this user can access. Elevating to Admin grants permissions to delete records and manage staff accounts. Downgrading to Member revokes access to the circulation desk and admin portal immediately.
+                            Changing the role changes which library and staff management pages this account can access. Check the selected role before saving.
                         </p>
                     </div>
                 </div>
 
                 <!-- Form Action Buttons -->
                 <div class="er-form-actions">
-                    <div class="er-audit-left">
-                        <i class="bi bi-lock-fill"></i>
-                        <span>All privilege updates are immutably logged for audit.</span>
-                    </div>
                     <div>
                         <a href="/Admin/Staff" class="btn-cancel">Cancel</a>
                         <button type="submit" class="btn-update-role">
@@ -641,7 +479,10 @@
                 </div>
             </form>
         </div>
+    </div>
 
+    <!-- Right column: live permission summary -->
+    <aside>
         <!-- Effective Operational Permissions Card -->
         <div class="er-card">
             <div class="eff-head">
@@ -654,19 +495,19 @@
 
             <div class="eff-grid">
                 <div class="eff-tile">
-                    <div class="eff-tile-head">
-                        <i class="bi bi-check-circle-fill text-success"></i>
+                    <div class="eff-tile-head" id="permCatalogHead">
+                        <i class="bi @(canUseCirculation ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-muted")"></i>
                         <span>Catalog Circulation</span>
                     </div>
-                    <p class="eff-tile-desc">Can issue, accept, and renew physical items via desk barcode terminal.</p>
+                    <p class="eff-tile-desc">Access to borrowing, returns, and circulation history.</p>
                 </div>
 
                 <div class="eff-tile">
-                    <div class="eff-tile-head">
-                        <i class="bi bi-check-circle-fill text-success"></i>
+                    <div class="eff-tile-head" id="permInventoryHead">
+                        <i class="bi @(canUseCirculation ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-muted")"></i>
                         <span>Inventory Curation</span>
                     </div>
-                    <p class="eff-tile-desc">Edit ISBN metadata, adjust stock allocations, and report lost units.</p>
+                    <p class="eff-tile-desc">Access to catalog and category management.</p>
                 </div>
 
                 <div class="eff-tile">
@@ -680,93 +521,14 @@
                 <div class="eff-tile">
                     <div class="eff-tile-head" id="permPurgeHead">
                         <i class="bi @(Model.SelectedRole == "Admin" ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-muted")"></i>
-                        <span>Historical Database Purge</span>
+                        <span>Administrative Controls</span>
                     </div>
-                    <p class="eff-tile-desc">Permanent deletion of patron lending history is strictly restricted.</p>
+                    <p class="eff-tile-desc">Access to account and system administration.</p>
                 </div>
             </div>
         </div>
-    </div>
+    </aside>
 
-    <!-- Right Column: Audit Log, Governance, Elevation Help -->
-    <div>
-        <!-- Recent Role Audit Log -->
-        <div class="er-card">
-            <div class="audit-log-head">
-                <span class="audit-log-title">
-                    <i class="bi bi-clock-history text-primary"></i> Recent Role Audit Log
-                </span>
-                <span class="chip-iso">ISO-27001</span>
-            </div>
-            <p class="audit-log-sub">Chronological trace of permission shifts for governance and compliance.</p>
-
-            <div class="audit-timeline">
-                <div class="tl-item">
-                    <span class="tl-dot"></span>
-                    <div class="tl-head">
-                        <span>Assigned: @Model.CurrentRole</span>
-                        <span class="tl-date">Jan 12, 2024</span>
-                    </div>
-                    <div class="tl-desc">Promoted from temporary member by Mona Ali (#ADM-001).</div>
-                    <span class="tl-tag">Ticket #OAM-8421</span>
-                </div>
-
-                <div class="tl-item">
-                    <span class="tl-dot"></span>
-                    <div class="tl-head">
-                        <span>Privilege Verification</span>
-                        <span class="tl-date">Dec 01, 2023</span>
-                    </div>
-                    <div class="tl-desc">Quarterly automated access audit validated without anomalies.</div>
-                    <span class="tl-tag">System Cron (Auto)</span>
-                </div>
-
-                <div class="tl-item">
-                    <span class="tl-dot"></span>
-                    <div class="tl-head">
-                        <span>Initial Profile Created</span>
-                        <span class="tl-date">Nov 15, 2023</span>
-                    </div>
-                    <div class="tl-desc">Onboarded as Patron Member by HR Operations registration workflow.</div>
-                    <span class="tl-tag">Batch Provision #401</span>
-                </div>
-            </div>
-
-            <button type="button" class="btn-export-trail">
-                <i class="bi bi-download"></i>
-                <span>Export Full Audit Trail (CSV)</span>
-            </button>
-        </div>
-
-        <!-- Security Governance Summary -->
-        <div class="er-card">
-            <div style="font-size: 14.5px; font-weight: 800; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                <i class="bi bi-shield-check text-primary"></i> Security Governance Summary
-            </div>
-
-            <div class="gov-sum-row">
-                <span class="gov-sum-label">Two-Factor Auth</span>
-                <span class="gov-sum-val" style="color: #10b981;">● Enabled (TOTP)</span>
-            </div>
-            <div class="gov-sum-row">
-                <span class="gov-sum-label">Session Timeout</span>
-                <span class="gov-sum-val">30 mins idle</span>
-            </div>
-            <div class="gov-sum-row">
-                <span class="gov-sum-label">IP Allowlist</span>
-                <span class="gov-sum-val">Library Subnet</span>
-            </div>
-        </div>
-
-        <!-- Need Help Card -->
-        <div class="help-card">
-            <i class="bi bi-headset help-icon"></i>
-            <div>
-                <h4 class="help-title">Need Role Elevation Help?</h4>
-                <p class="help-text">Contact IAM compliance desk for elevated temporary overrides.</p>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -787,14 +549,20 @@
     }
 
     function updatePermMatrix(role) {
-        const staffHead = document.getElementById("permStaffHead");
-        const purgeHead = document.getElementById("permPurgeHead");
-        if (role === "Admin") {
-            staffHead.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> <span>Staff & IAM Policy</span>';
-            purgeHead.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> <span>Historical Database Purge</span>';
-        } else {
-            staffHead.innerHTML = '<i class="bi bi-x-circle-fill text-muted"></i> <span>Staff & IAM Policy</span>';
-            purgeHead.innerHTML = '<i class="bi bi-x-circle-fill text-muted"></i> <span>Historical Database Purge</span>';
+        const circulationAllowed = role === "Admin" || role === "Librarian";
+        const adminAllowed = role === "Admin";
+        setPermissionState("permCatalogHead", circulationAllowed);
+        setPermissionState("permInventoryHead", circulationAllowed);
+        setPermissionState("permStaffHead", adminAllowed);
+        setPermissionState("permPurgeHead", adminAllowed);
+    }
+
+    function setPermissionState(id, enabled) {
+        const icon = document.getElementById(id)?.querySelector("i");
+        if (icon) {
+            icon.className = enabled
+                ? "bi bi-check-circle-fill text-success"
+                : "bi bi-x-circle-fill text-muted";
         }
     }
 </script>

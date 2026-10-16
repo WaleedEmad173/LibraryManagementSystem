@@ -86,21 +86,24 @@
     }
     .mem-stat-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 20px 24px;
+        box-sizing: border-box;
+        min-height: 136px;
+        height: 100%;
+        border: 1px solid #e7eaf2;
+        border-radius: 10px;
+        padding: 16px;
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        align-items: flex-start;
+        box-shadow: 0 1px 4px rgba(25, 34, 56, .055);
     }
     .mem-stat-lbl {
-        font-size: 11px;
+        font-size: 0.7rem;
         font-weight: 700;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: #64748b;
-        margin-bottom: 6px;
+        margin-bottom: 2px;
     }
     .mem-stat-num-group {
         display: flex;
@@ -108,10 +111,11 @@
         gap: 8px;
     }
     .mem-stat-num {
-        font-size: 30px;
+        font-size: 1.75rem;
         font-weight: 800;
         color: #0f172a;
-        line-height: 1;
+        line-height: 1.15;
+        margin: 2px 0 6px;
     }
     .mem-stat-num-sub {
         font-size: 12px;

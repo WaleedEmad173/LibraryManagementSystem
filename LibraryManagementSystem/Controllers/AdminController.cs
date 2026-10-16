@@ -33,8 +33,6 @@ namespace LibraryManagementSystem.Controllers
         [HttpGet("/Admin/Staff")]
         public async Task<IActionResult> Staff(string? search, string? role)
         {
-            await EnsureDemoStaffAccountsAsync();
-
             // Find all users who are Admin or Librarian
             var adminRoleId = await _context.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync();
             var librarianRoleId = await _context.Roles.Where(r => r.Name == "Librarian").Select(r => r.Id).FirstOrDefaultAsync();
@@ -359,42 +357,5 @@ namespace LibraryManagementSystem.Controllers
             return RedirectToAction(nameof(Staff));
         }
 
-        private async Task EnsureDemoStaffAccountsAsync()
-        {
-            var demoStaff = new[]
-            {
-                (name: "Mona Ali", email: "mona.ali@library.org", role: "Admin"),
-                (name: "Omar Hassan", email: "omar.hassan@library.org", role: "Librarian"),
-                (name: "Tariq Mansour", email: "tariq.mansour@library.org", role: "Admin"),
-                (name: "Layla Kassem", email: "layla.kassem@library.org", role: "Librarian"),
-                (name: "Kareem Zein", email: "kareem.zein@library.org", role: "Librarian")
-            };
-
-            foreach (var s in demoStaff)
-            {
-                if (await _userManager.FindByEmailAsync(s.email) == null)
-                {
-                    if (!await _roleManager.RoleExistsAsync(s.role))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole<int>(s.role));
-                    }
-
-                    var user = new ApplicationUser
-                    {
-                        UserName = s.email,
-                        Email = s.email,
-                        FullName = s.name,
-                        EmailConfirmed = true,
-                        JoinDate = DateTime.UtcNow.AddMonths(-new Random().Next(1, 12))
-                    };
-
-                    var res = await _userManager.CreateAsync(user, "Staff@123");
-                    if (res.Succeeded)
-                    {
-                        await _userManager.AddToRoleAsync(user, s.role);
-                    }
-                }
-            }
-        }
     }
 }

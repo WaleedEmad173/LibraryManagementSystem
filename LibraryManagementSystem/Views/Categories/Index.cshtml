@@ -398,14 +398,14 @@
                 <div class="cat-stat-label">TOTAL CATEGORIES</div>
                 <div class="cat-stat-val-group">
                     <span class="cat-stat-num">@Model.TotalCategories</span>
-                    <span class="badge-active-pill">Active</span>
+                    <span class="badge-active-pill">Saved</span>
                 </div>
             </div>
             <div class="cat-stat-icon-tile icon-categories">
                 <i class="bi bi-diagram-3"></i>
             </div>
         </div>
-        <p class="cat-stat-sub">100% catalog coverage</p>
+        <p class="cat-stat-sub">Categories saved in the catalog</p>
     </div>
 
     <!-- Card 2: Categorized Books -->
@@ -422,9 +422,7 @@
                 <i class="bi bi-book"></i>
             </div>
         </div>
-        <p class="cat-stat-sub text-added-green">
-            <i class="bi bi-arrow-up-right"></i> +38 added this month
-        </p>
+        <p class="cat-stat-sub">Titles assigned to categories</p>
     </div>
 
     <!-- Card 3: Largest Category -->
@@ -473,7 +471,7 @@
             <tr>
                 <th style="width: 28%;">CATEGORY NAME</th>
                 <th style="width: 25%;">DISTRIBUTION &amp; VOLUME</th>
-                <th style="width: 37%;">DEPARTMENT NOTE / CLASSIFICATION</th>
+                <th style="width: 37%;">INVENTORY</th>
                 <th style="width: 10%; text-align: right;">ACTIONS</th>
             </tr>
         </thead>
@@ -492,10 +490,6 @@
                                 <div>
                                     <div class="cat-name-line">
                                         <span class="cat-name-bold">@cat.Name</span>
-                                        @if (cat.IsHighDemand)
-                                        {
-                                            <span class="badge-high-demand">High Demand</span>
-                                        }
                                     </div>
                                     <div class="cat-code-sub">@cat.Code</div>
                                 </div>

@@ -551,24 +551,6 @@
         flex-wrap: wrap;
         gap: 12px;
     }
-    .patron-btn-suspend {
-        background: #ffffff;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 12.5px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-        transition: all 0.15s;
-    }
-    .patron-btn-suspend:hover {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
 </style>
 
 <div class="patron-page-wrap">
@@ -621,7 +603,6 @@
                     <span>&bull;</span>
                     <span>Digital &amp; Physical Circulation Access</span>
                     <span>&bull;</span>
-                    <span class="patron-fines-ok">@Model.OutstandingFines</span>
                 </div>
             </div>
         </div>
@@ -688,10 +669,10 @@
                 <span class="patron-quota-ratio">@Model.ActiveLoansCount of @Model.MaxLoansQuota Limit</span>
             </div>
             <div class="patron-quota-bar-outer">
-                <div class="patron-quota-bar-inner" style="width: @((Model.ActiveLoansCount / 5.0) * 100)%;"></div>
+                <div class="patron-quota-bar-inner" style="width: @(Model.MaxLoansQuota == 0 ? 0 : Math.Min(100, Model.ActiveLoansCount * 100.0 / Model.MaxLoansQuota))%;"></div>
             </div>
             <div class="patron-quota-sub">
-                ✓ @(Model.MaxLoansQuota - Model.ActiveLoansCount) book allocations available
+                ✓ @Math.Max(0, Model.MaxLoansQuota - Model.ActiveLoansCount) book allocations available
             </div>
         </div>
     </div>
@@ -721,7 +702,7 @@
                 </a>
                 <a asp-action="Details" asp-route-id="@Model.Id" asp-route-filter="returned" 
                    class="patron-filter-pill-btn @(currentFilter == "returned" ? "active" : "")">
-                    Returned (@(Model.TotalLoansCount - Model.ActiveLoansCount))
+                    Returned (@Model.ReturnedLoansCount)
                 </a>
             </div>
         </div>
@@ -778,7 +759,7 @@
                                         &bull; Borrowed
                                     </span>
                                     <span class="patron-status-due">
-                                        Due @(loan.DueDate?.ToString("MMM dd, yyyy") ?? "Nov 07, 2024")
+                                        Due @(loan.DueDate?.ToString("MMM dd, yyyy") ?? "—")
                                     </span>
                                 }
                                 else
@@ -842,10 +823,6 @@
         </a>
 
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="patron-btn-suspend" onclick="alert('Patron circulation privileges suspended temporarily.')">
-                <i class="bi bi-slash-circle"></i>
-                <span>Suspend Card</span>
-            </button>
             <a asp-action="Edit" asp-route-id="@Model.Id" class="patron-btn-edit">
                 <i class="bi bi-pencil-fill"></i>
                 <span>Edit Member</span>

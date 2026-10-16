@@ -848,18 +848,12 @@
             </p>
         </div>
 
-        <!-- State Pills Toggle (Interactive & Visual Replica) -->
+        <!-- Current dependency state from the database -->
         <div class="del-state-pills">
-            <a asp-action="Delete" asp-route-id="@Model.Id" asp-route-previewState="blocked" 
-               class="del-state-pill-btn @(isBlocked ? "active-blocked" : "inactive-blocked")">
-                <i class="bi bi-shield-lock-fill"></i>
-                <span>Blocked State (@(Model.BooksCount > 0 ? Model.BooksCount : 380) Titles)</span>
-            </a>
-            <a asp-action="Delete" asp-route-id="@Model.Id" asp-route-previewState="safe" 
-               class="del-state-pill-btn @(!isBlocked ? "active-safe" : "inactive-safe")">
-                <i class="bi bi-check-circle"></i>
-                <span>Zero-Item State (Safe)</span>
-            </a>
+            <span class="del-state-pill-btn @(isBlocked ? "active-blocked" : "active-safe")">
+                <i class="bi @(isBlocked ? "bi-shield-lock-fill" : "bi-check-circle")"></i>
+                <span>@(isBlocked ? $"Blocked by {Model.BooksCount} catalog title(s)" : "No catalog titles")</span>
+            </span>
         </div>
     </div>
 
@@ -888,16 +882,16 @@
                     </div>
                     <div>
                         <div class="del-cat-name">
-                            @(Model.Name.Equals("Technology", StringComparison.OrdinalIgnoreCase) ? "Technology & Applied Sciences" : Model.Name)
+                            @Model.Name
                         </div>
-                        <div class="del-cat-dewey">@Model.DeweyRange</div>
+                        <div class="del-cat-dewey">Category ID: @Model.Id</div>
                     </div>
                 </div>
 
                 <!-- 3 Stat Boxes -->
                 <div class="del-stat-grid">
                     <div class="del-stat-box">
-                        <div class="del-stat-box-lbl">Total Volumes</div>
+                        <div class="del-stat-box-lbl">Catalog Titles</div>
                         <div class="del-stat-box-num">@Model.BooksCount</div>
                         <div class="del-stat-box-sub">@(Model.BooksCount > 0 ? "100% assigned" : "0% assigned")</div>
                     </div>
@@ -909,30 +903,12 @@
                         </div>
                     </div>
                     <div class="del-stat-box">
-                        <div class="del-stat-box-lbl">Sub-sections</div>
-                        <div class="del-stat-box-num">@Model.SubSectionsCount</div>
-                        <div class="del-stat-box-sub text-truncate">Computing, AI...</div>
+                        <div class="del-stat-box-lbl">Unique Authors</div>
+                        <div class="del-stat-box-num">@Model.UniqueAuthorsCount</div>
+                        <div class="del-stat-box-sub text-truncate">From saved book records</div>
                     </div>
                 </div>
 
-                <!-- Progress Bar Section -->
-                <div>
-                    <div class="del-progress-row">
-                        <div class="del-progress-lbl">
-                            <i class="bi bi-calendar3"></i>
-                            <span>Catalog Reallocation Progress</span>
-                        </div>
-                        <div class="del-progress-stat @(!isBlocked ? "safe" : "")">
-                            @Model.CleanedCount of @(Model.BooksCount > 0 ? Model.BooksCount : (Model.CleanedCount > 0 ? Model.CleanedCount : 380)) Cleaned (@(Model.CleanedPercentage)%)
-                        </div>
-                    </div>
-                    <div class="del-bar-outer">
-                        <div class="del-bar-inner @(!isBlocked ? "safe" : "")" style="width: @(Model.CleanedPercentage)%;"></div>
-                    </div>
-                    <div class="del-progress-note">
-                        Database locks are automatically engaged when dependent records exist.
-                    </div>
-                </div>
             </div>
 
             <!-- Directive Policy Card -->
@@ -1142,8 +1118,8 @@
                         <thead>
                             <tr>
                                 <th style="width: 50%;">BOOK DETAILS</th>
-                                <th style="width: 30%;">ISBN / BARCODE</th>
-                                <th style="width: 20%; text-align: right;">SHELF POSITION</th>
+                                <th style="width: 30%;">ISBN</th>
+                                <th style="width: 20%; text-align: right;">CIRCULATION</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1157,7 +1133,7 @@
                                             </div>
                                             <div>
                                                 <div class="del-book-title">@book.Title</div>
-                                                <div class="del-book-author">@book.Author (@book.Year)</div>
+                                                <div class="del-book-author">@book.Author</div>
                                             </div>
                                         </div>
                                     </td>
@@ -1166,7 +1142,7 @@
                                     </td>
                                     <td style="text-align: right;">
                                         <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;">
-                                            <span class="del-shelf-badge">@book.ShelfPosition</span>
+                                            <span class="del-shelf-badge">@(book.HasActiveLoan ? "On loan" : "Available")</span>
                                             <button type="button" class="del-row-delete-btn" title="Delete book" 
                                                     onclick="openDeleteBookModal(@book.Id, '@Html.Raw(book.Title.Replace("'", "\\'"))')">
                                                 <i class="bi bi-trash3"></i>
@@ -1274,7 +1250,7 @@
                         This action will:
                     </p>
                     <ul style="font-size: 12px; color: #64748b; line-height: 1.6; padding-left: 20px; margin: 0 0 14px 0;">
-                        <li>Delete all @(Model.BooksCount > 0 ? Model.BooksCount : 1) book records and shelf associations from the database.</li>
+                        <li>Delete all @Model.BooksCount book records from the database.</li>
                         <li>Clean up linked circulation/borrowing ticket locks.</li>
                         <li>Unblock this category so it can be safely and permanently deleted.</li>
                     </ul>

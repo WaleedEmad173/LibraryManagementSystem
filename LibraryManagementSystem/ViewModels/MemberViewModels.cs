@@ -18,8 +18,6 @@ namespace LibraryManagementSystem.ViewModels
         [Display(Name = "Phone")]
         public string? Phone { get; set; }
 
-        public string MembershipTier { get; set; } = "Standard Member (5 loans max)";
-
         // Required on Create, optional on Edit (leave empty = keep current password)
         [DataType(DataType.Password)]
         [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
@@ -30,37 +28,26 @@ namespace LibraryManagementSystem.ViewModels
         public string? ConfirmPassword { get; set; }
 
         // Context properties for Edit screen
-        public string MemberCode { get; set; } = "#MB-4020";
-        public string Initials { get; set; } = "SA";
-        public string CardStatus { get; set; } = "Verified";
-        public DateTime JoinDate { get; set; } = new DateTime(2023, 10, 12);
-        public int CurrentlyBorrowed { get; set; } = 2;
-        public int BorrowAllowance { get; set; } = 5;
-        public int OverdueItems { get; set; } = 0;
-        public string StandingStatus { get; set; } = "Good";
-        public string StandingDesc { get; set; } = "Clean ledger & zero holds lost";
-        public string OutstandingFines { get; set; } = "$0.00 USD";
-        public string CardRenewalDue { get; set; } = "Oct 12, 2025";
-        public string LifetimeCheckouts { get; set; } = "43 Volumes";
+        public string MemberCode { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public string CardStatus { get; set; } = string.Empty;
+        public DateTime JoinDate { get; set; }
+        public int CurrentlyBorrowed { get; set; }
+        public int BorrowAllowance { get; set; }
+        public int OverdueItems { get; set; }
+        public string StandingStatus { get; set; } = string.Empty;
+        public string StandingDesc { get; set; } = string.Empty;
+        public string LifetimeCheckouts { get; set; } = string.Empty;
 
         public List<EditMemberLoanItem> ActiveLoans { get; set; } = new();
-        public List<MemberAuditLogItem> AuditLogs { get; set; } = new();
     }
 
     public class EditMemberLoanItem
     {
         public string Title { get; set; } = string.Empty;
-        public string Dewey { get; set; } = "005.759";
-        public string Barcode { get; set; } = "#BOK-0402";
-        public string DueText { get; set; } = "Due in 14 days (Nov 15, 2024)";
-    }
-
-    public class MemberAuditLogItem
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Timestamp { get; set; } = string.Empty;
-        public string Detail { get; set; } = string.Empty;
-        public bool IsPrimary { get; set; } = false;
+        public string Author { get; set; } = string.Empty;
+        public string ISBN { get; set; } = string.Empty;
+        public string DueText { get; set; } = string.Empty;
     }
 
     public class MemberRowViewModel
@@ -71,9 +58,9 @@ namespace LibraryManagementSystem.ViewModels
         public string? Phone { get; set; }
         public DateTime JoinDate { get; set; }
         public int ActiveBorrowings { get; set; }
-        public string MemberCode { get; set; } = "#MEM-4091";
-        public string Initials { get; set; } = "SA";
-        public string Role { get; set; } = "Member";
+        public string MemberCode { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
     }
 
     public class MemberListViewModel
@@ -82,9 +69,9 @@ namespace LibraryManagementSystem.ViewModels
         public string? Search { get; set; }
         public int Page { get; set; } = 1;
         public int TotalPages { get; set; } = 1;
-        public int TotalMembers { get; set; } = 356;
-        public int ActiveLoansTotal { get; set; } = 87;
-        public double GoodStandingPercentage { get; set; } = 98.2;
+        public int TotalMembers { get; set; }
+        public int ActiveLoansTotal { get; set; }
+        public double GoodStandingPercentage { get; set; }
     }
 
     public class BorrowingRowViewModel
@@ -106,14 +93,14 @@ namespace LibraryManagementSystem.ViewModels
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public DateTime JoinDate { get; set; }
-        public string MemberCode { get; set; } = "#MB-4018";
-        public string Initials { get; set; } = "SA";
-        public int ActiveLoansCount { get; set; } = 2;
-        public int MaxLoansQuota { get; set; } = 5;
-        public int TotalLoansCount { get; set; } = 9;
-        public double ReturnRate { get; set; } = 100.0;
-        public string StatusStanding { get; set; } = "In Good Standing";
-        public string OutstandingFines { get; set; } = "No Outstanding Fines";
+        public string MemberCode { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public int ActiveLoansCount { get; set; }
+        public int MaxLoansQuota { get; set; }
+        public int TotalLoansCount { get; set; }
+        public int ReturnedLoansCount { get; set; }
+        public double ReturnRate { get; set; }
+        public string StatusStanding { get; set; } = string.Empty;
         public List<BorrowingRowViewModel> Borrowings { get; set; } = new();
     }
 
@@ -121,7 +108,6 @@ namespace LibraryManagementSystem.ViewModels
     {
         public int Id { get; set; }
         public string BookTitle { get; set; } = string.Empty;
-        public string Barcode { get; set; } = string.Empty;
         public DateTime DueDate { get; set; }
         public bool IsOverdue => DateTime.UtcNow > DueDate;
     }

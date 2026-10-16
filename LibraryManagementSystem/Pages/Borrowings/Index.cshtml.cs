@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Models;
 using LibraryManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -105,7 +106,7 @@ namespace LibraryManagementSystem.Pages.Borrowings
                     CategoryName = b.Book?.Category?.Name ?? string.Empty,
                     BorrowerName = b.User?.FullName ?? string.Empty,
                     BorrowerEmail = b.User?.Email ?? string.Empty,
-                    MemberId = $"#MB-{b.UserId:D4}",
+                    MemberId = LibraryIdentifiers.Member(b.UserId),
                     BorrowerInitials = GetInitials(b.User?.FullName),
                     BorrowDate = b.BorrowDate,
                     ReturnDate = b.ReturnDate
@@ -164,7 +165,7 @@ namespace LibraryManagementSystem.Pages.Borrowings
             {
                 csv.AppendLine(string.Join(",", new[]
                 {
-                    EscapeCsv(row.Member), EscapeCsv($"#MB-{row.MemberId:D4}"), EscapeCsv(row.Book),
+                    EscapeCsv(row.Member), EscapeCsv(LibraryIdentifiers.Member(row.MemberId)), EscapeCsv(row.Book),
                     EscapeCsv(row.BorrowDate.ToString("yyyy-MM-dd")),
                     EscapeCsv(row.ReturnDate?.ToString("yyyy-MM-dd") ?? string.Empty),
                     EscapeCsv(row.Status)
