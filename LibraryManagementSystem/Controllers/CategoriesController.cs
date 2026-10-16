@@ -191,16 +191,14 @@ namespace LibraryManagementSystem.Controllers
         {
             var category = await _context.Categories
                 .Include(c => c.Books)
+                    .ThenInclude(b => b.Borrowings)
                 .FirstOrDefaultAsync(c => c.Id == id);
             if (category == null)
                 return NotFound();
 
-            int dbBooksCount = await _context.Books.CountAsync();
             int booksCount = category.Books.Count;
-            if (dbBooksCount == 0 && category.Name.Equals("Technology", StringComparison.OrdinalIgnoreCase))
-            {
-                booksCount = 380;
-            }
+            int totalCopies = category.Books.Sum(book => book.TotalCopies);
+            int activeLoans = category.Books.SelectMany(book => book.Borrowings).Count(loan => loan.ReturnDate == null);
 
             string name = category.Name;
             string slug = $"cat-{name.ToLower().Replace(" ", "-")}";
@@ -236,7 +234,8 @@ namespace LibraryManagementSystem.Controllers
                 },
                 CreatedDate = new DateTime(2023, 1, 15),
                 LastRevision = "Oct 29, 2023, 14:22",
-                InCirculationLoans = booksCount > 0 ? Math.Max(1, (int)(booksCount * 0.074)) : 28,
+                TotalCopies = totalCopies,
+                InCirculationLoans = activeLoans,
                 ShelfTileId = name.Equals("Technology", StringComparison.OrdinalIgnoreCase) ? "3B" : $"{(category.Id % 4) + 1}A",
                 ShelfAisle = name.ToLower() switch
                 {

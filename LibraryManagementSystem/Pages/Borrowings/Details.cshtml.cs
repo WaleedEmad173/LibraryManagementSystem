@@ -29,6 +29,12 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
             if (Borrowing == null) return NotFound();
 
+            if (Borrowing.Book != null)
+            {
+                var activeLoans = await _context.Borrowings.CountAsync(b => b.BookId == Borrowing.BookId && b.ReturnDate == null);
+                Borrowing.Book.AvailableCopies = Math.Max(0, Borrowing.Book.TotalCopies - activeLoans);
+            }
+
             return Page();
         }
     }

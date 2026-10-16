@@ -4620,3 +4620,98 @@ a.pager-link:hover {
     width: 20px;
     height: 20px;
 }
+
+/* Shared metric-card system for page summaries. */
+.dash-stat-card,
+.books-stat-card,
+.cat-stat-card,
+.mem-stat-card,
+.staff-stat-card,
+.history-stat-card,
+.stat-box-card,
+.stat-card-metric,
+.borrowings-stat-card {
+    box-sizing: border-box;
+    min-height: 136px !important;
+    height: 100%;
+    padding: 16px !important;
+    border: 1px solid #e7eaf2 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 4px rgba(25, 34, 56, .055) !important;
+}
+
+.stat-box-card { gap: 14px; }
+.stat-card-metric { justify-content: center; }
+.borrowings-stat-card {
+    height: 136px !important;
+    justify-content: space-between;
+    padding: 12px !important;
+}
+.borrowings-stat-card .stat-card-top { align-items: center; margin-bottom: 4px !important; }
+.borrowings-stat-card .stat-card-icon-box { width: 36px !important; height: 36px !important; font-size: 1rem !important; }
+.borrowings-stat-card .stat-card-number-row { gap: 8px; margin-bottom: 0 !important; }
+.borrowings-stat-card .stat-card-pill { padding: 3px 8px; font-size: .68rem; }
+.borrowings-stat-card .stat-card-footer { gap: 8px; min-height: 30px; padding: 5px 8px; font-size: .65rem; }
+.borrowings-stat-card .footer-meta-id { font-size: .62rem !important; white-space: nowrap; }
+
+.dash-stat-label,
+.stat-meta-label,
+.cat-stat-label,
+.mem-stat-lbl,
+.staff-stat-label,
+.history-stat-label,
+.stat-label,
+.metric-title,
+.stat-card-label {
+    color: #647087 !important;
+    font-family: inherit;
+    font-size: .69rem !important;
+    font-weight: 700 !important;
+    letter-spacing: .065em !important;
+    line-height: 1.3;
+}
+
+.dash-stat-value,
+.stat-main-number,
+.cat-stat-num,
+.mem-stat-num,
+.staff-stat-num,
+.history-stat-value,
+.stat-number,
+.metric-num,
+.stat-card-number {
+    color: #192238;
+    font-family: inherit;
+    font-size: 1.55rem !important;
+    font-weight: 750 !important;
+    line-height: 1.2 !important;
+}
+
+.dash-stat-note,
+.stat-note-badge,
+.cat-stat-sub,
+.mem-stat-num-sub,
+.staff-stat-bottom,
+.metric-desc {
+    font-family: inherit;
+    font-size: .68rem !important;
+    line-height: 1.4;
+}
+
+.dash-stat-icon,
+.stat-icon-tile,
+.cat-stat-icon-tile,
+.mem-stat-icon-tile,
+.staff-stat-icon-tile,
+.history-stat-icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    flex: 0 0 44px !important;
+    border-radius: 10px !important;
+}
+
+.circ-stat-chip { box-sizing: border-box; }
+.return-header-metrics .circ-stat-chip { min-height: 40px; }
+.borrow-page .circ-stat-chip { min-height: 48px; }

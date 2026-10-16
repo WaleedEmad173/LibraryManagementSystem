@@ -40,16 +40,17 @@ namespace LibraryManagementSystem.Pages.Borrowings
             var existing = await _context.Borrowings.Include(b => b.Book).FirstOrDefaultAsync(b => b.Id == Borrowing.Id);
             if (existing == null) return NotFound();
 
-            // If updating return date from null to a date, increment copies
-            if (existing.ReturnDate == null && Borrowing.ReturnDate != null && existing.Book != null)
-            {
-                existing.Book.AvailableCopies += 1;
-            }
-
+            var previousBook = existing.Book;
             existing.BorrowDate = Borrowing.BorrowDate;
             existing.ReturnDate = Borrowing.ReturnDate;
 
             await _context.SaveChangesAsync();
+            if (previousBook != null)
+            {
+                var activeLoans = await _context.Borrowings.CountAsync(b => b.BookId == previousBook.Id && b.ReturnDate == null);
+                previousBook.AvailableCopies = Math.Max(0, previousBook.TotalCopies - activeLoans);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToPage("./Index");
         }
     }

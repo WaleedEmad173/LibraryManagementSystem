@@ -89,7 +89,9 @@ namespace LibraryManagementSystem.Controllers
             if (user == null) return BadRequest("A valid member must be selected.");
 
             // Guard Rail 1: Inventory stock availability
-            if (book.AvailableCopies <= 0)
+            var activeBookLoans = await _context.Borrowings.CountAsync(b => b.BookId == book.Id && b.ReturnDate == null);
+            var availableCopies = Math.Max(0, book.TotalCopies - activeBookLoans);
+            if (availableCopies <= 0)
             {
                 input.ActiveFeedbackState = "nostock";
                 input.FeedbackBadge = "HTTP 409 Conflict";
@@ -113,7 +115,7 @@ namespace LibraryManagementSystem.Controllers
             }
 
             // Process Loan Transaction
-            book.AvailableCopies -= 1;
+            book.AvailableCopies = Math.Max(0, book.TotalCopies - activeBookLoans - 1);
 
             var borrowing = new Borrowing
             {
@@ -157,7 +159,8 @@ namespace LibraryManagementSystem.Controllers
             borrowing.ReturnDate = DateTime.Now;
             if (borrowing.Book != null)
             {
-                borrowing.Book.AvailableCopies += 1;
+                var remainingActiveLoans = await _context.Borrowings.CountAsync(b => b.BookId == borrowing.BookId && b.Id != borrowing.Id && b.ReturnDate == null);
+                borrowing.Book.AvailableCopies = Math.Max(0, borrowing.Book.TotalCopies - remainingActiveLoans);
             }
 
             await _context.SaveChangesAsync();

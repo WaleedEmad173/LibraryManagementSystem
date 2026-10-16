@@ -26,7 +26,7 @@ namespace LibraryManagementSystem.ViewModels
         public string? ImageUrl { get; set; }
         public int TotalCopies { get; set; }
         public int AvailableCopies { get; set; }
-        public int ActiveLoans => Math.Max(0, TotalCopies - AvailableCopies);
+        public int ActiveLoans { get; set; }
         public bool InStock => AvailableCopies > 0;
     }
 

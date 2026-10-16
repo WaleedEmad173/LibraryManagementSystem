@@ -57,19 +57,23 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
             if (fromDate.HasValue)
             {
-                query = query.Where(b => b.BorrowDate >= fromDate.Value.Date);
+                var from = fromDate.Value.Date;
+                query = query.Where(b => b.ReturnDate == null || b.BorrowDate >= from);
             }
 
             if (toDate.HasValue)
             {
-                query = query.Where(b => b.BorrowDate <= toDate.Value.Date.AddDays(1).AddTicks(-1));
+                var toExclusive = toDate.Value.Date.AddDays(1);
+                query = query.Where(b => b.ReturnDate == null || b.BorrowDate < toExclusive);
             }
 
             const int pageSize = 10;
             var matchingCount = await query.CountAsync();
             var totalPages = Math.Max(1, (int)Math.Ceiling(matchingCount / (double)pageSize));
             pageNumber = Math.Clamp(pageNumber, 1, totalPages);
-            var list = await query.OrderByDescending(b => b.BorrowDate).ThenByDescending(b => b.Id)
+            var list = await query.OrderBy(b => b.ReturnDate.HasValue)
+                .ThenByDescending(b => b.BorrowDate)
+                .ThenByDescending(b => b.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

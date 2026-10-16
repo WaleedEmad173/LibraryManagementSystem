@@ -93,20 +93,54 @@
             </div>
         </div>
 
-        <div class="head-actions left">
-            <button type="button" class="btn btn-primary" disabled><i class="bi bi-box-arrow-in-down"></i> Issue New Loan</button>
-            <button type="button" class="btn btn-soft" disabled><i class="bi bi-box-arrow-in-up"></i> Accept Return</button>
-        </div>
     </div>
 </section>
 
 <section class="card">
     <h2>Borrowing history of this book</h2>
-    <p class="muted">Audit log of all member circulation transactions for this catalog item.</p>
-    <div class="empty-state">
-        <i class="bi bi-clock-history"></i>
-        <div>@Model.HistoryCount borrowing record(s) on file. The detailed log will appear here once we wire in the Borrowing model.</div>
-    </div>
+    <p class="muted">Active loans appear first, followed by completed returns.</p>
+    @if (Model.Borrowings.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-clock-history"></i>
+            <div>No borrowing records have been recorded for this book yet.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr><th>Member</th><th>Borrow Date</th><th>Due Date</th><th>Return Date</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var borrowing in Model.Borrowings)
+                    {
+                        <tr>
+                            <td><strong>@borrowing.BorrowerName</strong><div class="small text-muted">@borrowing.MemberId</div></td>
+                            <td>@borrowing.BorrowDate.ToString("MMM dd, yyyy")</td>
+                            <td>@borrowing.DueDate.ToString("MMM dd, yyyy")</td>
+                            <td>@(borrowing.ReturnDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                            <td>
+                                @if (borrowing.IsReturned)
+                                {
+                                    <span class="chip chip-green">Returned</span>
+                                }
+                                else if (borrowing.IsOverdue)
+                                {
+                                    <span class="chip chip-red">Overdue</span>
+                                }
+                                else
+                                {
+                                    <span class="chip chip-amber">On loan</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </section>
 
 <section class="card detail-bar">

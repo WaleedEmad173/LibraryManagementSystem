@@ -27,9 +27,10 @@ namespace LibraryManagementSystem.ViewModels
         public string TaxonomyScope { get; set; } = "Encompasses Computer Science, Emerging Hardware, Artificial Intelligence, Telecommunications, Software Engineering, and Digital Networking infrastructures.";
         public DateTime CreatedDate { get; set; } = new DateTime(2023, 1, 15);
         public string LastRevision { get; set; } = "Oct 29, 2023, 14:22";
-        public int InCirculationLoans { get; set; } = 28;
-        public int InStockCount => Math.Max(0, BooksCount - InCirculationLoans);
-        public double OnShelvesPct => BooksCount > 0 ? Math.Round((double)InStockCount / BooksCount * 100, 1) : 92.6;
+        public int TotalCopies { get; set; }
+        public int InCirculationLoans { get; set; }
+        public int InStockCount => Math.Max(0, TotalCopies - InCirculationLoans);
+        public double OnShelvesPct => TotalCopies > 0 ? Math.Round((double)InStockCount / TotalCopies * 100, 1) : 0;
         public string ShelfAisle { get; set; } = "West Wing • Aisles 14-18";
         public string ShelfFloorCollection { get; set; } = "Floor 3 • Computing & Cybernetics Collection";
         public string ShelfTileId { get; set; } = "3B";

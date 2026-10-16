@@ -39,14 +39,16 @@ namespace LibraryManagementSystem.Pages.Borrowings
             var borrowing = await _context.Borrowings.Include(b => b.Book).FirstOrDefaultAsync(b => b.Id == id);
             if (borrowing != null)
             {
-                // If deleting an active loan, restore available copies
-                if (borrowing.ReturnDate == null && borrowing.Book != null)
-                {
-                    borrowing.Book.AvailableCopies += 1;
-                }
-
+                var book = borrowing.Book;
                 _context.Borrowings.Remove(borrowing);
                 await _context.SaveChangesAsync();
+
+                if (book != null)
+                {
+                    var activeLoans = await _context.Borrowings.CountAsync(b => b.BookId == book.Id && b.ReturnDate == null);
+                    book.AvailableCopies = Math.Max(0, book.TotalCopies - activeLoans);
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return RedirectToPage("./Index");

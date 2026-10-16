@@ -85,7 +85,8 @@ namespace LibraryManagementSystem.Controllers
             var categories = await _context.Categories.AsNoTracking().ToListAsync();
             var totalTitles = await _context.Books.CountAsync();
             var totalCopies = await _context.Books.SumAsync(b => (int?)b.TotalCopies) ?? 0;
-            var availableCopies = await _context.Books.SumAsync(b => (int?)b.AvailableCopies) ?? 0;
+            var activeLoans = await _context.Borrowings.CountAsync(b => b.ReturnDate == null);
+            var availableCopies = Math.Max(0, totalCopies - activeLoans);
             var totalMembers = await _userManager.Users.CountAsync();
             var totalBorrowings = await _context.Borrowings.CountAsync();
             var totalCategories = categories.Count;
@@ -128,8 +129,8 @@ namespace LibraryManagementSystem.Controllers
                     PublisherYear = !string.IsNullOrWhiteSpace(b.ISBN) ? $"ISBN: {b.ISBN}" : "CATALOG",
                     Rating = rating,
                     ReviewCount = reviewCount,
-                    IsAvailable = b.AvailableCopies > 0,
-                    AvailableCopies = b.AvailableCopies,
+                    IsAvailable = b.TotalCopies > b.Borrowings.Count(loan => loan.ReturnDate == null),
+                    AvailableCopies = Math.Max(0, b.TotalCopies - b.Borrowings.Count(loan => loan.ReturnDate == null)),
                     TotalCopies = b.TotalCopies,
                     ImageUrl = b.ImageUrl,
                     BgGradient = gradient,
@@ -159,10 +160,10 @@ namespace LibraryManagementSystem.Controllers
 
             var totalTitles = await _context.Books.CountAsync();
             var totalCopies = await _context.Books.SumAsync(b => (int?)b.TotalCopies) ?? 0;
-            var availableCopies = await _context.Books.SumAsync(b => (int?)b.AvailableCopies) ?? 0;
-            var zeroAvailable = await _context.Books.CountAsync(b => b.AvailableCopies == 0);
-            var totalMembers = await _userManager.Users.CountAsync();
             var activeLoans = await _context.Borrowings.CountAsync(b => b.ReturnDate == null);
+            var availableCopies = Math.Max(0, totalCopies - activeLoans);
+            var zeroAvailable = await _context.Books.CountAsync(b => b.TotalCopies <= b.Borrowings.Count(loan => loan.ReturnDate == null));
+            var totalMembers = await _userManager.Users.CountAsync();
 
             var overdueCount = await _context.Borrowings
                 .CountAsync(b => b.ReturnDate == null && b.BorrowDate.AddDays(14) < DateTime.Now);
@@ -175,7 +176,7 @@ namespace LibraryManagementSystem.Controllers
                 TotalCatalogTitles = totalTitles,
                 TotalCopies = totalCopies,
                 AvailableCopies = availableCopies,
-                CopiesOnLoan = totalCopies > availableCopies ? totalCopies - availableCopies : activeLoans,
+                CopiesOnLoan = activeLoans,
                 ZeroAvailableTitles = zeroAvailable,
                 TotalMembers = totalMembers,
                 ActiveLoansCount = activeLoans,
@@ -235,9 +236,12 @@ namespace LibraryManagementSystem.Controllers
             vm.RecentBooks = await _context.Books
                 .AsNoTracking()
                 .Include(b => b.Category)
+                .Include(b => b.Borrowings)
                 .OrderByDescending(b => b.Id)
                 .Take(6)
                 .ToListAsync();
+            foreach (var recentBook in vm.RecentBooks)
+                recentBook.AvailableCopies = Math.Max(0, recentBook.TotalCopies - recentBook.Borrowings.Count(loan => loan.ReturnDate == null));
 
             return vm;
         }

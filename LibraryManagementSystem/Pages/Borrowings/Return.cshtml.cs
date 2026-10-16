@@ -54,7 +54,10 @@ namespace LibraryManagementSystem.Pages.Borrowings
 
             borrowing.ReturnDate = DateTime.Now;
             if (borrowing.Book != null)
-                borrowing.Book.AvailableCopies = Math.Min(borrowing.Book.TotalCopies, borrowing.Book.AvailableCopies + 1);
+            {
+                var remainingActiveLoans = await _context.Borrowings.CountAsync(b => b.BookId == borrowing.BookId && b.Id != borrowing.Id && b.ReturnDate == null);
+                borrowing.Book.AvailableCopies = Math.Max(0, borrowing.Book.TotalCopies - remainingActiveLoans);
+            }
 
             await _context.SaveChangesAsync();
             await LoadActiveLoansAsync(PageNumber);

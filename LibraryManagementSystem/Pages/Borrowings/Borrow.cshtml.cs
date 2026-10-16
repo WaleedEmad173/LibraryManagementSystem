@@ -72,7 +72,9 @@ namespace LibraryManagementSystem.Pages.Borrowings
             }
 
             // Check availability
-            if (book.AvailableCopies <= 0)
+            var activeBookLoans = await _context.Borrowings.CountAsync(b => b.BookId == book.Id && b.ReturnDate == null);
+            var availableCopies = Math.Max(0, book.TotalCopies - activeBookLoans);
+            if (availableCopies <= 0)
             {
                 ViewModel.AlertState = "nostock";
                 ViewModel.AlertTitle = "No available copies for this book";
@@ -109,8 +111,8 @@ namespace LibraryManagementSystem.Pages.Borrowings
                 ReturnDate = null
             };
 
-            book.AvailableCopies = Math.Max(0, book.AvailableCopies - 1);
             _context.Borrowings.Add(borrowing);
+            book.AvailableCopies = Math.Max(0, book.TotalCopies - activeBookLoans - 1);
             await _context.SaveChangesAsync();
 
             // Refresh data after loan
@@ -128,7 +130,7 @@ namespace LibraryManagementSystem.Pages.Borrowings
         private async Task LoadCirculationDataAsync(int? preferredBookId, int? preferredUserId)
         {
             // Load Books
-            var dbBooks = await _context.Books.Include(b => b.Category).ToListAsync();
+            var dbBooks = await _context.Books.Include(b => b.Category).Include(b => b.Borrowings).ToListAsync();
             if (dbBooks.Any())
             {
                 ViewModel.Books = dbBooks.Select(b => new BookOptionViewModel
@@ -140,7 +142,8 @@ namespace LibraryManagementSystem.Pages.Borrowings
                     CategoryName = b.Category?.Name ?? string.Empty,
                     ImageUrl = b.ImageUrl,
                     TotalCopies = b.TotalCopies,
-                    AvailableCopies = b.AvailableCopies,
+                    AvailableCopies = Math.Max(0, b.TotalCopies - b.Borrowings.Count(loan => loan.ReturnDate == null)),
+                    ActiveLoans = b.Borrowings.Count(loan => loan.ReturnDate == null),
                 }).ToList();
             }
 

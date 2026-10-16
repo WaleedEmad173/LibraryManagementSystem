@@ -56,9 +56,15 @@ namespace LibraryManagementSystem.Controllers
                 query = query.Where(b => b.ReturnDate != null);
 
             if (resolvedFromDate.HasValue)
-                query = query.Where(b => b.BorrowDate >= resolvedFromDate.Value.Date);
+            {
+                var from = resolvedFromDate.Value.Date;
+                query = query.Where(b => b.ReturnDate == null || b.BorrowDate >= from);
+            }
             if (resolvedToDate.HasValue)
-                query = query.Where(b => b.BorrowDate < resolvedToDate.Value.Date.AddDays(1));
+            {
+                var toExclusive = resolvedToDate.Value.Date.AddDays(1);
+                query = query.Where(b => b.ReturnDate == null || b.BorrowDate < toExclusive);
+            }
 
             const int pageSize = 8;
             var matchingCount = await query.CountAsync();
@@ -66,7 +72,8 @@ namespace LibraryManagementSystem.Controllers
             pageNumber = Math.Clamp(pageNumber, 1, totalPages);
 
             var borrowings = await query
-                .OrderByDescending(b => b.BorrowDate)
+                .OrderBy(b => b.ReturnDate.HasValue)
+                .ThenByDescending(b => b.BorrowDate)
                 .ThenByDescending(b => b.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -133,7 +140,8 @@ namespace LibraryManagementSystem.Controllers
             borrowing.ReturnDate = DateTime.Now;
             if (borrowing.Book != null)
             {
-                borrowing.Book.AvailableCopies = Math.Min(borrowing.Book.TotalCopies, borrowing.Book.AvailableCopies + 1);
+                var remainingActiveLoans = await _context.Borrowings.CountAsync(b => b.BookId == borrowing.BookId && b.Id != borrowing.Id && b.ReturnDate == null);
+                borrowing.Book.AvailableCopies = Math.Max(0, borrowing.Book.TotalCopies - remainingActiveLoans);
             }
 
             await _context.SaveChangesAsync();

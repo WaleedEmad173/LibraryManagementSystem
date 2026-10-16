@@ -41,7 +41,7 @@ namespace LibraryManagementSystem.Controllers
                 query = query.Where(b => b.CategoryId == categoryId.Value);
 
             if (availableOnly)
-                query = query.Where(b => b.AvailableCopies > 0);
+                query = query.Where(b => b.TotalCopies > b.Borrowings.Count(loan => loan.ReturnDate == null));
 
             query = sortOrder switch
             {
@@ -52,10 +52,18 @@ namespace LibraryManagementSystem.Controllers
             };
 
             var books = await PaginatedList<Book>.CreateAsync(query, page, PageSize);
+            var activeLoanCounts = await _context.Borrowings
+                .Where(loan => loan.ReturnDate == null && books.Select(book => book.Id).Contains(loan.BookId))
+                .GroupBy(loan => loan.BookId)
+                .Select(group => new { BookId = group.Key, Count = group.Count() })
+                .ToDictionaryAsync(group => group.BookId, group => group.Count);
+            foreach (var listedBook in books)
+                listedBook.AvailableCopies = Math.Max(0, listedBook.TotalCopies - activeLoanCounts.GetValueOrDefault(listedBook.Id));
 
             // Stat cards always describe the whole catalog (not the filtered list)
             var totalCopies = await _context.Books.SumAsync(b => b.TotalCopies);
-            var availableCopies = await _context.Books.SumAsync(b => b.AvailableCopies);
+            var copiesOnLoan = await _context.Borrowings.CountAsync(loan => loan.ReturnDate == null);
+            var availableCopies = Math.Max(0, totalCopies - copiesOnLoan);
 
             var vm = new BookIndexViewModel
             {
@@ -68,8 +76,8 @@ namespace LibraryManagementSystem.Controllers
                 TotalTitles = await _context.Books.CountAsync(),
                 CatalogCopies = totalCopies,
                 AvailableCopies = availableCopies,
-                CopiesOnLoan = totalCopies - availableCopies,
-                ZeroAvailable = await _context.Books.CountAsync(b => b.AvailableCopies == 0)
+                CopiesOnLoan = copiesOnLoan,
+                ZeroAvailable = await _context.Books.CountAsync(b => b.TotalCopies <= b.Borrowings.Count(loan => loan.ReturnDate == null))
             };
 
             return View(vm);
@@ -80,7 +88,7 @@ namespace LibraryManagementSystem.Controllers
         {
             if (id == null) return NotFound();
 
-            var vm = await BuildDetailsAsync(id.Value);
+            var vm = await BuildDetailsAsync(id.Value, includeBorrowingHistory: true);
             return vm == null ? NotFound() : View(vm);
         }
 
@@ -139,6 +147,8 @@ namespace LibraryManagementSystem.Controllers
 
             var book = await _context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
             if (book == null) return NotFound();
+            var activeLoans = await _context.Borrowings.CountAsync(b => b.BookId == book.Id && b.ReturnDate == null);
+            var availableCopies = Math.Max(0, book.TotalCopies - activeLoans);
 
             return View(new BookFormViewModel
             {
@@ -149,8 +159,8 @@ namespace LibraryManagementSystem.Controllers
                 Description = book.Description,
                 CategoryId = book.CategoryId,
                 TotalCopies = book.TotalCopies,
-                AvailableCopies = book.AvailableCopies,
-                CopiesOnLoan = book.TotalCopies - book.AvailableCopies,
+                AvailableCopies = availableCopies,
+                CopiesOnLoan = activeLoans,
                 ImageUrl = book.ImageUrl,
                 Categories = await GetCategoriesSelectListAsync(book.CategoryId)
             });
@@ -166,7 +176,8 @@ namespace LibraryManagementSystem.Controllers
             var book = await _context.Books.FindAsync(id);
             if (book == null) return NotFound();
 
-            var onLoan = book.TotalCopies - book.AvailableCopies;
+            var onLoan = await _context.Borrowings.CountAsync(b => b.BookId == book.Id && b.ReturnDate == null);
+            var availableCopies = Math.Max(0, book.TotalCopies - onLoan);
 
             if (vm.TotalCopies.HasValue && vm.TotalCopies.Value < onLoan)
             {
@@ -179,7 +190,7 @@ namespace LibraryManagementSystem.Controllers
             if (!ModelState.IsValid)
             {
                 vm.CopiesOnLoan = onLoan;
-                vm.AvailableCopies = book.AvailableCopies;
+                vm.AvailableCopies = availableCopies;
                 vm.Categories = await GetCategoriesSelectListAsync(vm.CategoryId);
                 return View(vm);
             }
@@ -190,7 +201,7 @@ namespace LibraryManagementSystem.Controllers
             book.Description = string.IsNullOrWhiteSpace(vm.Description) ? null : vm.Description.Trim();
             book.CategoryId = vm.CategoryId!.Value;
             book.TotalCopies = vm.TotalCopies!.Value;
-            book.AvailableCopies = book.TotalCopies - onLoan; // keep loans intact
+            book.AvailableCopies = Math.Max(0, book.TotalCopies - onLoan); // keep active loans in sync
 
             if (vm.Image != null)
             {
@@ -247,7 +258,7 @@ namespace LibraryManagementSystem.Controllers
 
         // ---------- Helpers ----------
 
-        private async Task<BookDetailsViewModel?> BuildDetailsAsync(int id)
+        private async Task<BookDetailsViewModel?> BuildDetailsAsync(int id, bool includeBorrowingHistory = false)
         {
             var book = await _context.Books
                 .AsNoTracking()
@@ -256,12 +267,46 @@ namespace LibraryManagementSystem.Controllers
 
             if (book == null) return null;
 
-            var historyCount = await _context.Books
-                .Where(b => b.Id == id)
-                .Select(b => b.Borrowings.Count)
-                .FirstOrDefaultAsync();
+            var vm = new BookDetailsViewModel { Book = book };
+            if (includeBorrowingHistory)
+            {
+                var borrowings = await _context.Borrowings
+                    .AsNoTracking()
+                    .Include(b => b.User)
+                    .Where(b => b.BookId == id)
+                    .OrderBy(b => b.ReturnDate.HasValue)
+                    .ThenByDescending(b => b.BorrowDate)
+                    .ThenByDescending(b => b.Id)
+                    .ToListAsync();
 
-            return new BookDetailsViewModel { Book = book, HistoryCount = historyCount };
+                vm.Borrowings = borrowings
+                    .Select(b => new BorrowingHistoryItemViewModel
+                    {
+                        BorrowingId = b.Id,
+                        BookId = b.BookId,
+                        BookTitle = book.Title,
+                        BookAuthor = book.Author,
+                        BookISBN = book.ISBN,
+                        BorrowerName = b.User?.FullName ?? "Unknown member",
+                        MemberId = $"#MB-{b.UserId:D4}",
+                        BorrowDate = b.BorrowDate,
+                        ReturnDate = b.ReturnDate
+                    })
+                    .ToList();
+
+                vm.HistoryCount = vm.Borrowings.Count;
+                vm.CurrentLoanCount = vm.Borrowings.Count(b => !b.IsReturned);
+            }
+            else
+            {
+                vm.CurrentLoanCount = await _context.Borrowings.CountAsync(b => b.BookId == id && b.ReturnDate == null);
+                vm.HistoryCount = await _context.Books
+                    .Where(b => b.Id == id)
+                    .Select(b => b.Borrowings.Count)
+                    .FirstOrDefaultAsync();
+            }
+
+            return vm;
         }
 
         // Strips hyphens/spaces so "978-0-13-235088-4" and "9780132350884" are treated as the same ISBN
