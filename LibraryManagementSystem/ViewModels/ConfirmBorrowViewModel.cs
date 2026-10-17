@@ -45,6 +45,7 @@ namespace LibraryManagementSystem.ViewModels
         public string BookTitle { get; set; } = string.Empty;
         public string BookAuthor { get; set; } = string.Empty;
         public string BookISBN { get; set; } = string.Empty;
+        public string? BookImageUrl { get; set; }
         public string CategoryName { get; set; } = string.Empty;
         public string BorrowerName { get; set; } = string.Empty;
         public string BorrowerEmail { get; set; } = string.Empty;

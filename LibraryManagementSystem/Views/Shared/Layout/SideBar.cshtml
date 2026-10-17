@@ -19,7 +19,7 @@
     var isDashboard = !isBooks && !isCategories && !isMembers && !isBorrow && !isReturn && !isHistory && !isStaffAccounts && !isBorrowings;
 }
 
-<aside class="app-sidebar">
+<aside class="app-sidebar" id="appSidebar">
     <!-- Header / Brand -->
     <div class="sidebar-header">
         <div class="brand-info-flex">
@@ -74,7 +74,11 @@
                 <li class="nav-item">
                     <a class="nav-link-item @(isDashboard ? "active" : "")" href="/" data-title="Home">
                         <span class="nav-icon">
-                            <img src="~/Images/icons/HomeIcon.png" alt="Home" width="18" height="18" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m3 10 9-7 9 7"></path>
+                                <path d="M5 9v11h14V9"></path>
+                                <path d="M9 20v-6h6v6"></path>
+                            </svg>
                         </span>
                         <span class="nav-text">Home</span>
                     </a>
@@ -83,7 +87,10 @@
                 <li class="nav-item">
                     <a class="nav-link-item @(isBooks ? "active" : "")" href="/Book" data-title="Books">
                         <span class="nav-icon">
-                            <img src="~/Images/icons/BooksIcon.png" alt="Books" width="18" height="18" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
                         </span>
                         <span class="nav-text">Books</span>
                     </a>
@@ -92,7 +99,12 @@
                 <li class="nav-item">
                     <a class="nav-link-item @(isBorrowings ? "active" : "")" asp-controller="Member" asp-action="Borrow" data-title="My Borrowings">
                         <span class="nav-icon">
-                            <img src="~/Images/icons/BorrowIcon.png" alt="My Borrowings" width="18" height="18" />
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 8.5h16v11H4z"></path>
+                                <path d="M8 4h8l2 4.5H6L8 4z"></path>
+                                <path d="M12 11v5"></path>
+                                <path d="m9.5 13.5 2.5 2.5 2.5-2.5"></path>
+                            </svg>
                         </span>
                         <span class="nav-text">My Borrowings</span>
                     </a>
@@ -254,12 +266,29 @@
             }
         }
 
-        // Apply immediately if saved
-        if (localStorage.getItem(STORAGE_KEY) === 'true') {
-            applySidebarState(true);
+        const mobileBreakpoint = window.matchMedia('(max-width: 767.98px)');
+
+        function syncSidebarForViewport(isMobile) {
+            document.body.classList.remove('mobile-nav-open');
+            // A desktop collapsed preference must never hide navigation labels
+            // inside the mobile drawer.
+            applySidebarState(!isMobile && localStorage.getItem(STORAGE_KEY) === 'true');
         }
 
+        syncSidebarForViewport(mobileBreakpoint.matches);
+        mobileBreakpoint.addEventListener('change', event => syncSidebarForViewport(event.matches));
+
         window.toggleAppSidebar = function () {
+            if (window.matchMedia('(max-width: 767.98px)').matches) {
+                const isOpen = document.body.classList.toggle('mobile-nav-open');
+                const globalBtn = document.getElementById('globalSidebarToggle');
+                if (globalBtn) {
+                    globalBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    globalBtn.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+                }
+                return;
+            }
+
             const isCurrentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
             const willCollapse = !isCurrentlyCollapsed;
             applySidebarState(willCollapse);
@@ -276,6 +305,32 @@
             if (globalBtn && !globalBtn.dataset.bound) {
                 globalBtn.dataset.bound = 'true';
                 globalBtn.addEventListener('click', window.toggleAppSidebar);
+            }
+
+            if (!document.documentElement.dataset.mobileNavBound) {
+                document.documentElement.dataset.mobileNavBound = 'true';
+                document.addEventListener('click', function (event) {
+                    if (!window.matchMedia('(max-width: 767.98px)').matches || !document.body.classList.contains('mobile-nav-open')) return;
+
+                    const sidebar = document.getElementById('appSidebar');
+                    const toggle = document.getElementById('globalSidebarToggle');
+                    if (sidebar && !sidebar.contains(event.target) && toggle && !toggle.contains(event.target)) {
+                        document.body.classList.remove('mobile-nav-open');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        toggle.setAttribute('aria-label', 'Open navigation menu');
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
+                        document.body.classList.remove('mobile-nav-open');
+                        const toggle = document.getElementById('globalSidebarToggle');
+                        if (toggle) {
+                            toggle.setAttribute('aria-expanded', 'false');
+                            toggle.setAttribute('aria-label', 'Open navigation menu');
+                        }
+                    }
+                });
             }
         }
 

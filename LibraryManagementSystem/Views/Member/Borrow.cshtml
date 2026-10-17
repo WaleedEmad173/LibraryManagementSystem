@@ -323,6 +323,14 @@
             color: #64748b;
             border: 1px solid #f1f5f9;
         }
+        .book-cover-thumb {
+            width: 48px;
+            height: 64px;
+            flex: 0 0 48px;
+            border-radius: 6px;
+            object-fit: cover;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, .16);
+        }
         .book-title-link {
             font-size: 0.95rem;
             font-weight: 700;
@@ -657,16 +665,16 @@
                                 <!-- Book Details -->
                                 <td>
                                     <div class="book-details-flex">
-                                        <div class="book-symbol-box @(loan.IsReturned ? "returned-loan" : "active-loan")">
-                                            @if (loan.IsReturned)
-                                            {
-                                                <i class="bi bi-book" aria-hidden="true"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i>
-                                            }
-                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(loan.BookImageUrl))
+                                        {
+                                            <img class="book-cover-thumb" src="~/Images/@loan.BookImageUrl" alt="Cover of @loan.BookTitle" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <div class="book-symbol-box @(loan.IsReturned ? "returned-loan" : "active-loan")">
+                                                <i class="bi @(loan.IsReturned ? "bi-book" : "bi-journal-bookmark-fill")" aria-hidden="true"></i>
+                                            </div>
+                                        }
                                         <div>
                                             <a asp-controller="Book" asp-action="Details" asp-route-id="@loan.BookId" class="book-title-link">
                                                 @loan.BookTitle

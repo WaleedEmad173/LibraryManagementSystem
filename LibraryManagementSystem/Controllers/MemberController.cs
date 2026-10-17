@@ -84,6 +84,7 @@ namespace LibraryManagementSystem.Controllers
                     BookTitle = b.Book != null ? b.Book.Title : string.Empty,
                     BookAuthor = b.Book != null ? b.Book.Author : string.Empty,
                     BookISBN = b.Book != null ? b.Book.ISBN : string.Empty,
+                    BookImageUrl = b.Book != null ? b.Book.ImageUrl : null,
                     CategoryName = b.Book != null && b.Book.Category != null ? b.Book.Category.Name : string.Empty,
                     BorrowerName = member.FullName,
                     MemberId = LibraryIdentifiers.Member(member.Id),
