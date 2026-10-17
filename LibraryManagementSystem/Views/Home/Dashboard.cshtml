@@ -24,7 +24,7 @@
                     <line x1="8" y1="2" x2="8" y2="6"></line>
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <span>@DateTime.Now.ToString("dddd, MMM dd, yyyy")</span>
+                <span id="dashboard-local-date"></span>
             </div>
             @if (Model.IsStaff)
             {
@@ -377,3 +377,16 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const dashboardDate = new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            timeZone: 'Africa/Cairo'
+        });
+        document.getElementById('dashboard-local-date').textContent = dashboardDate.format(new Date());
+    </script>
+}

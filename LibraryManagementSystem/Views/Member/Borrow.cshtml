@@ -9,10 +9,21 @@
 
 @section Styles {
     <style>
+        .content:has(.my-borrowings-container) {
+            box-sizing: border-box;
+            min-height: calc(100vh - 64px);
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
         .my-borrowings-container {
             color: #0f172a;
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: none;
+            min-width: 0;
+            flex: 1 0 auto;
+            margin: 0;
+            box-sizing: border-box;
         }
 
         /* Top Page Header */
