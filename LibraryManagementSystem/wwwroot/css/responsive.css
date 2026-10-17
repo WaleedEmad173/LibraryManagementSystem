@@ -32,7 +32,7 @@ canvas { max-width: 100%; height: auto; }
 }
 
 /* Phones and small tablets. */
-@media (max-width: 767.98px) {
+@media (max-width: 800px) {
     html,
     body { overflow-x: hidden; }
 
@@ -188,6 +188,62 @@ canvas { max-width: 100%; height: auto; }
     main .circ-table-container table,
     main .history-table-card table,
     main .books-table-card table { min-width: 620px; }
+
+    /* The circulation history has six columns, so 620px still compresses
+       member avatars and dates. Give it enough intrinsic width to scroll. */
+    main .history-page .circ-table-container {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    main .history-page #ledgerTable {
+        width: 960px !important;
+        min-width: 960px !important;
+        max-width: none !important;
+        table-layout: fixed;
+    }
+
+    main .history-page .circ-mini-avatar {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        flex: 0 0 36px !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    main .history-page .circ-table-user-cell > div:last-child { min-width: 0; }
+
+    /* Return has five columns. Keep their readable widths inside the table
+       scroller instead of letting the browser squeeze dates and avatars. */
+    main .return-page .circ-table-container {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    main .return-page .return-table {
+        width: 900px !important;
+        min-width: 900px !important;
+        max-width: none !important;
+        table-layout: fixed;
+    }
+
+    main .return-page .circ-mini-avatar {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        flex: 0 0 36px !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    main .return-page .circ-table-user-cell > div:last-child { min-width: 0; }
 
     .library-main { margin-left: 0 !important; }
     .library-sidebar { display: none; }

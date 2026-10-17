@@ -109,6 +109,7 @@
                         <span class="nav-text">My Borrowings</span>
                     </a>
                 </li>
+
             }
             else
             {
@@ -266,7 +267,7 @@
             }
         }
 
-        const mobileBreakpoint = window.matchMedia('(max-width: 767.98px)');
+        const mobileBreakpoint = window.matchMedia('(max-width: 800px)');
 
         function syncSidebarForViewport(isMobile) {
             document.body.classList.remove('mobile-nav-open');
@@ -279,7 +280,7 @@
         mobileBreakpoint.addEventListener('change', event => syncSidebarForViewport(event.matches));
 
         window.toggleAppSidebar = function () {
-            if (window.matchMedia('(max-width: 767.98px)').matches) {
+            if (mobileBreakpoint.matches) {
                 const isOpen = document.body.classList.toggle('mobile-nav-open');
                 const globalBtn = document.getElementById('globalSidebarToggle');
                 if (globalBtn) {
@@ -310,7 +311,7 @@
             if (!document.documentElement.dataset.mobileNavBound) {
                 document.documentElement.dataset.mobileNavBound = 'true';
                 document.addEventListener('click', function (event) {
-                    if (!window.matchMedia('(max-width: 767.98px)').matches || !document.body.classList.contains('mobile-nav-open')) return;
+                    if (!mobileBreakpoint.matches || !document.body.classList.contains('mobile-nav-open')) return;
 
                     const sidebar = document.getElementById('appSidebar');
                     const toggle = document.getElementById('globalSidebarToggle');

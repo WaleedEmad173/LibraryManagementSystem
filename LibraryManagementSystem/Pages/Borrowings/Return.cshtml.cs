@@ -1,12 +1,14 @@
 using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Pages.Borrowings
 {
+    [Authorize(Roles = "Admin,Librarian")]
     public class ReturnModel : PageModel
     {
         private readonly AppDbContext _context;
