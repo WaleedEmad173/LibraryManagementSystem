@@ -1,0 +1,345 @@
+@using Microsoft.AspNetCore.Http
+@{
+    var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+    
+    var isAdmin = User.IsInRole("Admin");
+    var isLibrarian = User.IsInRole("Librarian");
+    var isStaff = isAdmin || isLibrarian;
+    var isMember = !isStaff;
+
+    // Active state checks
+    var isBooks = currentPath.Contains("/Book") || currentPath.Contains("/book");
+    var isCategories = currentPath.Contains("/categories") || currentPath.Contains("/category");
+    var isMembers = currentPath.Contains("/members") && !currentPath.Contains("/member/borrowings");
+    var isBorrow = currentPath.Contains("/borrow") && !currentPath.Contains("/borrowings") && !currentPath.Contains("/history");
+    var isReturn = currentPath.Contains("/return");
+    var isHistory = currentPath.Contains("/history");
+    var isStaffAccounts = currentPath.Contains("/staff") || currentPath.Contains("/accounts") || currentPath.Contains("/admin/staff");
+    var isBorrowings = currentPath.Contains("/member/borrow");
+    var isDashboard = !isBooks && !isCategories && !isMembers && !isBorrow && !isReturn && !isHistory && !isStaffAccounts && !isBorrowings;
+}
+
+<aside class="app-sidebar" id="appSidebar">
+    <!-- Header / Brand -->
+    <div class="sidebar-header">
+        <div class="brand-info-flex">
+            @if (isAdmin)
+            {
+                <div class="brand-box brand-dark-box">
+                    <img src="~/Images/icons/Logo.svg" alt="Library System" width="20" height="20" class="brand-icon" />
+                </div>
+                <div class="brand-text-wrapper">
+                    <span class="brand-title">Library System</span>
+                    <span class="brand-portal-subtitle">ADMIN PORTAL</span>
+                </div>
+            }
+            else if (isLibrarian)
+            {
+                <div class="brand-box brand-orange-box">
+                    <img src="~/Images/icons/Logo.svg" alt="Library System" width="20" height="20" class="brand-icon" />
+                </div>
+                <div class="brand-text-wrapper">
+                    <span class="brand-title">Library System</span>
+                    <span class="brand-portal-subtitle">LIBRARIAN PORTAL</span>
+                </div>
+            }
+            else
+            {
+                <div class="brand-box brand-default-box">
+                    <img src="~/Images/icons/Logo.svg" alt="Library System" width="22" height="22" class="brand-icon" />
+                </div>
+                <div class="brand-text-wrapper">
+                    <span class="brand-title">Library System</span>
+                </div>
+            }
+        </div>
+        <button type="button" class="sidebar-collapse-btn" id="sidebarInnerToggle" title="Toggle sidebar">
+            <svg class="collapse-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav">
+        @if (isLibrarian)
+        {
+            <div class="nav-section-title">CORE MENU</div>
+        }
+
+        <ul class="nav-list">
+            @if (isMember)
+            {
+                <!-- ================= MEMBER MENU (Only 3 Items) ================= -->
+                <li class="nav-item">
+                    <a class="nav-link-item @(isDashboard ? "active" : "")" href="/" data-title="Home">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m3 10 9-7 9 7"></path>
+                                <path d="M5 9v11h14V9"></path>
+                                <path d="M9 20v-6h6v6"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBooks ? "active" : "")" href="/Book" data-title="Books">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Books</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBorrowings ? "active" : "")" asp-controller="Member" asp-action="Borrow" data-title="My Borrowings">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 8.5h16v11H4z"></path>
+                                <path d="M8 4h8l2 4.5H6L8 4z"></path>
+                                <path d="M12 11v5"></path>
+                                <path d="m9.5 13.5 2.5 2.5 2.5-2.5"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">My Borrowings</span>
+                    </a>
+                </li>
+
+            }
+            else
+            {
+                <!-- ================= ADMIN & LIBRARIAN MENU ================= -->
+                <li class="nav-item">
+                    <a class="nav-link-item @(isDashboard ? "active" : "")" href="/" data-title="Dashboard">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBooks ? "active" : "")" href="/Book" data-title="Books">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Books</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isCategories ? "active" : "")" href="/Categories" data-title="Categories">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Categories</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isMembers ? "active" : "")" href="/Members" data-title="Members">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Members</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isBorrow ? "active" : "")" href="/Borrow" data-title="Borrow Book">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <polyline points="8 12 12 16 16 12"></polyline>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Borrow</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-item @(isReturn ? "active" : "")" href="/Return" data-title="Return Book">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <polyline points="16 12 12 8 8 12"></polyline>
+                                <line x1="12" y1="16" x2="12" y2="8"></line>
+                            </svg>
+                        </span>
+                        <span class="nav-text">Return</span>
+                    </a>
+                </li>
+                 <li class="nav-item">
+                    <a class="nav-link-item @(isHistory ? "active" : "")" href="/History" data-title="Borrowing History">
+                        <span class="nav-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                <polyline points="3 3 3 8 8 8"></polyline>
+                                <polyline points="12 7 12 12 15 15"></polyline>
+                            </svg>
+                        </span>
+                        <span class="nav-text">History</span>
+                    </a>
+                </li>
+
+                @if (isAdmin)
+                {
+                    <!-- ONLY FOR ADMIN -->
+                    <li class="nav-item staff-accounts-item">
+                        <a class="nav-link-item @(isStaffAccounts ? "active" : "")" href="/Admin/Staff" data-title="Staff Accounts">
+                            <span class="nav-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                            </span>
+                            <span class="nav-text">Staff Accounts</span>
+                        </a>
+                    </li>
+                }
+            }
+        </ul>
+    </nav>
+
+    <!-- Footer Status Badges -->
+    <div class="sidebar-footer">
+        @if (isLibrarian)
+        {
+            <div class="librarian-badge" data-title="Librarian Mode • v1.0">
+                <div class="badge-status">
+                    <span class="status-dot"></span>
+                    <span>Librarian Mode • v1.0</span>
+                </div>
+                <div class="badge-shield-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+            </div>
+        }
+        else if (isMember)
+        {
+            <div class="portal-badge" data-title="Member Portal • v1.0">
+                <div class="portal-status">
+                    <span class="status-dot"></span>
+                    <span>Member Portal</span>
+                </div>
+                <span class="portal-version">v1.0</span>
+            </div>
+        }
+    </div>
+</aside>
+
+<script>
+    (function () {
+        const STORAGE_KEY = 'sidebar_collapsed';
+
+        function applySidebarState(isCollapsed) {
+            const wrapper = document.getElementById('mainAppWrapper') || document.querySelector('.app');
+            if (isCollapsed) {
+                if (wrapper) wrapper.classList.add('sidebar-collapsed');
+                document.body.classList.add('sidebar-collapsed');
+            } else {
+                if (wrapper) wrapper.classList.remove('sidebar-collapsed');
+                document.body.classList.remove('sidebar-collapsed');
+            }
+        }
+
+        const mobileBreakpoint = window.matchMedia('(max-width: 800px)');
+
+        function syncSidebarForViewport(isMobile) {
+            document.body.classList.remove('mobile-nav-open');
+            // A desktop collapsed preference must never hide navigation labels
+            // inside the mobile drawer.
+            applySidebarState(!isMobile && localStorage.getItem(STORAGE_KEY) === 'true');
+        }
+
+        syncSidebarForViewport(mobileBreakpoint.matches);
+        mobileBreakpoint.addEventListener('change', event => syncSidebarForViewport(event.matches));
+
+        window.toggleAppSidebar = function () {
+            if (mobileBreakpoint.matches) {
+                const isOpen = document.body.classList.toggle('mobile-nav-open');
+                const globalBtn = document.getElementById('globalSidebarToggle');
+                if (globalBtn) {
+                    globalBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    globalBtn.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+                }
+                return;
+            }
+
+            const isCurrentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
+            const willCollapse = !isCurrentlyCollapsed;
+            applySidebarState(willCollapse);
+            localStorage.setItem(STORAGE_KEY, willCollapse ? 'true' : 'false');
+        };
+
+        function bindButtons() {
+            const innerBtn = document.getElementById('sidebarInnerToggle');
+            if (innerBtn && !innerBtn.dataset.bound) {
+                innerBtn.dataset.bound = 'true';
+                innerBtn.addEventListener('click', window.toggleAppSidebar);
+            }
+            const globalBtn = document.getElementById('globalSidebarToggle');
+            if (globalBtn && !globalBtn.dataset.bound) {
+                globalBtn.dataset.bound = 'true';
+                globalBtn.addEventListener('click', window.toggleAppSidebar);
+            }
+
+            if (!document.documentElement.dataset.mobileNavBound) {
+                document.documentElement.dataset.mobileNavBound = 'true';
+                document.addEventListener('click', function (event) {
+                    if (!mobileBreakpoint.matches || !document.body.classList.contains('mobile-nav-open')) return;
+
+                    const sidebar = document.getElementById('appSidebar');
+                    const toggle = document.getElementById('globalSidebarToggle');
+                    if (sidebar && !sidebar.contains(event.target) && toggle && !toggle.contains(event.target)) {
+                        document.body.classList.remove('mobile-nav-open');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        toggle.setAttribute('aria-label', 'Open navigation menu');
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
+                        document.body.classList.remove('mobile-nav-open');
+                        const toggle = document.getElementById('globalSidebarToggle');
+                        if (toggle) {
+                            toggle.setAttribute('aria-expanded', 'false');
+                            toggle.setAttribute('aria-label', 'Open navigation menu');
+                        }
+                    }
+                });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindButtons);
+        } else {
+            bindButtons();
+        }
+    })();
+</script>
+    

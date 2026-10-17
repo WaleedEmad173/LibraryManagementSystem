@@ -1,0 +1,277 @@
+@model LibraryManagementSystem.ViewModels.GuestHomeViewModel
+@{
+    ViewData["Title"] = "About Us";
+}
+
+<div class="about-page-container py-4">
+    <!-- Hero Header Section -->
+    <section class="about-hero text-center py-5">
+        <div class="about-pill mb-3">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>ABOUT OUR INSTITUTION</span>
+        </div>
+
+        <h1 class="about-hero-title">Connecting Curious Minds with Infinite Knowledge</h1>
+        <p class="about-hero-subtitle">
+            Founded in 1984, the Central Academic Library serves as the intellectual cornerstone for thousands of undergraduate, graduate, and faculty scholars. We blend centuries of archival tradition with frictionless modern digital workflows.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary-auth px-4 py-2">
+                <span>Get a Library Card</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+            <a asp-controller="Book" asp-action="Index" class="btn btn-outline-custom px-4 py-2">Explore Catalog</a>
+        </div>
+    </section>
+
+    <!-- Key Numerical Milestones Bar -->
+    <section class="stats-bar-section my-4">
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-primary">@(Model != null && Model.TotalTitles > 0 ? Model.TotalTitles.ToString("N0") : "0")</div>
+                    <div class="metric-title">Catalog Titles</div>
+                    <div class="metric-desc">Physical textbooks, monographs, &amp; journals</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-amber">@(Model != null && Model.TotalMembers > 0 ? Model.TotalMembers.ToString("N0") : "0")</div>
+                    <div class="metric-title">Active Scholars</div>
+                    <div class="metric-desc">Registered student &amp; faculty members</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-success">@(Model != null && Model.TotalCategories > 0 ? $"{Model.TotalCategories} Fields" : "Curated")</div>
+                    <div class="metric-title">Knowledge Categories</div>
+                    <div class="metric-desc">Specialized departments &amp; academic subjects</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card-metric">
+                    <div class="metric-num text-indigo">@(Model != null && Model.TotalBorrowings > 0 ? Model.TotalBorrowings.ToString("N0") : "0")</div>
+                    <div class="metric-title">Borrowing Transactions</div>
+                    <div class="metric-desc">Circulation operations completed via portal</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision 3 Cards -->
+    <section class="pillars-section my-5">
+        <div class="text-center mb-5">
+            <span class="section-tag">CORE PRINCIPLES</span>
+            <h2 class="section-title">The Pillars of Our Academic Mission</h2>
+            <p class="section-desc">Guided by a steadfast commitment to accessibility, intellectual freedom, and state-of-the-art research resources.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon bg-primary-soft text-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="pillar-title">Democratizing Access</h4>
+                    <p class="pillar-text">
+                        We believe that scholarly knowledge belongs to all. Every registered student and researcher enjoys open borrowing, unrestricted database access, and inter-library loan privileges.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon bg-amber-soft text-amber">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h4 class="pillar-title">Digital Excellence</h4>
+                    <p class="pillar-text">
+                        From automated self-checkout kiosks to seamless cloud reservations, our unified portal guarantees that securing the resources you need takes seconds, not hours.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="pillar-card">
+                    <div class="pillar-icon bg-success-soft text-success">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="pillar-title">Archival Preservation</h4>
+                    <p class="pillar-text">
+                        Our climate-controlled archival vaults protect thousands of delicate historical volumes, early faculty manuscripts, and rare scientific journals for future generations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facility Sanctuary Spotlight -->
+    <section class="facility-spotlight-section my-5">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-6">
+                    <img src="~/Images/library-hall.jpg" alt="Central Reading Hall" class="facility-img w-100" />
+                </div>
+                <div class="col-lg-6 p-4 p-md-5">
+                    <span class="spotlight-badge">CAMPUS LANDMARK</span>
+                    <h3 class="facility-heading mt-2">The Central Reading Hall & Research Commons</h3>
+                    <p class="facility-text">
+                        Designed with towering glass facades and handcrafted oak workstations, our main study hall provides natural daylight, ambient noise control, and individual charging terminals for over 450 concurrent readers.
+                    </p>
+
+                    <ul class="facility-features-list list-unstyled mt-3 mb-4">
+                        <li class="d-flex align-items-center gap-2 mb-2">
+                            <span class="check-bullet">✓</span>
+                            <span>Dedicated quiet zones for deep uninterrupted dissertation writing.</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2 mb-2">
+                            <span class="check-bullet">✓</span>
+                            <span>High-resolution document scanners and digital microfiche stations.</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <span class="check-bullet">✓</span>
+                            <span>On-site research librarians ready for one-on-one citation guidance.</span>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-light text-dark border p-2">📍 North Quad, Building B</span>
+                        <span class="text-muted small">Open Mon-Sun: 7:00 AM – 11:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leadership & Curators -->
+    <section class="team-section my-5">
+        <div class="text-center mb-5">
+            <span class="section-tag">LEADERSHIP & CURATION</span>
+            <h2 class="section-title">Meet the Library Custodians</h2>
+            <p class="section-desc">Passionate information specialists dedicated to guiding your research endeavors.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-navy-subtle">
+                        <span class="avatar-initials">EV</span>
+                    </div>
+                    <h5 class="team-name mb-1">Dr. Eleanor Vance</h5>
+                    <div class="team-role">Head of Library Services</div>
+                    <p class="team-bio mt-2">Ph.D. in Information Science with 18 years of archival curation experience.</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-amber-subtle">
+                        <span class="avatar-initials">MS</span>
+                    </div>
+                    <h5 class="team-name mb-1">Dr. Marcus Sterling</h5>
+                    <div class="team-role">Head of Digital Collections</div>
+                    <p class="team-bio mt-2">Specialist in open research repositories, metadata indexing, and digital catalogs.</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-emerald-subtle">
+                        <span class="avatar-initials">SA</span>
+                    </div>
+                    <h5 class="team-name mb-1">Sophia Al-Mansoor</h5>
+                    <div class="team-role">Senior Research Curator</div>
+                    <p class="team-bio mt-2">Directs graduate research seminars and bibliographic literature reviews.</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="team-card text-center p-4">
+                    <div class="avatar-circle mx-auto mb-3 bg-purple-subtle">
+                        <span class="avatar-initials">DC</span>
+                    </div>
+                    <h5 class="team-name mb-1">David Chen</h5>
+                    <div class="team-role">Lead Systems Architect</div>
+                    <p class="team-bio mt-2">Maintains high availability for online reservations and catalog databases.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Historic Milestones Timeline -->
+    <section class="timeline-section my-5">
+        <div class="text-center mb-5">
+            <span class="section-tag">OUR JOURNEY</span>
+            <h2 class="section-title">Four Decades of Growth</h2>
+            <p class="section-desc">Key milestones in our evolution into a modern academic learning hub.</p>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">1984</div>
+                    <h6 class="milestone-title">Foundation</h6>
+                    <p class="milestone-desc">Central Library opened its doors with an initial collection of 8,500 core print volumes.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">2003</div>
+                    <h6 class="milestone-title">Digital Catalogs</h6>
+                    <p class="milestone-desc">Transitioned from physical card catalogs to our first computerized indexing system.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">2018</div>
+                    <h6 class="milestone-title">Modern Sanctuaries</h6>
+                    <p class="milestone-desc">Expanded Floor 2 study suites, introducing acoustic isolation and gigabit student Wi-Fi.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="milestone-box p-4">
+                    <div class="milestone-year">2024</div>
+                    <h6 class="milestone-title">Smart Academic Portal</h6>
+                    <p class="milestone-desc">Launched the unified real-time reservation system with instant member barcode checkouts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Call To Action -->
+    <section class="cta-banner my-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+            <div>
+                <h3 class="cta-title">Ready to start your research journey?</h3>
+                <p class="cta-sub mb-0">Join over 12,000 university scholars. Register for your free library credentials in less than two minutes.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-warning-custom">
+                    <span>Register for Free</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-white">Sign In</a>
+            </div>
+        </div>
+    </section>
+</div>

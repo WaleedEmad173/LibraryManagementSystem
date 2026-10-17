@@ -1,0 +1,286 @@
+/* Project-wide responsive layer. Loaded after shared and view styles. */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html,
+body { max-width: 100%; }
+
+img,
+video,
+canvas { max-width: 100%; height: auto; }
+
+/* Tablet layouts: stack the major two-panel work areas before they get tight. */
+@media (max-width: 991.98px) {
+    main .two-col,
+    main .detail-card,
+    main .borrow-layout,
+    main .borrow-workspace,
+    main .borrow-page-layout,
+    main .member-details-layout,
+    main .category-details-layout,
+    main .staff-layout {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    main,
+    .content,
+    .library-content,
+    .main { min-width: 0; }
+
+    .content { padding-inline: 20px; }
+}
+
+/* Phones and small tablets. */
+@media (max-width: 800px) {
+    html,
+    body { overflow-x: hidden; }
+
+    /* Keep the app area full width and use the existing hamburger as a drawer. */
+    .app { display: block; min-width: 0; }
+
+    .app-sidebar {
+        position: fixed !important;
+        inset: 0 auto 0 0;
+        z-index: 1200;
+        width: min(82vw, 280px) !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        overflow-x: hidden;
+        overflow-y: auto !important;
+        padding: 20px 14px !important;
+        transform: translateX(-105%);
+        transition: transform .22s ease;
+        box-shadow: 8px 0 28px rgb(15 23 42 / 18%);
+    }
+
+    body.mobile-nav-open { overflow: hidden; }
+
+    /* Ignore an old desktop-only collapsed state if it exists in the browser. */
+    body.sidebar-collapsed .app-sidebar .brand-text-wrapper,
+    body.sidebar-collapsed .app-sidebar .nav-section-title,
+    body.sidebar-collapsed .app-sidebar .nav-text,
+    body.sidebar-collapsed .app-sidebar .portal-badge span:not(.status-dot),
+    body.sidebar-collapsed .app-sidebar .portal-version {
+        display: initial !important;
+    }
+
+    body.sidebar-collapsed .app-sidebar .brand-text-wrapper { display: flex !important; }
+    body.sidebar-collapsed .app-sidebar .nav-section-title { display: block !important; }
+    body.sidebar-collapsed .app-sidebar .nav-text { display: inline !important; }
+
+    body.sidebar-collapsed .app-sidebar .sidebar-header {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    body.sidebar-collapsed .app-sidebar .nav-link-item {
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 10px 12px !important;
+        justify-content: flex-start !important;
+    }
+
+    body.mobile-nav-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1190;
+        background: rgb(15 23 42 / 48%);
+    }
+
+    body.mobile-nav-open .app-sidebar { transform: translateX(0); }
+
+    .sidebar-collapse-btn { display: none !important; }
+
+    .main,
+    .content,
+    .app-main-wrapper {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .content {
+        padding: 18px 16px 28px !important;
+        gap: 16px;
+    }
+
+    .topbar,
+    .app-top-navbar {
+        position: relative;
+        padding: 10px 14px !important;
+    }
+
+    .navbar-content,
+    .portal-title-wrapper,
+    .topbar-right,
+    .user { min-width: 0; }
+
+    .topbar-right { gap: 8px; }
+
+    .crumbs,
+    .member-portal-crumbs {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .crumbs span:not(:last-child),
+    .member-portal-crumbs span:not(:last-child) { display: none; }
+
+    /* Reduce custom grids to one column; keep summary tiles in a compact pair. */
+    main [class*="grid"]:not(.nav-list):not(.books-stats-grid):not([class*="stats-grid"]):not([class*="stat-grid"]),
+    main .two-col,
+    main .form-grid,
+    main .history-filter-form,
+    main .detail-card {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    main .stats,
+    main .history-stats,
+    main .books-stats-grid,
+    main [class*="stats-grid"],
+    main [class*="stat-grid"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    main .borrow-main-card form > .row,
+    main .roster-legend { grid-template-columns: minmax(0, 1fr) !important; }
+
+    main .container,
+    main .container-fluid,
+    main .card,
+    main [class*="card"] {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    main input,
+    main select,
+    main textarea,
+    main .form-control,
+    main .form-select { min-width: 0; max-width: 100%; }
+
+    /* Keep wide data tables inside their cards; the page itself stays fixed-width. */
+    main .table-responsive,
+    main .table-wrap,
+    main .table-card,
+    main .table-container,
+    main .circ-table-container,
+    main .history-table-card,
+    main .books-table-card {
+        max-width: 100%;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    main .table-responsive table,
+    main .table-wrap table,
+    main .table-card table,
+    main .table-container table,
+    main .circ-table-container table,
+    main .history-table-card table,
+    main .books-table-card table { min-width: 620px; }
+
+    /* The circulation history has six columns, so 620px still compresses
+       member avatars and dates. Give it enough intrinsic width to scroll. */
+    main .history-page .circ-table-container {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    main .history-page #ledgerTable {
+        width: 960px !important;
+        min-width: 960px !important;
+        max-width: none !important;
+        table-layout: fixed;
+    }
+
+    main .history-page .circ-mini-avatar {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        flex: 0 0 36px !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    main .history-page .circ-table-user-cell > div:last-child { min-width: 0; }
+
+    /* Return has five columns. Keep their readable widths inside the table
+       scroller instead of letting the browser squeeze dates and avatars. */
+    main .return-page .circ-table-container {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    main .return-page .return-table {
+        width: 900px !important;
+        min-width: 900px !important;
+        max-width: none !important;
+        table-layout: fixed;
+    }
+
+    main .return-page .circ-mini-avatar {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        flex: 0 0 36px !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    main .return-page .circ-table-user-cell > div:last-child { min-width: 0; }
+
+    .library-main { margin-left: 0 !important; }
+    .library-sidebar { display: none; }
+    .library-topbar { height: auto; min-height: 58px; padding-inline: 12px; }
+    .library-breadcrumb { display: none; }
+    .library-content { padding: 12px 10px 22px !important; }
+
+    .app-guest-navbar .container,
+    footer .container { padding-inline: 14px; }
+}
+
+@media (max-width: 575.98px) {
+    .content { padding: 14px 12px 24px !important; gap: 12px; }
+
+    main .card { padding: 14px !important; }
+
+    main .stats,
+    main .history-stats,
+    main .books-stats-grid,
+    main [class*="stats-grid"],
+    main [class*="stat-grid"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    main h1 { font-size: clamp(1.45rem, 7vw, 1.9rem); overflow-wrap: anywhere; }
+    main h2 { font-size: clamp(1.2rem, 5.5vw, 1.5rem); }
+
+    main .d-flex:not(.flex-nowrap) { flex-wrap: wrap; }
+
+    main .btn,
+    main button { max-width: 100%; white-space: normal; }
+
+    main .row { --bs-gutter-x: 1rem; }
+
+    .user-meta,
+    .user-text-info,
+    .user-sub { display: none !important; }
+
+    .library-content { padding: 10px 8px 18px !important; }
+}

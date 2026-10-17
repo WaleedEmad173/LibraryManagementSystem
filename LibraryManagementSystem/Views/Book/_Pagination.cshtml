@@ -1,0 +1,62 @@
+@model BookIndexViewModel
+@{
+    var p = Model.Books;
+    var totalPages = Math.Max(1, p.TotalPages);
+    var first = p.TotalCount == 0 ? 0 : (p.PageIndex - 1) * p.PageSize + 1;
+    var last = Math.Min(p.PageIndex * p.PageSize, p.TotalCount);
+
+    // Show at most 5 page numbers around the current page
+    var end = Math.Min(totalPages, Math.Max(1, p.PageIndex - 2) + 4);
+    var start = Math.Max(1, end - 4);
+
+    // Builds the query string for a page link while keeping the current search/filter/sort
+    Dictionary<string, string> Route(int page)
+    {
+        var d = new Dictionary<string, string> { ["page"] = page.ToString() };
+        if (!string.IsNullOrWhiteSpace(Model.Search)) d["search"] = Model.Search;
+        if (Model.CategoryId.HasValue) d["categoryId"] = Model.CategoryId.Value.ToString();
+        if (!string.IsNullOrEmpty(Model.SortOrder)) d["sortOrder"] = Model.SortOrder;
+        if (Model.AvailableOnly) d["availableOnly"] = "true";
+        return d;
+    }
+}
+
+<div class="books-table-footer d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="footer-counts-text text-muted">
+        Showing <strong>@(first)-@(last)</strong> of <strong>@p.TotalCount</strong> books
+        <span class="mx-1">•</span> Page @p.PageIndex of @totalPages
+    </div>
+
+    <nav class="books-pager-nav d-flex align-items-center gap-1">
+        @if (p.HasPreviousPage)
+        {
+            <a class="pager-nav-link" asp-action="Index" asp-all-route-data="Route(p.PageIndex - 1)">
+                <i class="bi bi-chevron-left me-1"></i> Previous
+            </a>
+        }
+        else
+        {
+            <span class="pager-nav-link disabled">
+                <i class="bi bi-chevron-left me-1"></i> Previous
+            </span>
+        }
+
+        @for (var i = start; i <= end; i++)
+        {
+            <a class="pager-nav-number @(i == p.PageIndex ? "active" : "")" asp-action="Index" asp-all-route-data="Route(i)">@i</a>
+        }
+
+        @if (p.HasNextPage)
+        {
+            <a class="pager-nav-link" asp-action="Index" asp-all-route-data="Route(p.PageIndex + 1)">
+                Next <i class="bi bi-chevron-right ms-1"></i>
+            </a>
+        }
+        else
+        {
+            <span class="pager-nav-link disabled">
+                Next <i class="bi bi-chevron-right ms-1"></i>
+            </span>
+        }
+    </nav>
+</div>

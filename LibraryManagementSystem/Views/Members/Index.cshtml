@@ -1,0 +1,657 @@
+@model LibraryManagementSystem.ViewModels.MemberListViewModel
+
+@{
+    ViewData["Title"] = "Members Directory";
+    Layout = "_AdminLayout";
+    ViewData["Section"] = "Members";
+}
+
+<style>
+    .mem-page-wrap {
+        padding: 0 0 60px;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 70px);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Page Header */
+    .mem-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .mem-title-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+    .mem-header-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+    .mem-badge-registry {
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 99px;
+    }
+    .mem-header-sub {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+        max-width: 650px;
+        line-height: 1.5;
+    }
+    .mem-btn-add {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 1px 3px rgba(30, 58, 138, 0.25);
+        transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .mem-btn-add:hover {
+        background: #172554;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    /* Stat Cards Grid */
+    .mem-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @@media (max-width: 900px) {
+        .mem-stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .mem-stat-card {
+        background: #ffffff;
+        box-sizing: border-box;
+        min-height: 136px;
+        height: 100%;
+        border: 1px solid #e7eaf2;
+        border-radius: 10px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        box-shadow: 0 1px 4px rgba(25, 34, 56, .055);
+    }
+    .mem-stat-lbl {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+    .mem-stat-num-group {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+    .mem-stat-num {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.15;
+        margin: 2px 0 6px;
+    }
+    .mem-stat-num-sub {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .mem-stat-num.standing {
+        font-size: 18px;
+        font-weight: 800;
+        color: #15803d;
+    }
+    .mem-stat-icon-tile {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .mem-stat-icon-tile.blue {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    .mem-stat-icon-tile.amber {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    .mem-stat-icon-tile.green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    /* Filter & Search Bar */
+    .mem-filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 14px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .mem-search-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        max-width: 540px;
+    }
+    .mem-search-input-wrap {
+        position: relative;
+        flex: 1;
+    }
+    .mem-search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 14px;
+        pointer-events: none;
+    }
+    .mem-search-input {
+        width: 100%;
+        padding: 9px 14px 9px 36px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        background: #ffffff;
+        color: #0f172a;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+    .mem-search-input:focus {
+        border-color: #2563eb;
+    }
+    .mem-search-btn {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .mem-search-btn:hover {
+        background: #172554;
+    }
+    .mem-reset-btn {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .mem-reset-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .mem-filter-meta-pill {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        color: #1e40af;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 7px 14px;
+        border-radius: 99px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .mem-filter-meta-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #2563eb;
+    }
+
+    /* Directory Table */
+    .mem-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .mem-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .mem-table th {
+        background: #f8fafc;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        padding: 13px 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .mem-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+        vertical-align: middle;
+    }
+    .mem-table tr:hover td {
+        background-color: #fafbfc;
+    }
+
+    /* Name & Avatar Column */
+    .mem-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .mem-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: grid;
+        place-items: center;
+        font-size: 12.5px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .mem-fullname {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+        margin-bottom: 2px;
+    }
+    .mem-code {
+        font-size: 11px;
+        color: #64748b;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    /* Borrowed Badge */
+    .mem-borrowed-pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 99px;
+        font-size: 11.5px;
+        font-weight: 700;
+    }
+    .mem-borrowed-pill.active-loans {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+    .mem-borrowed-pill.zero-loans {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Actions Column */
+    .mem-actions-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .mem-action-icon {
+        color: #64748b;
+        font-size: 15px;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .mem-action-icon:hover {
+        color: #1e3a8a;
+    }
+
+    /* Table Footer & Pagination */
+    .mem-table-footer {
+        padding: 14px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .mem-footer-count {
+        font-size: 12.5px;
+        color: #64748b;
+    }
+    .mem-pagination {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .mem-page-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #475569;
+        background: #ffffff;
+        border: 1px solid transparent;
+        transition: all 0.15s;
+    }
+    .mem-page-btn:hover {
+        color: #0f172a;
+        background: #f1f5f9;
+    }
+    .mem-page-btn.active {
+        background: #1e3a8a;
+        color: #ffffff;
+        border-color: #1e3a8a;
+    }
+    .mem-page-btn.nav-btn {
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+    .mem-page-dots {
+        color: #94a3b8;
+        font-size: 12px;
+        padding: 0 4px;
+    }
+</style>
+
+<div class="mem-page-wrap">
+
+    <!-- Header Section -->
+    <div class="mem-header-row">
+        <div>
+            <div class="mem-title-group">
+                <h1 class="mem-header-title">Members Directory</h1>
+                <span class="mem-badge-registry">Active Registry</span>
+            </div>
+            <p class="mem-header-sub">
+                Manage registered patron accounts, circulation eligibility, and active loans.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="mem-btn-add">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Add Member</span>
+        </a>
+    </div>
+
+    <!-- Alerts if any -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-3 py-2 px-3 small d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            <div>@TempData["Success"]</div>
+        </div>
+    }
+
+    <!-- Stat 3 Cards -->
+    <div class="mem-stats-grid">
+        <!-- Card 1 -->
+        <div class="mem-stat-card">
+            <div>
+                <div class="mem-stat-lbl">TOTAL REGISTERED</div>
+                <div class="mem-stat-num">@Model.TotalMembers</div>
+            </div>
+            <div class="mem-stat-icon-tile icon-members">
+                <i class="bi bi-people"></i>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="mem-stat-card">
+            <div>
+                <div class="mem-stat-lbl">ACTIVE LOANS</div>
+                <div class="mem-stat-num-group">
+                    <span class="mem-stat-num">@Model.ActiveLoansTotal</span>
+                    <span class="mem-stat-num-sub">books checked out</span>
+                </div>
+            </div>
+            <div class="mem-stat-icon-tile icon-circulation">
+                <i class="bi bi-arrow-left-right"></i>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="mem-stat-card">
+            <div>
+                <div class="mem-stat-lbl">CIRCULATION STATUS</div>
+                <div class="mem-stat-num standing">@Model.GoodStandingPercentage% In Good Standing</div>
+            </div>
+            <div class="mem-stat-icon-tile icon-available">
+                <i class="bi bi-patch-check-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="mem-filter-card">
+        <form method="get" class="mem-search-form">
+            <div class="mem-search-input-wrap">
+                <i class="bi bi-search mem-search-icon"></i>
+                <input type="text" name="search" value="@Model.Search" class="mem-search-input" 
+                       placeholder="Search by name or email..." />
+            </div>
+            <button type="submit" class="mem-search-btn">
+                <i class="bi bi-search"></i>
+                <span>Search</span>
+            </button>
+            <a asp-action="Index" class="mem-reset-btn">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Reset</span>
+            </a>
+        </form>
+
+        <div class="mem-filter-meta-pill">
+            <span class="mem-filter-meta-dot"></span>
+            <span>Total Registered: @Model.TotalMembers Members | Active Loans: @Model.ActiveLoansTotal</span>
+        </div>
+    </div>
+
+    <!-- Members Directory Table Card -->
+    <div class="mem-table-card">
+        <table class="mem-table">
+            <thead>
+                <tr>
+                    <th style="width: 26%;">NAME</th>
+                    <th style="width: 25%;">EMAIL</th>
+                    <th style="width: 17%;">PHONE</th>
+                    <th style="width: 12%;">JOIN DATE</th>
+                    <th style="width: 13%;">CURRENTLY BORROWED</th>
+                    <th style="width: 7%; text-align: right;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Members.Any())
+                {
+                    foreach (var member in Model.Members)
+                    {
+                        <tr>
+                            <!-- Name Column -->
+                            <td>
+                                <div class="mem-name-cell">
+                                    <div class="mem-avatar">
+                                        @member.Initials
+                                    </div>
+                                    <div>
+                                        <div class="mem-fullname">
+                                            @member.FullName
+                                            @if (member.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <span class="badge rounded-pill ms-1" style="background: #fee2e2; color: #dc2626; font-size: 10px; font-weight: 700;">Admin</span>
+                                            }
+                                            else if (member.Role.Equals("Librarian", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <span class="badge rounded-pill ms-1" style="background: #eff6ff; color: #1e40af; font-size: 10px; font-weight: 700;">Librarian</span>
+                                            }
+                                        </div>
+                                        <div class="mem-code">ID: @member.MemberCode</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Email Column -->
+                            <td>
+                                @member.Email
+                            </td>
+
+                            <!-- Phone Column -->
+                            <td style="font-family: ui-monospace, SFMono-Regular, monospace; color: #475569;">
+                                @member.Phone
+                            </td>
+
+                            <!-- Join Date Column -->
+                            <td style="color: #475569;">
+                                @member.JoinDate.ToString("MMM dd, yyyy")
+                            </td>
+
+                            <!-- Currently Borrowed Column -->
+                            <td>
+                                @if (member.ActiveBorrowings > 0)
+                                {
+                                    <span class="mem-borrowed-pill active-loans">
+                                        @member.ActiveBorrowings @(member.ActiveBorrowings == 1 ? "Book" : "Books")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="mem-borrowed-pill zero-loans">
+                                        0 Books
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- Actions Column -->
+                            <td style="text-align: right;">
+                                <div class="mem-actions-group">
+                                    <a asp-action="Details" asp-route-id="@member.Id" class="mem-action-icon" title="View Member Profile">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@member.Id" class="mem-action-icon" title="Edit Member Details">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 48px 20px; color: #64748b;">
+                            <i class="bi bi-people" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+                            <div>No members found matching your search.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Footer & Dynamic Pagination -->
+        @{
+            int startItem = Model.TotalMembers > 0 ? (Model.Page - 1) * 7 + 1 : 0;
+            int endItem = Math.Min(Model.Page * 7, Model.TotalMembers);
+        }
+        <div class="mem-table-footer">
+            <div class="mem-footer-count">
+                Showing <strong>@startItem-@endItem</strong> of <strong>@Model.TotalMembers</strong> members
+            </div>
+
+            <div class="mem-pagination">
+                @if (Model.Page > 1)
+                {
+                    <a asp-action="Index" asp-route-search="@Model.Search" asp-route-page="@(Model.Page - 1)" 
+                       class="mem-page-btn nav-btn">
+                        &lt; Previous
+                    </a>
+                }
+                else
+                {
+                    <span class="mem-page-btn nav-btn disabled" style="opacity: 0.5; cursor: not-allowed;">
+                        &lt; Previous
+                    </span>
+                }
+
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    if (p == 1 || p == Model.TotalPages || (p >= Model.Page - 2 && p <= Model.Page + 2))
+                    {
+                        <a asp-action="Index" asp-route-search="@Model.Search" asp-route-page="@p" 
+                           class="mem-page-btn @(p == Model.Page ? "active" : "")">
+                            @p
+                        </a>
+                    }
+                    else if (p == Model.Page - 3 || p == Model.Page + 3)
+                    {
+                        <span class="mem-page-dots">...</span>
+                    }
+                }
+
+                @if (Model.Page < Model.TotalPages)
+                {
+                    <a asp-action="Index" asp-route-search="@Model.Search" asp-route-page="@(Model.Page + 1)" 
+                       class="mem-page-btn nav-btn">
+                        Next &gt;
+                    </a>
+                }
+                else
+                {
+                    <span class="mem-page-btn nav-btn disabled" style="opacity: 0.5; cursor: not-allowed;">
+                        Next &gt;
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>

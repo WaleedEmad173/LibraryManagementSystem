@@ -1,0 +1,569 @@
+@page "/Return"
+@using System.Collections.Generic
+@model LibraryManagementSystem.Pages.Borrowings.ReturnModel
+@{
+    ViewData["Title"] = "Return a Book";
+    ViewData["Section"] = "Return";
+}
+
+<style>
+    .circulation-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding-bottom: 2.5rem;
+    }
+    .return-page .circ-return-action {
+        border: 1px solid #047857;
+        border-radius: 8px;
+        padding: 8px 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        color: #fff;
+        background: #047857;
+        font-size: .85rem;
+        font-weight: 650;
+        line-height: 1.2;
+        box-shadow: 0 2px 4px rgba(4, 120, 87, .16);
+        transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    .return-page .circ-return-action:hover {
+        color: #fff;
+        background: #065f46;
+        border-color: #065f46;
+        box-shadow: 0 4px 10px rgba(4, 120, 87, .22);
+        transform: translateY(-1px);
+    }
+    .return-page .circ-return-action:focus-visible,
+    .return-confirm-button:focus-visible,
+    .return-cancel-button:focus-visible {
+        outline: 3px solid rgba(37, 99, 235, .35);
+        outline-offset: 2px;
+    }
+
+    /* Modern Return Search Bar */
+    .return-search-card {
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+    .return-search-form {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+    }
+    .return-search-input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+    .return-search-input-wrapper .search-icon {
+        position: absolute;
+        left: 14px;
+        color: #94a3b8;
+        pointer-events: none;
+        flex-shrink: 0;
+    }
+    .return-search-input {
+        width: 100%;
+        height: 46px;
+        padding: 0 40px 0 44px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 9px;
+        background: #ffffff;
+        font-size: 0.92rem;
+        color: #0f172a;
+        outline: none;
+        transition: all 0.15s ease-in-out;
+    }
+    .return-search-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .return-search-input::placeholder {
+        color: #94a3b8;
+        font-size: 0.88rem;
+    }
+    .search-clear-btn {
+        position: absolute;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        background: #f1f5f9;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .search-clear-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .return-search-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    .btn-search-submit {
+        height: 46px;
+        padding: 0 24px;
+        border-radius: 9px;
+        background: #1e3a8a;
+        color: #ffffff;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        white-space: nowrap;
+    }
+    .btn-search-submit:hover {
+        background: #172554;
+    }
+    .btn-search-reset {
+        height: 46px;
+        padding: 0 16px;
+        border-radius: 9px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 0.88rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .btn-search-reset:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    @@media (max-width: 768px) {
+        .return-search-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .return-search-actions {
+            width: 100%;
+        }
+        .btn-search-submit {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    /* Confirm Return Dialog */
+    .return-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, .48);
+        backdrop-filter: blur(3px);
+    }
+    .return-confirm-overlay[hidden] { display: none; }
+    .return-confirm-dialog {
+        width: min(100%, 440px);
+        padding: 26px;
+        border: 1px solid #e6eaf2;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+        animation: return-dialog-in .16s ease-out;
+    }
+    .return-confirm-icon {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        margin-bottom: 17px;
+        border-radius: 14px;
+        color: #047857;
+        background: #d1fae5;
+    }
+    .return-confirm-title { margin: 0 0 8px; color: #17223b; font-size: 1.2rem; font-weight: 750; }
+    .return-confirm-copy { margin: 0; color: #64748b; line-height: 1.55; }
+    .return-confirm-book {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border: 1px solid #e8ebf5;
+        border-radius: 10px;
+        background: #f7f8ff;
+        color: #17223b;
+        font-weight: 650;
+    }
+    .return-confirm-member { margin-top: 3px; color: #64748b; font-size: .88rem; }
+    .return-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .return-cancel-button, .return-confirm-button {
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 9px;
+        font: inherit;
+        font-size: .9rem;
+        font-weight: 650;
+        cursor: pointer;
+    }
+    .return-cancel-button { border: 1px solid #dbe1ec; color: #334155; background: #fff; }
+    .return-cancel-button:hover { background: #f8fafc; }
+    .return-confirm-button { border: 1px solid #047857; color: #fff; background: #047857; }
+    .return-confirm-button:hover { border-color: #065f46; background: #065f46; }
+    @@keyframes return-dialog-in {
+        from { opacity: 0; transform: translateY(6px) scale(.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @@media (prefers-reduced-motion: reduce) {
+        .return-confirm-dialog { animation: none; }
+        .return-page .circ-return-action { transition: none; }
+    }
+</style>
+
+<div class="circulation-container circulation-workflow-page return-page">
+    @await Html.PartialAsync("_CirculationModuleTabs")
+
+    <!-- Header Section -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <div class="circ-terminal-badge">CIRCULATION DESK • CHECK-IN CONSOLE</div>
+            <h1 class="circ-title">Return a Book</h1>
+            <p class="circ-subtitle mb-0">
+                Process book returns, verify physical condition, and instantly restore catalog availability across branches.
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-lg-0">
+            <div class="circ-stat-chip">
+                <div class="circ-stat-chip-icon icon-circulation"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></div>
+                <div>
+                    <div class="circ-stat-chip-label">ACTIVE LOANS</div>
+                    <div class="circ-stat-chip-val">@Model.ViewModel.TotalActiveLoansCount</div>
+                </div>
+            </div>
+            <div class="circ-stat-chip">
+                <div class="circ-stat-chip-icon icon-due"><i class="bi bi-clock-history" aria-hidden="true"></i></div>
+                <div>
+                    <div class="circ-stat-chip-label">DUE THIS WEEK</div>
+                    <div class="circ-stat-chip-val">@Model.ViewModel.DueThisWeekCount</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Showcase Banners -->
+    @if (!string.IsNullOrEmpty(Model.ViewModel.AlertState))
+    {
+        if (Model.ViewModel.AlertState == "success")
+        {
+            <div class="circ-alert-card circ-alert-success mb-4">
+                <div class="circ-alert-icon">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div class="circ-alert-body">
+                    <div class="circ-alert-header">
+                        <h4 class="circ-alert-title">@(Model.ViewModel.AlertTitle ?? "Book returned successfully")</h4>
+                        <span class="circ-badge circ-badge-emerald">Just now</span>
+                    </div>
+                    <p class="circ-alert-desc">@Model.ViewModel.AlertMessage</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="circ-alert-card circ-alert-danger mb-4">
+                <div class="circ-alert-icon">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="circ-alert-body">
+                    <div class="circ-alert-header">
+                        <h4 class="circ-alert-title">@(Model.ViewModel.AlertTitle ?? "This borrowing was already returned")</h4>
+                        <span class="circ-badge circ-badge-rose">Record locked</span>
+                    </div>
+                    <p class="circ-alert-desc">@Model.ViewModel.AlertMessage</p>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Search & Filter Bar Card (Modern Full-Width Design) -->
+    <div class="circ-card mb-4 return-search-card">
+        <div class="circ-card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold text-slate-900 mb-1 d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#1d4ed8">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Find Active Loan
+                    </h5>
+                    <p class="text-muted small mb-0">Search patron name, member ID, book title, or ISBN to process check-in.</p>
+                </div>
+                <div>
+                    <span class="circ-badge circ-badge-amber py-2 px-3">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="me-1">
+                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                            <polyline points="12 6 12 12 16 14" stroke-width="2"></polyline>
+                        </svg>
+                        @Model.ViewModel.TotalActiveLoansCount Active Loans | @Model.ViewModel.DueThisWeekCount Due This Week
+                    </span>
+                </div>
+            </div>
+
+            <form method="get" class="return-search-form">
+                <div class="return-search-input-wrapper">
+                    <svg class="search-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text"
+                           name="SearchQuery"
+                           value="@Model.ViewModel.SearchQuery"
+                           class="return-search-input"
+                           placeholder="Scan barcode or type member name, patron ID, book title, ISBN..."
+                           autocomplete="off" />
+                    @if (!string.IsNullOrWhiteSpace(Model.ViewModel.SearchQuery))
+                    {
+                        <a asp-page="./Return" class="search-clear-btn" title="Clear search">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    }
+                </div>
+                <div class="return-search-actions">
+                    <button type="submit" class="btn-search-submit">
+                        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="11" cy="11" r="7" stroke-width="2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16l4.5 4.5" />
+                        </svg>
+                        Search
+                    </button>
+                    @if (!string.IsNullOrWhiteSpace(Model.ViewModel.SearchQuery))
+                    {
+                        <a asp-page="./Return" class="btn-search-reset">
+                            Reset
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Currently Borrowed Inventory Table Card (Full Width) -->
+    <div class="circ-card">
+        <div class="circ-card-header">
+            <div>
+                <h3 class="circ-card-title">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#059669">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Currently Borrowed Inventory
+                </h3>
+            </div>
+            <span class="text-muted small">
+                Showing @Model.ViewModel.ActiveLoans.Count active loans
+            </span>
+        </div>
+
+        <div class="circ-table-container">
+            <table class="circ-table return-table w-100">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">MEMBER / PATRON</th>
+                        <th style="width: 32%;">BOOK TITLE &amp; AUTHOR</th>
+                        <th style="width: 15%;">BORROW DATE</th>
+                        <th style="width: 15%;">LOAN STATUS</th>
+                        <th style="width: 13%;" class="text-end pe-4">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ViewModel.ActiveLoans.Any())
+                    {
+                        @foreach (var loan in Model.ViewModel.ActiveLoans)
+                        {
+                            <tr>
+                                <!-- Member Cell -->
+                                <td>
+                                    <div class="circ-table-user-cell">
+                                        <div class="circ-mini-avatar">
+                                            @loan.BorrowerInitials
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-slate-900">@loan.BorrowerName</div>
+                                            <div class="text-muted small">@loan.MemberId</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Book Cell -->
+                                <td>
+                                    <div class="fw-bold text-slate-900">@loan.BookTitle</div>
+                                    <div class="text-muted small">By @loan.BookAuthor</div>
+                                </td>
+
+                                <!-- Borrow Date Cell -->
+                                <td>
+                                    <div class="text-slate-800 fw-semibold">@loan.BorrowDate.ToString("MMM dd, yyyy")</div>
+                                </td>
+
+                                <!-- Loan Status Cell -->
+                                <td>
+                                    @if (loan.IsOverdue)
+                                    {
+                                        <span class="circ-badge circ-badge-rose">
+                                            @loan.DaysOverdue days (Overdue)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="circ-badge circ-badge-amber">
+                                            @(loan.DaysRemaining == 0 ? "Due today" : $"{loan.DaysRemaining} days")
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- Action Return Button -->
+                                <td class="text-end pe-4">
+                                    <form method="post" asp-page-handler="Return" class="d-inline">
+                                        <input type="hidden" name="id" value="@loan.BorrowingId" />
+                                        <input type="hidden" name="SearchQuery" value="@Model.ViewModel.SearchQuery" />
+                                        <input type="hidden" name="PageNumber" value="@Model.ViewModel.PageNumber" />
+                                        <button type="button" class="circ-return-action js-open-return-confirm" data-book="@loan.BookTitle" data-member="@loan.BorrowerName">
+                                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h7a5 5 0 015 5v4m0 0l-3-3m3 3l3-3M4 10l5 5m-5-5l5-5" />
+                                            </svg>
+                                            Return
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <div class="py-4">
+                                    <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" class="mb-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <div class="fw-semibold">No active loans found matching your criteria.</div>
+                                    <div class="small">Check out a book at the <a asp-page="./Borrow" class="text-primary">Circulation Desk</a>.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Footer / Pagination -->
+        <div class="circ-card-header py-3 return-table-footer">
+            <div class="text-muted small">
+                @if (Model.ViewModel.MatchingActiveLoansCount == 0)
+                {
+                    <span>Showing 0 of @Model.ViewModel.TotalActiveLoansCount active loans</span>
+                }
+                else
+                {
+                    var firstRecord = (Model.ViewModel.PageNumber - 1) * 7 + 1;
+                    var lastRecord = Math.Min(Model.ViewModel.PageNumber * 7, Model.ViewModel.MatchingActiveLoansCount);
+                    <span>Showing records @firstRecord - @lastRecord of @Model.ViewModel.MatchingActiveLoansCount active loans</span>
+                }
+            </div>
+            @if (Model.ViewModel.TotalPages > 1)
+            {
+                var visiblePages = new SortedSet<int> { 1, Model.ViewModel.TotalPages };
+                if (Model.ViewModel.PageNumber > 1) visiblePages.Add(Model.ViewModel.PageNumber - 1);
+                visiblePages.Add(Model.ViewModel.PageNumber);
+                if (Model.ViewModel.PageNumber < Model.ViewModel.TotalPages) visiblePages.Add(Model.ViewModel.PageNumber + 1);
+                <nav class="circ-pagination" aria-label="Active loans pages">
+                    <a asp-page="./Return" asp-route-SearchQuery="@Model.ViewModel.SearchQuery" asp-route-PageNumber="@(Model.ViewModel.PageNumber - 1)" class="@(Model.ViewModel.PageNumber == 1 ? "disabled" : "")" aria-label="Previous">‹</a>
+                    @{ var previousPage = 0; }
+                    @foreach (var pageNumber in visiblePages)
+                    {
+                        if (previousPage > 0 && pageNumber > previousPage + 1) { <span class="page-ellipsis">…</span> }
+                        <a asp-page="./Return" asp-route-SearchQuery="@Model.ViewModel.SearchQuery" asp-route-PageNumber="@pageNumber" class="@(pageNumber == Model.ViewModel.PageNumber ? "active" : "")">@pageNumber</a>
+                        previousPage = pageNumber;
+                    }
+                    <a asp-page="./Return" asp-route-SearchQuery="@Model.ViewModel.SearchQuery" asp-route-PageNumber="@(Model.ViewModel.PageNumber + 1)" class="@(Model.ViewModel.PageNumber == Model.ViewModel.TotalPages ? "disabled" : "")" aria-label="Next">›</a>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="return-confirm-overlay" id="returnConfirmDialog" hidden>
+    <section class="return-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="returnConfirmTitle" aria-describedby="returnConfirmCopy">
+        <div class="return-confirm-icon" aria-hidden="true">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h7a5 5 0 015 5v4m0 0l-3-3m3 3l3-3M4 10l5 5m-5-5l5-5" />
+            </svg>
+        </div>
+        <h2 class="return-confirm-title" id="returnConfirmTitle">Confirm book return</h2>
+        <p class="return-confirm-copy" id="returnConfirmCopy">Confirm that this book has been physically checked in. Its available copy count will be updated.</p>
+        <div class="return-confirm-book">
+            <div id="returnConfirmBookTitle"></div>
+            <div class="return-confirm-member" id="returnConfirmMember"></div>
+        </div>
+        <div class="return-confirm-actions">
+            <button type="button" class="return-cancel-button" id="cancelReturnConfirm">Cancel</button>
+            <button type="button" class="return-confirm-button" id="submitReturnConfirm">Confirm return</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    (() => {
+        const dialog = document.getElementById('returnConfirmDialog');
+        const bookTitle = document.getElementById('returnConfirmBookTitle');
+        const memberName = document.getElementById('returnConfirmMember');
+        const cancelButton = document.getElementById('cancelReturnConfirm');
+        const confirmButton = document.getElementById('submitReturnConfirm');
+        let pendingForm = null;
+        let opener = null;
+
+        const closeDialog = () => {
+            dialog.hidden = true;
+            pendingForm = null;
+            if (opener) opener.focus();
+        };
+
+        document.querySelectorAll('.js-open-return-confirm').forEach(button => {
+            button.addEventListener('click', () => {
+                pendingForm = button.closest('form');
+                opener = button;
+                bookTitle.textContent = button.dataset.book || 'Selected book';
+                memberName.textContent = `Borrowed by ${button.dataset.member || 'member'}`;
+                dialog.hidden = false;
+                cancelButton.focus();
+            });
+        });
+
+        cancelButton.addEventListener('click', closeDialog);
+        confirmButton.addEventListener('click', () => {
+            if (pendingForm) pendingForm.requestSubmit();
+        });
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) closeDialog();
+        });
+        document.addEventListener('keydown', event => {
+            if (!dialog.hidden && event.key === 'Escape') closeDialog();
+        });
+    })();
+</script>

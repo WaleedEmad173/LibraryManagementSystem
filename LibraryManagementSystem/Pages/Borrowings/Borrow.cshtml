@@ -1,0 +1,771 @@
+@page "/Borrow/{id:int?}"
+@model LibraryManagementSystem.Pages.Borrowings.BorrowModel
+@{
+    ViewData["Title"] = "Borrow a Book for a Member";
+    ViewData["Section"] = "Borrow";
+    var member = Model.ViewModel.SelectedMember;
+    var book = Model.ViewModel.SelectedBook;
+
+    string? ResolveBookImageUrl(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl)) return null;
+
+        var path = imageUrl.Trim().Replace('\\', '/');
+        if (Uri.TryCreate(path, UriKind.Absolute, out _)) return path;
+        if (path.StartsWith("~/", StringComparison.Ordinal)) return Url.Content(path);
+        if (path.StartsWith("/", StringComparison.Ordinal)) return path;
+        if (path.StartsWith("Images/", StringComparison.OrdinalIgnoreCase))
+            return Url.Content("~/" + path);
+
+        return Url.Content("~/Images/" + path.TrimStart('/'));
+    }
+}
+
+<style>
+    .circulation-container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding-bottom: 2.5rem;
+    }
+    .library-content .circulation-container {
+        max-width: none;
+        margin-inline: 0;
+    }
+    .circulation-container .book-cover-frame {
+        width: 100px;
+        height: 140px;
+        flex: 0 0 100px;
+        overflow: hidden;
+        border-radius: 6px;
+        background: #f0f2ff;
+        display: grid;
+        place-items: center;
+    }
+    .circulation-container .book-cover-frame img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .circulation-container .book-cover-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 10px 8px;
+        color: #fff;
+        text-align: left;
+        background: linear-gradient(145deg, #1b4b9e 0%, #0b2d70 62%, #071f52 100%);
+        box-shadow: inset 3px 0 0 rgba(255, 255, 255, .2);
+    }
+    .circulation-container .book-cover-fallback-mark { color: #c9dcff; font-size: .48rem; font-weight: 800; letter-spacing: .16em; }
+    .circulation-container .book-cover-fallback-title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 5; color: #fff; font-size: .75rem; font-weight: 750; line-height: 1.2; overflow-wrap: anywhere; }
+    .circulation-container .book-cover-fallback-rule { width: 22px; height: 2px; flex: 0 0 auto; background: #91b5ff; }
+    .circulation-container .book-cover-fallback-author { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: #d3e0ff; font-size: .59rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .circulation-container .date-field-label {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 24px;
+    }
+    .circulation-container .date-field-period {
+        font-size: 0.72rem;
+    }
+    .circulation-container .borrow-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(320px, .85fr);
+        align-items: stretch;
+        gap: 16px;
+        width: 100%;
+        margin-inline: 0;
+    }
+    .circulation-container .borrow-main-column {
+        display: flex;
+        min-width: 0;
+    }
+    .circulation-container .borrow-main-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0 !important;
+    }
+    .circulation-container .borrow-main-card > .circ-card-body {
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: .8rem 1rem;
+    }
+    .library-content .circulation-container .borrow-main-card .circ-card-header {
+        padding: .9rem 1.2rem;
+    }
+    .circulation-container .borrow-main-card form {
+        display: flex;
+        flex: 1 1 auto;
+    }
+    .circulation-container .borrow-main-card form > .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto auto auto auto 68px;
+        gap: .2rem .9rem;
+        margin: 0;
+        flex: 1 1 auto;
+        align-content: start;
+        width: 100%;
+    }
+    .circulation-container .borrow-main-card form > .row > .col-12 {
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    .circulation-container .borrow-main-card form > .row > .col-md-6 {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    .circulation-container .borrow-main-card .circ-label:not(.date-field-label) {
+        margin-bottom: .2rem;
+    }
+    .circulation-container .borrow-main-card .mt-2 {
+        margin-top: .2rem !important;
+    }
+    .circulation-container .borrow-main-card .mt-1 {
+        margin-top: .15rem !important;
+    }
+    .circulation-container .loan-date-column .date-field-label {
+        height: 28px;
+        min-height: 28px;
+        margin-bottom: .15rem;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        gap: 8px;
+    }
+    .circulation-container .loan-date-column .date-field-label > span:first-child {
+        min-width: 0;
+    }
+    .circulation-container .loan-date-column .circ-hint {
+        min-height: 2.2em;
+    }
+    .circulation-container .borrow-actions-row {
+        height: 100%;
+        min-height: 68px;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 !important;
+        transform: translateY(-1.5rem);
+    }
+    .circulation-container .borrow-actions-row .circ-btn-primary,
+    .circulation-container .borrow-actions-row .circ-btn-secondary {
+        min-height: 50px;
+        padding: 13px 24px;
+        font-size: .96rem;
+    }
+    .circulation-container .borrow-side-column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+    }
+    .circulation-container .borrow-side-column .circ-card {
+        margin: 0;
+        height: auto !important;
+    }
+    .library-content .circulation-container .borrow-side-column .circ-card-header {
+        padding: .8rem 1rem !important;
+    }
+    .library-content .circulation-container .borrow-side-column .circ-card-body {
+        padding: 1rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-card-body > .d-flex:first-child {
+        margin-bottom: .65rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-card-body > .mb-3.pt-2 {
+        margin-top: .45rem !important;
+        margin-bottom: .55rem !important;
+        padding-top: .55rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-card-body > .d-flex.justify-content-between.align-items-center.pt-2 {
+        padding-top: .55rem !important;
+    }
+    .circulation-container .borrow-side-column .circ-book-metrics-grid {
+        margin-top: 8px;
+        padding: 7px;
+    }
+    .library-content .circulation-container .book-cover-frame {
+        width: 82px;
+        height: 112px;
+        flex-basis: 82px;
+    }
+    @@media (max-width: 992px) {
+        .circulation-container .borrow-workspace {
+            grid-template-columns: minmax(0, 1fr);
+            align-items: start;
+        }
+        .circulation-container .borrow-main-column {
+            display: block;
+        }
+        .circulation-container .borrow-main-card {
+            display: block;
+            height: auto;
+        }
+        .circulation-container .borrow-main-card > .circ-card-body {
+            display: block;
+            flex: initial;
+            padding: 1rem 1.1rem;
+        }
+        .circulation-container .borrow-main-card form {
+            display: block;
+        }
+        .circulation-container .borrow-main-card form > .row {
+            display: flex;
+            gap: .2rem .9rem;
+            margin-right: calc(var(--bs-gutter-x, 1.5rem) * -.5);
+            margin-left: calc(var(--bs-gutter-x, 1.5rem) * -.5);
+            flex: initial;
+            align-content: start;
+            width: auto;
+            --bs-gutter-y: .55rem;
+        }
+        .circulation-container .borrow-main-card form > .row > .col-12,
+        .circulation-container .borrow-main-card form > .row > .col-md-6 {
+            width: 100%;
+            max-width: 100%;
+            padding-right: calc(var(--bs-gutter-x, 1.5rem) * .5);
+            padding-left: calc(var(--bs-gutter-x, 1.5rem) * .5);
+        }
+    }
+    @@media (min-width: 993px) and (max-height: 900px) {
+        .library-content .circulation-container {
+            margin-top: 0 !important;
+            padding-bottom: .5rem;
+        }
+        .library-content .circulation-container .circ-title {
+            font-size: clamp(1.55rem, 3.2vh, 2rem);
+            margin-bottom: .15rem;
+        }
+        .library-content .circulation-container .circ-subtitle {
+            font-size: .8rem;
+            line-height: 1.3;
+        }
+        .circulation-container .mb-4 {
+            margin-bottom: .55rem !important;
+        }
+        .circulation-container .circ-stat-chip {
+            padding: 6px 9px;
+            gap: 7px;
+        }
+        .circulation-container .circ-stat-chip-icon {
+            width: 27px;
+            height: 27px;
+        }
+        .circulation-container .circ-card-header {
+            padding: .65rem .9rem !important;
+        }
+        .circulation-container .borrow-main-card > .circ-card-body {
+            display: flex;
+            padding: .8rem 1rem !important;
+        }
+        .circulation-container .borrow-main-card form > .row {
+            display: grid;
+            grid-template-rows: auto auto auto auto 68px;
+            gap: .15rem .9rem;
+            margin: 0;
+            flex: 1 1 auto;
+            align-content: start;
+            width: 100%;
+        }
+        .circulation-container .circ-label {
+            margin-bottom: .2rem;
+            font-size: .74rem;
+        }
+        .circulation-container .circ-select,
+        .circulation-container .circ-input {
+            padding: 7px 10px;
+            font-size: .82rem;
+        }
+        .circulation-container .circ-hint {
+            font-size: .62rem;
+            line-height: 1.25;
+        }
+        .circulation-container .circ-notice-box {
+            padding: 8px 11px;
+        }
+        .circulation-container .circ-notice-title,
+        .circulation-container .circ-notice-desc {
+            font-size: .68rem;
+            line-height: 1.3;
+        }
+        .circulation-container .borrow-actions-row .circ-btn-primary,
+        .circulation-container .borrow-actions-row .circ-btn-secondary {
+            min-height: 46px;
+            padding: 10px 18px;
+            font-size: .88rem;
+        }
+        .circulation-container .borrow-side-column {
+            gap: 8px;
+        }
+        .library-content .circulation-container .borrow-side-column .circ-card-header {
+            padding: .55rem .8rem !important;
+        }
+        .library-content .circulation-container .borrow-side-column .circ-card-body {
+            padding: .7rem .8rem !important;
+        }
+        .circulation-container .circ-patron-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: .9rem;
+        }
+        .library-content .circulation-container .book-cover-frame {
+            width: 68px;
+            height: 96px;
+        }
+        .circulation-container .circ-book-metrics-grid {
+            margin-top: 6px;
+            padding: 6px;
+        }
+        .circulation-container .circ-book-metric-val {
+            font-size: .9rem;
+        }
+        .circulation-container .circ-book-metric-label {
+            font-size: .56rem;
+        }
+        .library-content .circulation-container .circ-alert-card {
+            padding: 7px 10px;
+        }
+    }
+</style>
+
+<div class="circulation-container circulation-workflow-page">
+    @await Html.PartialAsync("_CirculationModuleTabs")
+
+    <!-- Header Section -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <div class="circ-terminal-badge">CIRCULATION TERMINAL • SESSION ACTIVE</div>
+            <h1 class="circ-title">Borrow a Book for a Member</h1>
+            <p class="circ-subtitle mb-0">
+                Process physical desk checkout and assign book inventory to a registered patron. Loans automatically enforce quota limits and standard duration rules.
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-lg-0">
+            <div class="circ-stat-chip">
+                <div class="circ-stat-chip-icon icon-date"><i class="bi bi-calendar3" aria-hidden="true"></i></div>
+                <div>
+                    <div class="circ-stat-chip-label">SYSTEM DATE</div>
+                    <div class="circ-stat-chip-val">@DateTime.Today.ToString("MMM dd, yyyy")</div>
+                </div>
+            </div>
+            <div class="circ-stat-chip">
+                <div class="circ-stat-chip-icon icon-circulation"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></div>
+                <div>
+                    <div class="circ-stat-chip-label">TODAY'S CHECKOUTS</div>
+                    <div class="circ-stat-chip-val">@Model.ViewModel.TransactedCount Transacted</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Execution Alert Banner -->
+    @if (!string.IsNullOrEmpty(Model.ViewModel.AlertState))
+    {
+        if (Model.ViewModel.AlertState == "success")
+        {
+            <div class="circ-alert-card circ-alert-success mb-4">
+                <div class="circ-alert-icon">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div class="circ-alert-body">
+                    <div class="circ-alert-header">
+                        <h4 class="circ-alert-title">@(Model.ViewModel.AlertTitle ?? "Book borrowed successfully")</h4>
+                        <span class="circ-badge circ-badge-emerald">SUCCESS</span>
+                    </div>
+                    <p class="circ-alert-desc">@Model.ViewModel.AlertMessage</p>
+                    <div class="circ-alert-footer">
+                        <span>Return Due: <strong>@Model.ViewModel.AlertDueDate?.ToString("MMM dd, yyyy")</strong> (14 Day Policy)</span>
+                        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2 rounded-2" onclick="window.print()">Print Receipt ↗</button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="circ-alert-card circ-alert-danger mb-4">
+                <div class="circ-alert-icon">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="circ-alert-body">
+                    <div class="circ-alert-header">
+                        <h4 class="circ-alert-title">@(Model.ViewModel.AlertTitle ?? "Circulation Transaction Rejected")</h4>
+                        <span class="circ-badge circ-badge-rose">REJECTED</span>
+                    </div>
+                    <p class="circ-alert-desc">@Model.ViewModel.AlertMessage</p>
+                </div>
+            </div>
+        }
+    }
+
+    <div class="borrow-workspace">
+      <section class="borrow-main-column">
+    <!-- Main Circulation Form -->
+    <div class="circ-card mb-4 borrow-main-card">
+        <div class="circ-card-header">
+            <div>
+                <h3 class="circ-card-title">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#1d4ed8">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Issue New Loan / Circulation Desk
+                </h3>
+                <p class="text-muted small mb-0 mt-1">Complete all fields below confirming physical item handover.</p>
+            </div>
+            <span class="circ-badge circ-badge-blue">DESK FLOW</span>
+        </div>
+
+        <div class="circ-card-body">
+            <form id="loanForm" method="post" asp-page-handler="Borrow">
+                <div class="row g-4">
+                    <!-- Member Field (Column 1) -->
+                    <div class="col-12">
+                        <label class="circ-label" for="memberSelect">
+                            <span>Member <span class="text-danger">*</span></span>
+                            <span class="circ-hint">Required • ID, email or NFC scan</span>
+                        </label>
+                        <select id="memberSelect" name="SelectedUserId" class="circ-select" onchange="onMemberChanged(this)" disabled="@(Model.ViewModel.Members.Count == 0)">
+                            @foreach (var m in Model.ViewModel.Members)
+                            {
+                                <option value="@m.Id"
+                                        selected="@(m.Id == Model.SelectedUserId)"
+                                        data-name="@m.FullName"
+                                        data-email="@m.Email"
+                                        data-memberid="@m.MemberId"
+                                        data-initials="@m.Initials"
+                                        data-activeloans="@m.ActiveLoansCount"
+                                        data-maxquota="@m.MaxQuota"
+                                        data-overdue="@m.OverdueCount"
+                                        data-standing="@m.Standing">
+                                    @m.FullName - @m.MemberId (@m.Email)
+                                </option>
+                            }
+                        </select>
+                        @if (Model.ViewModel.Members.Count == 0) { <div class="circ-hint">No members are recorded in the database.</div> }
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <span class="circ-badge circ-badge-emerald" id="patronBadgeLabel">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Patron Card Validated <span id="patronBadgeId">@member?.MemberId</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Book Field (Column 2) -->
+                    <div class="col-12">
+                        <label class="circ-label" for="bookSelect">
+                            <span>Book <span class="text-danger">*</span></span>
+                            <span class="circ-hint">Only titles with stock available</span>
+                        </label>
+                        <select id="bookSelect" name="SelectedBookId" class="circ-select" onchange="onBookChanged(this)" disabled="@(Model.ViewModel.Books.Count == 0)">
+                            @foreach (var b in Model.ViewModel.Books)
+                            {
+                                <option value="@b.Id"
+                                        selected="@(b.Id == Model.SelectedBookId)"
+                                        data-title="@b.Title"
+                                        data-author="@b.Author"
+                                        data-isbn="@b.ISBN"
+                                        data-category="@b.CategoryName"
+                                        data-image-url="@(ResolveBookImageUrl(b.ImageUrl) ?? string.Empty)"
+                                        data-total="@b.TotalCopies"
+                                        data-available="@b.AvailableCopies"
+                                        data-instock="@(b.InStock ? "true" : "false")">
+                                    @b.Title (@b.AvailableCopies available of @b.TotalCopies)
+                                </option>
+                            }
+                        </select>
+                        @if (Model.ViewModel.Books.Count == 0) { <div class="circ-hint">No books are recorded in the database.</div> }
+                        <div class="circ-hint mt-2" id="fieldBookIsbn">ISBN: @book?.ISBN</div>
+                    </div>
+
+                    <!-- Borrow Date (Auto-filled) (Column 1) -->
+                    <div class="col-md-6 loan-date-column">
+                        <label class="circ-label date-field-label">
+                            <span>Borrow Date (Auto-filled) <span class="text-danger">*</span></span>
+                        </label>
+                        <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.ToString("MMM dd, yyyy")" readonly />
+                        <div class="circ-hint mt-1">Not editable during standard circulation checkout.</div>
+                    </div>
+
+                    <!-- Calculated Due Date (Column 2) -->
+                    <div class="col-md-6 loan-date-column">
+                        <label class="circ-label date-field-label">
+                            <span>Calculated Due Date <span class="text-danger">*</span></span>
+                            <span class="circ-badge circ-badge-emerald date-field-period">+@CirculationPolicy.LoanPeriodDays Days</span>
+                        </label>
+                        <input type="text" class="circ-input circ-input-readonly" value="@DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays).ToString("MMM dd, yyyy")" readonly />
+                        <div class="circ-hint mt-1">Standard @CirculationPolicy.LoanPeriodDays days - auto-policy applied.</div>
+                    </div>
+
+                    <!-- Terms Notice Box (Full Width) -->
+                    <div class="col-12">
+                        <div class="circ-notice-box">
+                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2563eb" class="flex-shrink-0 mt-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <div>
+                                <div class="circ-notice-title">Patron circulation notification terms</div>
+                                <p class="circ-notice-desc mb-0">
+                                    The due date is calculated as <strong>@DateTime.Today.AddDays(CirculationPolicy.LoanPeriodDays).ToString("MMM dd, yyyy")</strong> using the standard loan duration.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end gap-2 pt-4 borrow-actions-row">
+                            <a asp-page="./Index" class="circ-btn-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="circ-btn-primary" disabled="@(member == null || book == null || book.AvailableCopies <= 0)">
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Confirm Borrow
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+      </section>
+
+      <aside class="borrow-side-column">
+        <!-- Patron Circulation Status Card -->
+        <div class="borrow-preview-item">
+            <div class="circ-card h-100">
+                <div class="circ-card-header py-3">
+                    <span class="circ-card-title fs-6">PATRON CIRCULATION STATUS</span>
+                    <span class="circ-badge circ-badge-blue" id="previewPatronStatusBadge">@(member == null ? string.Empty : "Member")</span>
+                </div>
+                <div class="circ-card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="circ-patron-avatar" id="previewAvatar">
+                            @member?.Initials
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-slate-900" id="previewPatronName">@member?.FullName</h5>
+                            <div class="text-muted small" id="previewPatronEmail">@member?.Email</div>
+                            <div class="text-secondary small mt-1">
+                                <span id="previewPatronId">ID: @member?.MemberId</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quota Progress -->
+                    <div class="mb-3 pt-2 border-top">
+                        <div class="d-flex justify-content-between small fw-semibold text-slate-700">
+                            <span>Active Loans Quota:</span>
+                            <span id="previewQuotaText">@(member?.ActiveLoansCount ?? 0) of @(member?.MaxQuota ?? CirculationPolicy.MaxActiveLoans) books checked out</span>
+                        </div>
+                        <div class="circ-quota-bar">
+                            @{
+                                var activeCount = member?.ActiveLoansCount ?? 0;
+                                var maxQuota = member?.MaxQuota ?? CirculationPolicy.MaxActiveLoans;
+                                var pct = Math.Min(100, (int)((activeCount / (double)maxQuota) * 100));
+                            }
+                            <div class="circ-quota-fill" id="previewQuotaFill" style="width: @(pct)%;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted mt-1">
+                            <span id="previewSlotsRemaining">@(Math.Max(0, maxQuota - activeCount)) slot remaining</span>
+                            <span class="text-primary">Quota limit: 3</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <div>
+                            <span class="text-muted small">Overdue Items:</span>
+                            <strong class="ms-1 small" id="previewOverdue">@(member?.OverdueCount ?? 0) Items</strong>
+                        </div>
+                        <span class="circ-badge circ-badge-blue" id="previewStanding">
+                            @member?.Standing
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Book Inventory Card -->
+        <div class="borrow-preview-item">
+            <div class="circ-card h-100">
+                <div class="circ-card-header py-3">
+                    <span class="circ-card-title fs-6">SELECTED BOOK INVENTORY</span>
+                    <span class="circ-badge @(book == null ? "circ-badge-blue" : book.InStock ? "circ-badge-emerald" : "circ-badge-rose")" id="previewBookStockBadge">
+                        @(book == null ? string.Empty : book.InStock ? "• In Stock" : "• Out of Stock")
+                    </span>
+                </div>
+                <div class="circ-card-body">
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="book-cover-frame flex-shrink-0">
+                            @if (!string.IsNullOrWhiteSpace(book?.ImageUrl))
+                            {
+                                <img id="previewBookCover" src="@ResolveBookImageUrl(book.ImageUrl)" alt="@book.Title" onerror="showBookCoverFallback()" />
+                            }
+                            else
+                            {
+                                <img id="previewBookCover" class="d-none" alt="" />
+                            }
+                            <div id="previewBookCoverEmpty" class="book-cover-fallback @(string.IsNullOrWhiteSpace(book?.ImageUrl) ? string.Empty : "d-none")">
+                                <span class="book-cover-fallback-mark">LIBRARY</span>
+                                <span id="previewBookCoverFallbackTitle" class="book-cover-fallback-title">@(book?.Title ?? "Select a book")</span>
+                                <span class="book-cover-fallback-rule"></span>
+                                <span id="previewBookCoverFallbackAuthor" class="book-cover-fallback-author">@(book?.Author ?? string.Empty)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge bg-light text-primary border mb-1" id="previewCategory">@book?.CategoryName</span>
+                            <h6 class="fw-bold mb-1 text-slate-900" id="previewBookTitle">@book?.Title</h6>
+                            <div class="text-muted small" id="previewBookAuthor">@book?.Author</div>
+                            <div class="text-secondary small mt-1" id="previewBookIsbn">@book?.ISBN</div>
+                        </div>
+                    </div>
+
+                    <!-- 3-Metrics Grid -->
+                    <div class="circ-book-metrics-grid">
+                        <div>
+                            <div class="circ-book-metric-val" id="metricTotal">@(book?.TotalCopies ?? 0)</div>
+                            <div class="circ-book-metric-label">Total Catalog</div>
+                        </div>
+                        <div>
+                            <div class="circ-book-metric-val text-success" id="metricAvailable">@(book?.AvailableCopies ?? 0)</div>
+                            <div class="circ-book-metric-label">Available Shelf</div>
+                        </div>
+                        <div>
+                            <div class="circ-book-metric-val text-primary" id="metricActiveLoan">@(book?.ActiveLoans ?? 0)</div>
+                            <div class="circ-book-metric-label">In Active Loan</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function onMemberChanged(select) {
+            const opt = select.options[select.selectedIndex];
+            if (!opt) return;
+
+            const name = opt.getAttribute('data-name');
+            const email = opt.getAttribute('data-email');
+            const memberId = opt.getAttribute('data-memberid');
+            const initials = opt.getAttribute('data-initials');
+            const activeLoans = parseInt(opt.getAttribute('data-activeloans') || '0');
+            const maxQuota = parseInt(opt.getAttribute('data-maxquota') || '3');
+            const overdue = opt.getAttribute('data-overdue') || '0';
+            const standing = opt.getAttribute('data-standing') || '';
+
+            document.getElementById('previewPatronName').innerText = name;
+            document.getElementById('previewPatronEmail').innerText = email;
+            document.getElementById('previewPatronId').innerText = 'ID: ' + memberId;
+            document.getElementById('previewAvatar').innerText = initials;
+            document.getElementById('patronBadgeId').innerText = memberId;
+
+            document.getElementById('previewQuotaText').innerText = `${activeLoans} of ${maxQuota} books checked out`;
+            const pct = Math.min(100, Math.round((activeLoans / maxQuota) * 100));
+            document.getElementById('previewQuotaFill').style.width = pct + '%';
+            document.getElementById('previewSlotsRemaining').innerText = `${Math.max(0, maxQuota - activeLoans)} slot remaining`;
+            document.getElementById('previewOverdue').innerText = `${overdue} Items`;
+            document.getElementById('previewStanding').innerText = standing;
+        }
+
+        function onBookChanged(select) {
+            const opt = select.options[select.selectedIndex];
+            if (!opt) return;
+
+            const title = opt.getAttribute('data-title');
+            const author = opt.getAttribute('data-author');
+            const isbn = opt.getAttribute('data-isbn');
+            const category = opt.getAttribute('data-category');
+            const imageUrl = opt.getAttribute('data-image-url');
+            const total = parseInt(opt.getAttribute('data-total') || '0');
+            const available = parseInt(opt.getAttribute('data-available') || '0');
+            const inStock = opt.getAttribute('data-instock') === 'true';
+
+            document.getElementById('previewBookTitle').innerText = title;
+            document.getElementById('previewBookAuthor').innerText = author;
+            document.getElementById('previewBookIsbn').innerText = isbn;
+            const fieldIsbn = document.getElementById('fieldBookIsbn');
+            if (fieldIsbn) fieldIsbn.innerText = 'ISBN: ' + isbn;
+            document.getElementById('previewCategory').innerText = category;
+            document.getElementById('previewBookCoverFallbackTitle').innerText = title;
+            document.getElementById('previewBookCoverFallbackAuthor').innerText = author;
+            const cover = document.getElementById('previewBookCover');
+            const emptyCover = document.getElementById('previewBookCoverEmpty');
+            if (imageUrl) {
+                cover.src = imageUrl;
+                cover.alt = 'Cover of ' + title;
+                cover.classList.remove('d-none');
+                if (emptyCover) emptyCover.classList.add('d-none');
+            } else {
+                cover.removeAttribute('src');
+                cover.classList.add('d-none');
+                if (emptyCover) emptyCover.classList.remove('d-none');
+            }
+            document.getElementById('metricTotal').innerText = total;
+            document.getElementById('metricAvailable').innerText = available;
+            document.getElementById('metricActiveLoan').innerText = Math.max(0, total - available);
+
+            const stockBadge = document.getElementById('previewBookStockBadge');
+            if (inStock) {
+                stockBadge.className = 'circ-badge circ-badge-emerald';
+                stockBadge.innerText = '• In Stock';
+            } else {
+                stockBadge.className = 'circ-badge circ-badge-rose';
+                stockBadge.innerText = '• Out of Stock';
+            }
+        }
+
+        function showBookCoverFallback() {
+            const cover = document.getElementById('previewBookCover');
+            const fallback = document.getElementById('previewBookCoverEmpty');
+            if (cover) cover.classList.add('d-none');
+            if (fallback) fallback.classList.remove('d-none');
+        }
+
+        function syncBorrowCardHeight() {
+            const mainCard = document.querySelector('.borrow-main-card');
+            const sideColumn = document.querySelector('.borrow-side-column');
+            if (!mainCard || !sideColumn) return;
+
+            if (window.innerWidth <= 992) {
+                mainCard.style.height = '';
+                return;
+            }
+
+            const previewCards = Array.from(sideColumn.children);
+            const cardHeights = previewCards.reduce((height, card) => height + card.getBoundingClientRect().height, 0);
+            const gap = parseFloat(getComputedStyle(sideColumn).rowGap) || 0;
+            const targetHeight = cardHeights + gap * Math.max(0, previewCards.length - 1);
+            if (Math.abs(mainCard.getBoundingClientRect().height - targetHeight) > 1) {
+                mainCard.style.height = `${targetHeight}px`;
+            }
+        }
+
+        syncBorrowCardHeight();
+        window.addEventListener('resize', syncBorrowCardHeight);
+        if ('ResizeObserver' in window) {
+            const sideColumn = document.querySelector('.borrow-side-column');
+            if (sideColumn) new ResizeObserver(syncBorrowCardHeight).observe(sideColumn);
+        }
+    </script>
+}

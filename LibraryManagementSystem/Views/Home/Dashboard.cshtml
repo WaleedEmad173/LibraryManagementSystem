@@ -1,0 +1,392 @@
+@model LibraryManagementSystem.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard-container">
+    <!-- Header Greeting Banner -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <h1 class="dash-title mb-0">Welcome back, @Model.FullName!</h1>
+                <span class="badge @(Model.IsStaff ? "bg-primary" : "bg-success") text-white px-2 py-1 fs-xs fw-semibold">
+                    @Model.PrimaryRole
+                </span>
+            </div>
+            <p class="dash-subtitle mb-0 mt-1">Here is an overview of the library catalog and your activity today.</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="dash-date-pill">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span id="dashboard-local-date"></span>
+            </div>
+            @if (Model.IsStaff)
+            {
+                <a asp-controller="Book" asp-action="Create" class="btn btn-primary-dash">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add New Book</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Book" asp-action="Index" class="btn btn-primary-dash">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span>Browse Books</span>
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Overview Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="dash-stat-label">TOTAL CATALOG</div>
+                        <div class="dash-stat-value">@Model.TotalCatalogTitles.ToString("N0")</div>
+                    </div>
+                    <div class="dash-stat-icon icon-books"><i class="bi bi-book" aria-hidden="true"></i></div>
+                </div>
+                <div class="dash-stat-note text-muted mt-2">
+                    <span>@Model.TotalCopies.ToString("N0") physical copies recorded</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="dash-stat-label">IN CIRCULATION</div>
+                        <div class="dash-stat-value text-amber-600">@Model.CopiesOnLoan.ToString("N0")</div>
+                    </div>
+                    <div class="dash-stat-icon icon-circulation"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></div>
+                </div>
+                <div class="dash-stat-note text-amber-600 mt-2">
+                    <span>@Model.ActiveLoansCount active borrower loans</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="dash-stat-label">AVAILABLE COPIES</div>
+                        <div class="dash-stat-value text-emerald-600">@Model.AvailableCopies.ToString("N0")</div>
+                    </div>
+                    <div class="dash-stat-icon icon-available"><i class="bi bi-check-circle" aria-hidden="true"></i></div>
+                </div>
+                <div class="dash-stat-note text-emerald-600 mt-2">
+                    <span>@Model.ShelfReadinessPercent% shelf availability rate</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="dash-stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="dash-stat-label">@(Model.IsStaff ? "TOTAL MEMBERS" : "MY ACTIVE LOANS")</div>
+                        <div class="dash-stat-value @(Model.OverdueLoansCount > 0 ? "text-danger" : "text-slate-800")">
+                            @(Model.IsStaff ? Model.TotalMembers.ToString("N0") : Model.MyActiveBorrowingsCount.ToString("N0"))
+                        </div>
+                    </div>
+                    <div class="dash-stat-icon icon-members"><i class="bi bi-people" aria-hidden="true"></i></div>
+                </div>
+                <div class="dash-stat-note mt-2 @(Model.OverdueLoansCount > 0 ? "text-danger" : "text-muted")">
+                    @if (Model.IsStaff)
+                    {
+                        <span>@(Model.OverdueLoansCount > 0 ? $"{Model.OverdueLoansCount} overdue loans pending" : "All loans on schedule")</span>
+                    }
+                    else
+                    {
+                        <span>@Model.MyTotalHistoryCount total lifetime borrowings</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="row g-4">
+        <!-- Left Column: Member Loans or Recent Activity -->
+        <div class="col-lg-8">
+            @if (!Model.IsStaff)
+            {
+                <!-- Member Loans Card -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-header bg-white border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0">My Current Borrowings</h5>
+                            <span class="text-muted small">Books currently checked out to your member account</span>
+                        </div>
+                        <a asp-action="Index" asp-controller="Book" class="btn btn-sm btn-outline-secondary">Borrow More</a>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.MyBorrowings != null && Model.MyBorrowings.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light text-muted small">
+                                        <tr>
+                                            <th class="ps-3">Book Title</th>
+                                            <th>Borrowed On</th>
+                                            <th>Due Date</th>
+                                            <th>Status</th>
+                                            <th class="text-end pe-3">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var loan in Model.MyBorrowings)
+                                        {
+                                            <tr>
+                                                <td class="ps-3">
+                                                    <div class="fw-semibold text-dark">@loan.BookTitle</div>
+                                                    <div class="text-muted small">@loan.BookAuthor</div>
+                                                </td>
+                                                <td class="small text-muted">@loan.BorrowDate.ToString("MMM dd, yyyy")</td>
+                                                <td class="small @(loan.IsOverdue ? "text-danger fw-bold" : "text-muted")">
+                                                    @loan.DueDate.ToString("MMM dd, yyyy")
+                                                </td>
+                                                <td>
+                                                    @if (loan.IsReturned)
+                                                    {
+                                                        <span class="badge bg-success-subtle text-success">Returned</span>
+                                                    }
+                                                    else if (loan.IsOverdue)
+                                                    {
+                                                        <span class="badge bg-danger-subtle text-danger">Overdue</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-primary-subtle text-primary">Active</span>
+                                                    }
+                                                </td>
+                                                <td class="text-end pe-3">
+                                                    <a asp-controller="Book" asp-action="Details" asp-route-id="@loan.BookId" class="btn btn-sm btn-light">View</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <div class="empty-icon-circle mx-auto mb-3">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                                    </svg>
+                                </div>
+                                <h6 class="fw-bold text-dark">No active borrowings</h6>
+                                <p class="text-muted small mb-3">You don't have any books checked out right now.</p>
+                                <a asp-controller="Book" asp-action="Index" class="btn btn-primary-dash btn-sm">Explore Catalog</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Staff / Admin Recent Activities Card -->
+                <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card-header bg-white border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0">Recent Circulation Activity</h5>
+                            <span class="text-muted small">Latest book loan transactions across members</span>
+                        </div>
+                        <a asp-controller="Book" asp-action="Index" class="btn btn-sm btn-outline-secondary">Manage Books</a>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.RecentBorrowings != null && Model.RecentBorrowings.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light text-muted small">
+                                        <tr>
+                                            <th class="ps-3">Borrower</th>
+                                            <th>Book Title</th>
+                                            <th>Borrow Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var b in Model.RecentBorrowings)
+                                        {
+                                            <tr>
+                                                <td class="ps-3 fw-semibold text-dark">@b.UserName</td>
+                                                <td>@b.BookTitle</td>
+                                                <td class="small text-muted">@b.BorrowDate.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    @if (b.IsReturned)
+                                                    {
+                                                        <span class="badge bg-success-subtle text-success">Returned</span>
+                                                    }
+                                                    else if (b.IsOverdue)
+                                                    {
+                                                        <span class="badge bg-danger-subtle text-danger">Overdue</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-primary-subtle text-primary">Active</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5 text-muted small">
+                                No recent loan activity recorded yet.
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Recommended / Popular Books Section -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title fw-bold text-dark mb-0">Discover in Catalog</h5>
+                        <span class="text-muted small">Popular titles ready for checkout</span>
+                    </div>
+                    <a asp-controller="Book" asp-action="Index" class="text-primary small fw-semibold text-decoration-none">View All &rarr;</a>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="row g-3">
+                        @foreach (var book in Model.RecentBooks)
+                        {
+                            <div class="col-md-6">
+                                <div class="catalog-mini-card p-3 border rounded-3 d-flex align-items-center justify-content-between">
+                                    <div class="me-2 text-truncate">
+                                        <div class="fw-bold text-dark text-truncate" title="@book.Title">@book.Title</div>
+                                        <div class="text-muted small">@book.Author</div>
+                                        <span class="badge @(book.AvailableCopies > 0 ? "bg-emerald-subtle text-emerald-600" : "bg-danger-subtle text-danger") mt-1">
+                                            @(book.AvailableCopies > 0 ? $"{book.AvailableCopies} available" : "Out of stock")
+                                        </span>
+                                    </div>
+                                    <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" class="btn btn-sm btn-outline-primary flex-shrink-0">
+                                        Details
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Quick Shortcuts & Library Notice -->
+        <div class="col-lg-4">
+            <!-- Quick Actions Card -->
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <h5 class="card-title fw-bold text-dark mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="list-group list-group-flush border-top">
+                        <a asp-controller="Book" asp-action="Index" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="action-icon bg-primary-subtle text-primary">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark">Search Catalog</div>
+                                    <div class="text-muted small">Find titles by ISBN or author</div>
+                                </div>
+                            </div>
+                            <span class="text-muted">&rsaquo;</span>
+                        </a>
+
+                        @if (Model.IsStaff)
+                        {
+                            <a asp-controller="Book" asp-action="Create" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="action-icon bg-emerald-subtle text-emerald-600">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark">Add New Book</div>
+                                        <div class="text-muted small">Register new catalog copies</div>
+                                    </div>
+                                </div>
+                                <span class="text-muted">&rsaquo;</span>
+                            </a>
+                        }
+
+                        <a asp-controller="Book" asp-action="Index" asp-route-availableOnly="true" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="action-icon bg-amber-subtle text-amber-600">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark">Available On Shelf</div>
+                                    <div class="text-muted small">Filter instantly available copies</div>
+                                </div>
+                            </div>
+                            <span class="text-muted">&rsaquo;</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Library Hours & Info Card -->
+            <div class="card border-0 shadow-sm rounded-3 bg-navy text-white p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="library-badge-icon">
+                        <img src="~/Images/icons/Logo.svg" alt="Library" width="18" height="18" style="filter: brightness(0) invert(1);" />
+                    </div>
+                    <span class="fw-bold fs-6">Academic Library Portal</span>
+                </div>
+                <h6 class="fw-bold mb-2">Central Branch Study Hall</h6>
+                <p class="small text-blue-200 mb-3">
+                    Quiet study suites and high-speed research Wi-Fi are available on Floor 2.
+                </p>
+                <div class="d-flex justify-content-between align-items-center border-top border-white-10 pt-3 small text-blue-200">
+                    <span>Working Hours:</span>
+                    <span class="fw-semibold text-white">7:00 AM – 11:00 PM</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const dashboardDate = new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            timeZone: 'Africa/Cairo'
+        });
+        document.getElementById('dashboard-local-date').textContent = dashboardDate.format(new Date());
+    </script>
+}

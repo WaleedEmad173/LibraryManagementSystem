@@ -1,0 +1,990 @@
+@model MemberFormViewModel
+
+@{
+    ViewData["Title"] = "Edit Member";
+    ViewData["Section"] = "Members";
+    var memberName = !string.IsNullOrWhiteSpace(Model.FullName) ? Model.FullName : "Member";
+}
+
+<style>
+    /* Scoped Styles for Edit Member */
+    .patron-edit-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 4px 12px 48px;
+        color: #0f172a;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Sub-Breadcrumb */
+    .patron-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+
+    .patron-breadcrumb a {
+        color: #64748b;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+
+    .patron-breadcrumb a:hover {
+        color: #1e293b;
+    }
+
+    .patron-breadcrumb .active-crumb {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    /* Header Section */
+    .edit-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .edit-header-left {
+        max-width: 700px;
+    }
+
+    .edit-page-title {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #0f172a;
+        margin: 0 0 6px;
+        line-height: 1.2;
+    }
+
+    .edit-page-subtitle {
+        font-size: 13.5px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .edit-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .btn-header-back {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        border-radius: 9px;
+        padding: 9px 18px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+    }
+
+    .btn-header-back:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        text-decoration: none;
+    }
+
+    .btn-header-save {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        border-radius: 9px;
+        padding: 9px 20px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 3px rgba(30, 58, 138, 0.2);
+    }
+
+    .btn-header-save:hover {
+        background: #172554;
+        color: #ffffff;
+    }
+
+    /* Main Grid Layout */
+    .edit-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        gap: 26px;
+        align-items: stretch;
+    }
+
+    .edit-grid-left,
+    .edit-grid-right {
+        min-width: 0;
+    }
+
+    @@media (max-width: 1024px) {
+        .edit-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Left Column: Main Edit Card */
+    .edit-main-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Identity Banner Inside Card */
+    .patron-identity-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #f1f5f9;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .identity-left-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .identity-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 17px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+    }
+
+    .identity-name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .identity-name {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .identity-active-badge {
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .identity-active-dot {
+        width: 6px;
+        height: 6px;
+        background: #15803d;
+        border-radius: 50%;
+    }
+
+    .identity-subline {
+        font-size: 12.5px;
+        color: #64748b;
+        margin: 4px 0 0;
+    }
+
+    .identity-reg-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .identity-reg-badge i {
+        color: #16a34a;
+        font-size: 15px;
+    }
+
+    /* Stack form inputs vertically */
+    .form-fields-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px 24px;
+        margin-bottom: 22px;
+    }
+
+    .edit-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 6px;
+    }
+
+    .edit-label .req-star {
+        color: #dc2626;
+        margin-left: 2px;
+    }
+
+    .edit-input, .edit-select {
+        width: 100%;
+        height: 42px;
+        padding: 0 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        font-size: 13.5px;
+        color: #0f172a;
+        background: #ffffff;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .edit-input:focus, .edit-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+
+    .edit-input-note {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-top: 5px;
+        line-height: 1.4;
+    }
+
+    /* Credential Security Policy Callout */
+    .credential-policy-box {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        padding: 13px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .credential-policy-icon {
+        color: #2563eb;
+        font-size: 16px;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .credential-policy-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin: 0;
+    }
+
+    .credential-policy-desc {
+        font-size: 12px;
+        color: #475569;
+        margin: 3px 0 0;
+        line-height: 1.45;
+    }
+
+    /* Change Password Section Box */
+    .password-section-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 20px;
+        margin-bottom: 26px;
+    }
+
+    .password-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .password-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .password-section-sub {
+        font-size: 12px;
+        color: #64748b;
+        margin: 2px 0 0;
+    }
+
+    .badge-optional {
+        background: #e2e8f0;
+        color: #475569;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 7px;
+        border-radius: 4px;
+        letter-spacing: 0.04em;
+    }
+
+    .password-inputs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 20px;
+    }
+
+    @@media (max-width: 640px) {
+        .password-inputs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pw-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .pw-toggle-btn {
+        position: absolute;
+        right: 12px;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pw-toggle-btn:hover {
+        color: #475569;
+    }
+
+    .pw-note-warn {
+        font-size: 11.5px;
+        color: #b45309;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    /* Form Action Buttons Bar */
+    .edit-actions-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: 10px;
+    }
+
+    .edit-right-btns {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-cancel-custom {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        padding: 9px 22px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .btn-cancel-custom:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        text-decoration: none;
+    }
+
+    .btn-save-custom {
+        background: #1e3a8a;
+        color: #ffffff;
+        border: none;
+        border-radius: 9px;
+        padding: 9px 24px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+    }
+
+    .btn-save-custom:hover {
+        background: #172554;
+        color: #ffffff;
+    }
+
+    /* Circulation Summary Section */
+    .circulation-summary-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 22px 26px;
+        margin-top: 22px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .circ-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .circ-title-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15.5px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .circ-title-left i {
+        color: #2563eb;
+        font-size: 18px;
+    }
+
+    .circ-pill-badge {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        color: #1d4ed8;
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 999px;
+    }
+
+    .circ-books-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .circ-book-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .circ-book-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .circ-book-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .circ-book-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .circ-book-meta {
+        font-size: 11.5px;
+        color: #64748b;
+        margin: 2px 0 6px;
+        overflow-wrap: anywhere;
+    }
+
+    .circ-due-line {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: #15803d;
+        font-weight: 600;
+    }
+
+    /* Right Column Cards */
+    .side-overview-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        margin-bottom: 22px;
+    }
+
+    .edit-grid-right {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        height: 100%;
+    }
+
+    .edit-grid-right .side-overview-card,
+    .edit-grid-right .circulation-summary-card {
+        flex: 1 1 0;
+        margin: 0;
+    }
+
+    .side-card-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .side-card-header i {
+        color: #2563eb;
+        font-size: 18px;
+    }
+
+    .side-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    /* Metric Boxes in Account Overview */
+    .metric-row-box {
+        border-radius: 12px;
+        padding: 13px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .metric-borrowed {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+    }
+
+    .metric-overdue {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .metric-standing {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+    }
+
+    .metric-box-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .metric-icon-wrap {
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .metric-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .metric-sub {
+        font-size: 11.5px;
+        color: #64748b;
+        margin: 2px 0 0;
+        line-height: 1.2;
+    }
+
+    .metric-big-num {
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .badge-standing-good {
+        background: #10b981;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        line-height: 1;
+    }
+
+    /* Key-Value Details List */
+    .stats-details-list {
+        margin-top: 18px;
+        padding-top: 10px;
+        border-top: 1px dashed #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .stat-detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12.5px;
+    }
+
+    .stat-detail-label {
+        color: #64748b;
+    }
+
+    .stat-detail-val {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .text-danger-custom {
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+        display: block;
+    }
+</style>
+
+<div class="patron-edit-container">
+    <!-- Sub-Breadcrumb -->
+    <div class="patron-breadcrumb">
+        <a asp-action="Index">Librarian Portal</a>
+        <span>/</span>
+        <a asp-action="Index">Members</a>
+        <span>/</span>
+        <span>Edit Member</span>
+        <span>/</span>
+        <span class="active-crumb">@memberName</span>
+    </div>
+
+    <!-- Header Section -->
+    <div class="edit-header-row">
+        <div class="edit-header-left">
+            <h1 class="edit-page-title">Edit Member</h1>
+            <p class="edit-page-subtitle">
+                Update patron account contact details and circulation preferences.
+            </p>
+        </div>
+
+        <div class="edit-header-actions">
+            <a asp-action="Index" class="btn-header-back">
+                <i class="bi bi-arrow-left"></i> Back to Directory
+            </a>
+            <button type="button" class="btn-header-save" onclick="document.getElementById('editMemberForm').requestSubmit();">
+                <i class="bi bi-floppy"></i> Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="edit-grid">
+        <!-- Left Column: Member Form -->
+        <div class="edit-grid-left">
+            <div class="edit-main-card">
+                <!-- Identity Banner -->
+                <div class="patron-identity-banner">
+                    <div class="identity-left-box">
+                        <div class="identity-avatar">
+                            @Model.Initials
+                        </div>
+                        <div>
+                            <div class="identity-name-row">
+                                <h2 class="identity-name">@memberName</h2>
+                                <span class="identity-active-badge">
+                                    <span class="identity-active-dot"></span> Active Member
+                                </span>
+                            </div>
+                            <p class="identity-subline">
+                                Patron ID: <strong>@Model.MemberCode</strong> • Card Status: @Model.CardStatus
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="identity-reg-badge">
+                        <i class="bi bi-calendar2-check"></i>
+                        <span>Registered: @Model.JoinDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                </div>
+
+                <!-- Main Form -->
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post" id="editMemberForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 px-3 small rounded-3 mb-3"></div>
+
+                    <!-- Fields Grid -->
+                    <div class="form-fields-grid">
+                        <!-- Full Name -->
+                        <div>
+                            <label asp-for="FullName" class="edit-label">Full Name <span class="req-star">*</span></label>
+                            <input asp-for="FullName" class="edit-input" required />
+                            <div class="edit-input-note">As printed on government or student identity document.</div>
+                            <span asp-validation-for="FullName" class="text-danger-custom"></span>
+                        </div>
+
+                        <!-- Email Address -->
+                        <div>
+                            <label asp-for="Email" class="edit-label">Email Address <span class="req-star">*</span></label>
+                            <input asp-for="Email" class="edit-input" required />
+                            <div class="edit-input-note">Used for hold notifications and renewal receipts.</div>
+                            <span asp-validation-for="Email" class="text-danger-custom"></span>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div>
+                            <label asp-for="Phone" class="edit-label">Phone Number</label>
+                            <input asp-for="Phone" class="edit-input" />
+                            <div class="edit-input-note">SMS reservation notifications will be dispatched here.</div>
+                            <span asp-validation-for="Phone" class="text-danger-custom"></span>
+                        </div>
+
+                    </div>
+
+                    <!-- Credential Security Policy Callout -->
+                    <div class="credential-policy-box">
+                        <i class="bi bi-info-circle credential-policy-icon"></i>
+                        <div>
+                            <div class="credential-policy-title">Credential Security Policy</div>
+                            <div class="credential-policy-desc">
+                                Password update is completely optional. Only enter a new password below if the patron explicitly requested an in-person credential reset.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Section -->
+                    <div class="password-section-box">
+                        <div class="password-section-header">
+                            <div>
+                                <h3 class="password-section-title">Change Member Password</h3>
+                                <div class="password-section-sub">Keep empty to retain @memberName's existing password securely.</div>
+                            </div>
+                            <span class="badge-optional">OPTIONAL</span>
+                        </div>
+
+                        <div class="password-inputs-grid">
+                            <!-- New Password -->
+                            <div>
+                                <label asp-for="Password" class="edit-label">New Temporary Password</label>
+                                <div class="pw-input-wrapper">
+                                    <input asp-for="Password" id="inputNewPassword" type="password" class="edit-input" placeholder="••••••••" autocomplete="new-password" />
+                                    <button type="button" class="pw-toggle-btn" id="toggleNewPwBtn" title="Toggle password visibility">
+                                        <i class="bi bi-eye" id="iconNewPw"></i>
+                                    </button>
+                                </div>
+                                <div class="pw-note-warn">Leave blank to keep existing password.</div>
+                                <span asp-validation-for="Password" class="text-danger-custom"></span>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div>
+                                <label asp-for="ConfirmPassword" class="edit-label">Confirm New Password</label>
+                                <div class="pw-input-wrapper">
+                                    <input asp-for="ConfirmPassword" id="inputConfirmPassword" type="password" class="edit-input" placeholder="••••••••" autocomplete="new-password" />
+                                    <button type="button" class="pw-toggle-btn" id="toggleConfirmPwBtn" title="Toggle password visibility">
+                                        <i class="bi bi-eye" id="iconConfirmPw"></i>
+                                    </button>
+                                </div>
+                                <div class="edit-input-note">Must match exactly if updating.</div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger-custom"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Action Buttons Footer -->
+                    <div class="edit-actions-bar">
+                        <div class="edit-right-btns">
+                            <a asp-action="Index" class="btn-cancel-custom">Cancel</a>
+                            <button type="submit" class="btn-save-custom">
+                                <i class="bi bi-check2"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Account Overview & Circulation Summary -->
+        <div class="edit-grid-right">
+            <!-- Account Overview Card -->
+            <div class="side-overview-card">
+                <div class="side-card-header">
+                    <i class="bi bi-person-badge"></i>
+                    <h3 class="side-card-title">Account Overview</h3>
+                </div>
+
+                <!-- Currently Borrowed -->
+                <div class="metric-row-box metric-borrowed">
+                    <div class="metric-box-left">
+                        <div class="metric-icon-wrap" style="color: #4338ca;">
+                            <i class="bi bi-bag-check"></i>
+                        </div>
+                        <div>
+                            <div class="metric-title">Currently Borrowed</div>
+                            <div class="metric-sub">Borrow allowance: @Model.BorrowAllowance</div>
+                        </div>
+                    </div>
+                    <div class="metric-big-num" style="color: #1e3a8a;">@Model.CurrentlyBorrowed</div>
+                </div>
+
+                <!-- Overdue Items -->
+                <div class="metric-row-box metric-overdue">
+                    <div class="metric-box-left">
+                        <div class="metric-icon-wrap" style="color: #64748b;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="metric-title">Overdue Items</div>
+                            <div class="metric-sub">No late return fees</div>
+                        </div>
+                    </div>
+                    <div class="metric-big-num" style="color: #0f172a;">@Model.OverdueItems</div>
+                </div>
+
+                <!-- Patron Standing -->
+                <div class="metric-row-box metric-standing">
+                    <div class="metric-box-left">
+                        <div class="metric-icon-wrap" style="color: #10b981;">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <div class="metric-title" style="color: #065f46;">Patron Standing</div>
+                            <div class="metric-sub" style="color: #047857;">@Model.StandingDesc</div>
+                        </div>
+                    </div>
+                    <span class="badge-standing-good">@Model.StandingStatus</span>
+                </div>
+
+                <!-- Key-Value Details -->
+                <div class="stats-details-list">
+                    <div class="stat-detail-item">
+                        <span class="stat-detail-label">Lifetime Checkouts:</span>
+                        <span class="stat-detail-val">@Model.LifetimeCheckouts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Circulation Summary Card -->
+            <div class="circulation-summary-card">
+                <div class="circ-header-flex">
+                    <div class="circ-title-left">
+                        <i class="bi bi-journal-text"></i>
+                        <span>Circulation Summary</span>
+                    </div>
+                    <span class="circ-pill-badge">@Model.ActiveLoans.Count Active Loans</span>
+                </div>
+
+                <div class="circ-books-grid">
+                    @if (Model.ActiveLoans.Any())
+                    {
+                        @foreach (var loan in Model.ActiveLoans)
+                        {
+                            <div class="circ-book-item">
+                                <div class="circ-book-icon">
+                                    <i class="bi bi-book-half"></i>
+                                </div>
+                                <div class="circ-book-details">
+                                    <h4 class="circ-book-title" title="@loan.Title">@loan.Title</h4>
+                                    <div class="circ-book-meta">@loan.Author@if (!string.IsNullOrWhiteSpace(loan.ISBN)) { <span> • ISBN: @loan.ISBN</span> }</div>
+                                    <div class="circ-due-line">
+                                        <i class="bi bi-calendar2-event"></i>
+                                        <span>@loan.DueText</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted">No active loans are recorded for this member.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Password toggles for New and Confirm password fields
+        document.addEventListener('DOMContentLoaded', function () {
+            function bindToggle(btnId, inputId, iconId) {
+                var btn = document.getElementById(btnId);
+                var input = document.getElementById(inputId);
+                var icon = document.getElementById(iconId);
+                if (btn && input && icon) {
+                    btn.addEventListener('click', function () {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            icon.classList.remove('bi-eye');
+                            icon.classList.add('bi-eye-slash');
+                        } else {
+                            input.type = 'password';
+                            icon.classList.remove('bi-eye-slash');
+                            icon.classList.add('bi-eye');
+                        }
+                    });
+                }
+            }
+
+            bindToggle('toggleNewPwBtn', 'inputNewPassword', 'iconNewPw');
+            bindToggle('toggleConfirmPwBtn', 'inputConfirmPassword', 'iconConfirmPw');
+        });
+
+    </script>
+}

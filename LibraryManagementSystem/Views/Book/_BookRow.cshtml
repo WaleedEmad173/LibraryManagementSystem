@@ -1,0 +1,79 @@
+@model Book
+@{
+    var available = Model.AvailableCopies;
+    var total = Model.TotalCopies;
+    var pct = total == 0 ? 0 : (int)Math.Round(available * 100.0 / total);
+
+    // out = none left, full = nothing borrowed, low = a third or less left, ok = everything else
+    var state = available == 0 ? "out" : available == total ? "full" : pct <= 34 ? "low" : "ok";
+
+    var categoryName = Model.Category?.Name ?? "Uncategorized";
+    // "Psychology & Self-Help" -> "psychology-self-help"
+    var categorySlug = System.Text.RegularExpressions.Regex
+        .Replace(categoryName.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+
+}
+
+<tr class="books-table-row @(state == "out" ? "row-out" : "")">
+    <td class="cell-title">
+        <div class="book-item-wrapper d-flex align-items-center gap-3">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="~/Images/@Model.ImageUrl" alt="@Model.Title" class="books-item-img" />
+            }
+            else
+            {
+                <div class="books-item-icon @(state == "out" ? "books-item-icon-out" : "")">
+                    <i class="bi bi-book"></i>
+                </div>
+            }
+            <div class="book-details-box">
+                <div class="book-primary-title d-flex align-items-center gap-2 flex-wrap">
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="book-title-link">@Model.Title</a>
+                </div>
+            </div>
+        </div>
+    </td>
+    <td class="cell-author">@Model.Author</td>
+    <td class="cell-isbn">@Model.ISBN</td>
+    <td class="cell-category">
+        <span class="badge-category cat-@categorySlug">@categoryName</span>
+    </td>
+    <td class="cell-copies">
+        @if (state == "out")
+        {
+            <div class="copies-progress-wrap d-flex align-items-center gap-2">
+                <span class="copies-bar copies-bar-empty"></span>
+                <span class="copies-pill-out">0 / @total</span>
+            </div>
+        }
+        else
+        {
+            <div class="copies-progress-wrap d-flex align-items-center gap-2">
+                <span class="copies-bar">
+                    <span class="copies-fill fill-@state" style="width:@(pct)%"></span>
+                </span>
+                <span class="copies-count count-@state"><strong>@available</strong> / @total</span>
+            </div>
+        }
+    </td>
+    <td class="cell-actions text-end">
+        <div class="actions-group d-inline-flex align-items-center gap-1">
+            <a class="btn-table-action" asp-action="Details" asp-route-id="@Model.Id" title="View Details">
+                <i class="bi bi-eye"></i>
+            </a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+            {
+                <a class="btn-table-action" asp-action="Edit" asp-route-id="@Model.Id" title="Edit Book">
+                    <i class="bi bi-pencil"></i>
+                </a>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="btn-table-action btn-table-action-danger" asp-action="Delete" asp-route-id="@Model.Id" title="Delete Book">
+                    <i class="bi bi-trash3"></i>
+                </a>
+            }
+        </div>
+    </td>
+</tr>
